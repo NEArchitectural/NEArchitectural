@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "212346711366",
+    "firebase_url": "https://ne-architectural.firebaseio.com",
+    "project_id": "ne-architectural",
+    "storage_bucket": "ne-architectural.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212346711366:android:72a3dfd807513a73494947",
+        "android_client_info": {
+          "package_name": "com.nearchitectural"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212346711366-omrdgcbkdrd0aeq5b6cj54okjqlm4k8v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nearchitectural",
+            "certificate_hash": "f431b3e637c29b1d7f510d315470171c340baa46"
+          }
+        },
+        {
+          "client_id": "212346711366-cj4h21kq3db2mms21qq1tbhbcffa6dev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx5K98vdKzNn0_BCKqR15JffQyGnT-5n8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212346711366-cj4h21kq3db2mms21qq1tbhbcffa6dev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
