@@ -9,6 +9,10 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -70,5 +74,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void openTimeline(MenuItem item) {
+        /* We have to fill this one in later */
+        MessageBox("Timeline pressed");
+        /* Open timeline view */
+    }
+
+    public void openSettings(MenuItem item){
+        /* We have to fill this one in later */
+        MessageBox("Settings pressed");
+        /* Open Settings view */
+    }
+
+    /* Message bubble */
+    public void MessageBox(String message)
+    {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
