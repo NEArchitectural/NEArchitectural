@@ -24,7 +24,7 @@
             android:maxWidth="200dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="6"
+            android:maxLines="10"
             android:id="@+id/snippet"
             android:textSize="14sp"
             android:textColor="#000"/>

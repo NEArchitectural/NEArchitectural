@@ -75,14 +75,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    private void init(){
-        Log.d(TAG,"init: initializing");
+    private void init() {
+        Log.d(TAG, "init: initializing");
 
         mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event.getAction() == KeyEvent.ACTION_DOWN
-            || event.getAction() == KeyEvent.KEYCODE_ENTER){
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER) {
                     /* Execute searching for a place in the db */
                     MessageBox("Search Attempted");
                 }
@@ -106,8 +106,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         mMap.setOnInfoWindowClickListener(
-                new GoogleMap.OnInfoWindowClickListener(){
-                    public void onInfoWindowClick(Marker marker){
+                new GoogleMap.OnInfoWindowClickListener() {
+                    public void onInfoWindowClick(Marker marker) {
 
                         /* These lines are for navigating through Google maps forcefully */
 //                        Uri uri = Uri.parse(String.format(Locale.ENGLISH, "google.navigation:q=%f,%f", marker.getPosition().latitude,marker.getPosition().longitude));
@@ -124,7 +124,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Add a marker in Newcastle and move the camera
         LatLng newcastle = new LatLng(54.966667, -1.600000);
-        mMap.addMarker(new MarkerOptions().position(newcastle).title("Marker in Newcastle").snippet("Population: 500,400 Also an incredibly long fucking snippet you know?"));
+        int avgPrice = 8;
+
+        mMap.addMarker(new MarkerOptions().position(newcastle)
+                .title("Marker in Newcastle")
+                .snippet(String.format(Locale.ENGLISH,"This is some summary about the location. It can also be" +
+                        "pretty long, depending on the need.\n\nAverage fee: %d £" +
+                        "\nWheelchair accessible\nSuitable for kids", avgPrice)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(newcastle));
 
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
@@ -147,22 +153,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         /* Open timeline view */
     }
 
-    public void openSettings(MenuItem item){
+    public void openSettings(MenuItem item) {
         /* We have to fill this one in later */
         MessageBox("Settings pressed");
         /* Open Settings view */
     }
 
-    public void openSearch(View view) {
-        /* We have to fill this one in later */
-        MessageBox("Search icon clicked");
-        /* Transform toolbar into a search bar */
-    }
+//    public void openSearch(View view) {
+//        /* We have to fill this one in later */
+//        MessageBox("Search icon clicked");
+//        /* Transform toolbar into a search bar */
+//    }
 
 
     /* Message bubble */
-    public void MessageBox(String message)
-    {
+    public void MessageBox(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
