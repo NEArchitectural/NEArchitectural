@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="361dp"
+        android:layout_marginTop="100dp"
+        android:orientation="vertical">
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:theme="@style/AppTheme"
+            android:value="60"
+            android:valueFrom="0"
+            android:valueTo="100" />
+
+        <ListView
+            android:id="@+id/places_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            tools:listitem=""/>
+
+    </LinearLayout>
+
+</RelativeLayout>

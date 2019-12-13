@@ -8,12 +8,6 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:orientation="vertical">
-
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -28,13 +22,11 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <FrameLayout
-            android:id="@+id/fragment_container"
+        <fragment
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-
-    </FrameLayout>
+            android:layout_height="match_parent"
+            android:name="com.nearchitectural.fragments.SearchFragment"
+            android:id="@+id/search_fragment" />
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
