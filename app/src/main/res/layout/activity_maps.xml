@@ -26,7 +26,30 @@
             android:background="@color/colorPrimary"
             android:elevation="10dp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary"
+                >
+
+                <ImageView
+                    android:id="@+id/toolbar_search"
+                    android:layout_width="25dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/ic_search"
+                    android:onClick="openSearch"
+                    android:title="Search"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp" />
+
+            </RelativeLayout>
+
+
+        </androidx.appcompat.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/fragment_container"
@@ -43,48 +66,6 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginBottom="20dp"
-                android:text="Accessibility Options"
-                android:textSize="15sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchButton"
-                android:paddingRight="20dp"
-                android:paddingEnd="20dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:text="Wheelchair Accessible"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchButton2"
-                android:paddingRight="20dp"
-                android:paddingEnd="20dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:text="Suitable for children"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </LinearLayout>
 
     </com.google.android.material.navigation.NavigationView>
 

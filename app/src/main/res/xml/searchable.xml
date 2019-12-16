@@ -5,10 +5,10 @@
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
     android:searchSettingsDescription="locations, post codes, places"
      >
-<actionkey
-android:keycode="KEYCODE_ENTER"
-android:queryActionMsg="string"
-android:suggestActionMsg="string"
-android:suggestActionMsgColumn="string" />
+<!--<actionkey-->
+<!--android:keycode="KEYCODE_ENTER"-->
+<!--android:queryActionMsg="string"-->
+<!--android:suggestActionMsg="locations, post codes, places"-->
+<!--android:suggestActionMsgColumn="string" />-->
 
 </searchable>

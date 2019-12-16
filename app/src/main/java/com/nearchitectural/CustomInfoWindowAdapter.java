@@ -3,6 +3,7 @@ package com.nearchitectural;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +22,14 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
     private void renderWindowText(Marker marker, View view){
         String title = marker.getTitle();
         TextView textViewTitle = view.findViewById(R.id.title);
+        ImageView pic = view.findViewById(R.id.picture);
+
+//        Uri uri = Uri.parse(app.res);
+//        pic.setImageURI(null);
+//        pic.setImageURI(uri);
+
+        /* We're gonna use this line to pass the link/bitmap of the image to the window */
+//        pic.setImageBitmap();
 
         if(!title.equals("")){
             textViewTitle.setText(title);

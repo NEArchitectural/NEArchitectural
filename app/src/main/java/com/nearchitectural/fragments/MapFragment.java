@@ -2,6 +2,7 @@ package com.nearchitectural.fragments;
 
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.nearchitectural.CurrentCoordinates;
 import com.nearchitectural.CustomInfoWindowAdapter;
 import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
@@ -50,7 +53,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void getDeviceLocation() {
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         try {
             if (mLocationPermissionsGranted) {
@@ -61,6 +64,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: found location!");
                             Location currentLocation = (Location) task.getResult();
+                            CurrentCoordinates.setCoords(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
                             moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 15f);
                         } else {
                             Log.d(TAG, "onComplete: current location is nullT");
@@ -111,12 +115,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
@@ -134,6 +138,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 //                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
 //                        mapIntent.setPackage("com.google.android.apps.maps");
 //                        startActivity(mapIntent);
+
+                        LocationFragment lf = new LocationFragment();
+                        Bundle arguments = new Bundle();
+                        arguments.putString("placeName", marker.getTitle());
+                        lf.setArguments(arguments);
+                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, lf).commit();
 
                         /* Code to load DetailsPage for the place will sit here */
                         MessageBox(marker.getTitle() + " was pressed!");
@@ -161,6 +171,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
 
+
         rlp.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
         rlp.addRule(RelativeLayout.ALIGN_END, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -168,7 +179,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
         googleMap.addMarker(new MarkerOptions().position(newcastle)
-                .title("Marker in Newcastle")
+                .title("Newcastle")
                 .snippet(String.format(Locale.ENGLISH, "This is some summary about the location. It can also be" +
                         "pretty long, depending on the need.\n\nAverage fee: %d £" +
                         "\nWheelchair accessible\nSuitable for kids", avgPrice)));
@@ -179,7 +190,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
     /* Message bubble */
-    public void MessageBox(String message) {
+    private void MessageBox(String message) {
         Toast.makeText(this.getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

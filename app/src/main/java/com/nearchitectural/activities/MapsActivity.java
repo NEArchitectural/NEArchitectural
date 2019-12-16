@@ -1,19 +1,17 @@
 package com.nearchitectural.activities;
 
 import android.Manifest;
-import android.app.SearchManager;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -120,6 +118,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
+
     private void getLocationPermission() {
         String[] permissions = {FINE_LOCATION, COARSE_LOCATION};
 
@@ -134,24 +133,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         } else {
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
         }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbarmenu, menu);
-
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.toolbar_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-        MenuItem searchItem = menu.findItem(R.id.toolbar_search);
-
-        return true;
     }
 
 
@@ -232,5 +213,11 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
     public void setCurrent(Fragment current) {
         this.currentFragment = current;
+    }
+
+    public void openSearch(View view) {
+        Intent myIntent = new Intent(MapsActivity.this, SearchableActivity.class);
+        myIntent.putExtra("key", "yolo"); //Optional parameters
+        MapsActivity.this.startActivity(myIntent);
     }
 }

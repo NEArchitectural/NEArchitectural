@@ -1,33 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_of_search_fragment"
     android:background="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="361dp"
-        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:orientation="vertical">
 
-        <com.google.android.material.slider.Slider
-            android:id="@+id/slider"
-            android:layout_width="240dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:theme="@style/AppTheme"
-            android:value="60"
-            android:valueFrom="0"
-            android:valueTo="100" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp">
 
-        <ListView
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="18dp"
+                android:src="@drawable/ic_child_friendly"/>
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/child_friendly_cb"
+                android:onClick="setChildFriendly"/>
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="18dp"
+                android:src="@drawable/ic_accessible"/>
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/accessible_cb"
+                android:onClick="setAccessible"/>
+
+
+            <ImageView
+                android:id="@+id/options"
+                android:layout_width="30dp"
+                android:layout_marginTop="10dp"
+                android:paddingTop="10dp"
+                android:layout_height="36dp"
+                android:layout_marginRight="10dp"
+                android:onClick="openOptions"
+                android:src="@drawable/ic_arrow_down"
+                android:tint="@color/black"
+                android:layout_marginEnd="10dp" />
+
+            <LinearLayout
+                android:layout_width="190dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider"
+                android:layout_width="190dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:stepSize="10"
+                android:theme="@style/AppTheme"
+                android:value="0"
+                android:valueFrom="0"
+                android:valueTo="100"
+                app:floatingLabel="true" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:textColor="@color/black"
+                android:textAlignment="center"
+                android:id="@+id/seekbar_progress"/>
+
+        </LinearLayout>
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/places_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            tools:listitem=""/>
+            tools:listitem="" />
 
     </LinearLayout>
 
+
 </RelativeLayout>
+
