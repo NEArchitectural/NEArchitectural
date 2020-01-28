@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.slider.Slider;
 import com.nearchitectural.CurrentCoordinates;
 import com.nearchitectural.ListItemAdapter;
+import com.nearchitectural.Place;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivitySearchBinding;
 import com.nearchitectural.databinding.ListItemBinding;
@@ -61,7 +62,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //TODO: Swtich from findViewById to data binding like below
         searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 //        setContentView(R.layout.activity_search);
 
@@ -73,9 +73,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
 //        slider = (Slider) this.findViewById(R.id.slider);
         slider = (Slider) searchBinding.slider;
-
-//        layoutManager = new LinearLayoutManager(this);
-//        places.setLayoutManager(layoutManager);
 
         mAdapter = new ListItemAdapter(this, ALPHABETICAL_COMPARATOR);
 
@@ -95,27 +92,19 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 //        mBinding = DataBindingUtil.inflate(, R.layout.list_item, viewGroup, false);
 //        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
-        List<String> placesNames = new ArrayList<>();
-        placesNames.add("First place");
-        placesNames.add("Second place");
-        placesNames.add("Third option");
-        placesNames.add("A fortress");
-        placesNames.add("Gallery");
 
-        List<String> placeTypes = new ArrayList<>();
-        placeTypes.add("Castle");
-        placeTypes.add("Castle");
-        placeTypes.add("Museum");
-        placeTypes.add("Fortress");
-        placeTypes.add("Art");
-
+        List<Place> placesToShow = new ArrayList<>();
+        placesToShow.add(new Place((long) (Math.random() * 100 * 32), "First place", "Castle"));
+        placesToShow.add(new Place((long) (Math.random() * 100 * 32), "Second place", "Castle"));
+        placesToShow.add(new Place((long) (Math.random() * 100 * 32), "Third place", "Museum"));
+        placesToShow.add(new Place((long) (Math.random() * 100 * 32), "A fortress", "Fortress"));
+        placesToShow.add(new Place((long) (Math.random() * 100 * 32), "Gallery", "Art"));
 
         mModels = new ArrayList<>();
 //        for (String place : placesNames)
-        for (int i = 0; i < placesNames.size(); i++)
-        {
+        for (Place place : placesToShow) {
             /* This Math.random call is gonna be replaced by the db id of each place */
-            mModels.add(new ListItemModel((long) (Math.random() * 100 * 32), placesNames.get(i),placeTypes.get(i)));
+            mModels.add(new ListItemModel(place.getId(), place.getName(), place.getPlaceType()));
         }
         mAdapter.add(mModels);
 
@@ -218,7 +207,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             }
         };
         searchView.setOnQueryTextListener(queryTextListener);
-//        searchView.setIconifiedByDefault(false);
 
 
         return true;
