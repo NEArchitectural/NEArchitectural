@@ -180,7 +180,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         googleMap.addMarker(new MarkerOptions().position(newcastle)
                 .title("Newcastle")
-                .snippet(String.format(Locale.ENGLISH, "This is some summary about the location. It can also be" +
+                 .snippet(String.format(Locale.ENGLISH, "This is some summary about the location. It can also be" +
                         "pretty long, depending on the need.\n\nAverage fee: %d £" +
                         "\nWheelchair accessible\nSuitable for kids", avgPrice)));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(newcastle));

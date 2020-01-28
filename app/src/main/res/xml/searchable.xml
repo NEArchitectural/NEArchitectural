@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
-    android:label="@string/app_name"
     android:hint="locations, post codes, places"
-    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
+    android:label="@string/app_name"
     android:searchSettingsDescription="locations, post codes, places"
-     >
-<!--<actionkey-->
-<!--android:keycode="KEYCODE_ENTER"-->
-<!--android:queryActionMsg="string"-->
-<!--android:suggestActionMsg="locations, post codes, places"-->
-<!--android:suggestActionMsgColumn="string" />-->
+    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer">
+    <actionkey
+        android:keycode="KEYCODE_UNKNOWN"
+        android:queryActionMsg="string"
+        android:suggestActionMsg="locations, post codes, places"
+        android:suggestActionMsgColumn="string" />
 
 </searchable>

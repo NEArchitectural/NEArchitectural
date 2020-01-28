@@ -26,7 +26,6 @@ import com.nearchitectural.R;
 import com.nearchitectural.fragments.AboutFragment;
 import com.nearchitectural.fragments.HelpFragment;
 import com.nearchitectural.fragments.MapFragment;
-import com.nearchitectural.fragments.SearchFragment;
 import com.nearchitectural.fragments.SettingsFragment;
 import com.nearchitectural.fragments.TimelineFragment;
 
@@ -75,8 +74,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         getSupportActionBar().setDisplayShowHomeEnabled(false);
 
 
-//        mSearchText = findViewById(R.id.search_input);
-
         drawer = findViewById(R.id.drawer_layout);
 
         navigationView = findViewById(R.id.nav_view);
@@ -96,8 +93,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                     navigationView.getMenu().findItem(R.id.nav_info).setChecked(true);
                 } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof HelpFragment) {
                     navigationView.getMenu().findItem(R.id.nav_help).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof SearchFragment) {
-                    navigationView.setCheckedItem(-1);
                 }
             }
         });
@@ -141,23 +136,19 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (!(currentFragment instanceof SearchFragment)) {
-                if (currentFragment instanceof MapFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
-                } else if (currentFragment instanceof SettingsFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_settings).setChecked(true);
-                } else if (currentFragment instanceof HelpFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_help).setChecked(true);
-                } else if (currentFragment instanceof AboutFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_info).setChecked(true);
-                } else if (currentFragment instanceof TimelineFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_timeline).setChecked(true);
-                }
-            } else {
-                navigationView.setCheckedItem(0);
+            if (currentFragment instanceof MapFragment) {
+                navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
+            } else if (currentFragment instanceof SettingsFragment) {
+                navigationView.getMenu().findItem(R.id.nav_settings).setChecked(true);
+            } else if (currentFragment instanceof HelpFragment) {
+                navigationView.getMenu().findItem(R.id.nav_help).setChecked(true);
+            } else if (currentFragment instanceof AboutFragment) {
+                navigationView.getMenu().findItem(R.id.nav_info).setChecked(true);
+            } else if (currentFragment instanceof TimelineFragment) {
+                navigationView.getMenu().findItem(R.id.nav_timeline).setChecked(true);
             }
-            super.onBackPressed();
         }
+        super.onBackPressed();
     }
 
 

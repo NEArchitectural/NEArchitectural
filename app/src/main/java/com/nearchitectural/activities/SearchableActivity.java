@@ -4,35 +4,123 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.slider.Slider;
 import com.nearchitectural.CurrentCoordinates;
+import com.nearchitectural.ListItemAdapter;
 import com.nearchitectural.R;
+import com.nearchitectural.databinding.ActivitySearchBinding;
+import com.nearchitectural.databinding.ListItemBinding;
 import com.nearchitectural.fragments.OptionsDialogFragment;
+import com.nearchitectural.ui.models.ListItemModel;
 
-public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener, SearchView.OnQueryTextListener {
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener {
 
     private boolean wheelchairAccess;
     private boolean childFriendly;
     private boolean cheapEntry;
     private boolean freeEntry;
     private LatLng currentLocation;
+    public static final String TAG = "SearchableActivity";
+
+    private RecyclerView places;
+    private ActivitySearchBinding searchBinding;
+    private TextView seekbarProg;
+    private Slider slider;
+    private List<ListItemModel> mModels;
+    private ListItemBinding mBinding;
+    private ListItemAdapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+
+    private static final Comparator<ListItemModel> ALPHABETICAL_COMPARATOR = new Comparator<ListItemModel>() {
+        @Override
+        public int compare(ListItemModel a, ListItemModel b) {
+            return a.getTitle().compareTo(b.getTitle());
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        //TODO: Swtich from findViewById to data binding like below
+        searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+//        setContentView(R.layout.activity_search);
 
-        Toolbar searchViewToolbar = findViewById(R.id.search_toolbar);
+        places = (RecyclerView) searchBinding.placesList;
+//        places = (RecyclerView) this.findViewById(R.id.places_list);
+
+//        seekbarProg = (TextView) this.findViewById(R.id.seekbar_progress);
+        seekbarProg = (TextView) searchBinding.seekbarProgress;
+
+//        slider = (Slider) this.findViewById(R.id.slider);
+        slider = (Slider) searchBinding.slider;
+
+//        layoutManager = new LinearLayoutManager(this);
+//        places.setLayoutManager(layoutManager);
+
+        mAdapter = new ListItemAdapter(this, ALPHABETICAL_COMPARATOR);
+
+        places.setAdapter(mAdapter);
+
+        seekbarProg.setText("Distance: " + (int) slider.getValue() + "km");
+        seekbarProg.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+
+        slider.setOnChangeListener(new Slider.OnChangeListener() {
+            @Override
+            public void onValueChange(Slider slider, float value) {
+                seekbarProg.setText("Distance: " + (int) slider.getValue() + "km");
+            }
+        });
+
+
+//        mBinding = DataBindingUtil.inflate(, R.layout.list_item, viewGroup, false);
+//        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+
+        List<String> placesNames = new ArrayList<>();
+        placesNames.add("First place");
+        placesNames.add("Second place");
+        placesNames.add("Third option");
+        placesNames.add("A fortress");
+        placesNames.add("Gallery");
+
+        List<String> placeTypes = new ArrayList<>();
+        placeTypes.add("Castle");
+        placeTypes.add("Castle");
+        placeTypes.add("Museum");
+        placeTypes.add("Fortress");
+        placeTypes.add("Art");
+
+
+        mModels = new ArrayList<>();
+//        for (String place : placesNames)
+        for (int i = 0; i < placesNames.size(); i++)
+        {
+            /* This Math.random call is gonna be replaced by the db id of each place */
+            mModels.add(new ListItemModel((long) (Math.random() * 100 * 32), placesNames.get(i),placeTypes.get(i)));
+        }
+        mAdapter.add(mModels);
+
+//        Toolbar searchViewToolbar = findViewById(R.id.search_toolbar);
+        Toolbar searchViewToolbar = searchBinding.searchToolbar;
 
         setSupportActionBar(searchViewToolbar);
 
@@ -49,6 +137,13 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         handleIntent(getIntent());
     }
 
+    @Override
+    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+//        super.onPostCreate(savedInstanceState, persistentState);
+        /* The recycler view for our layout */
+
+
+    }
 
     /**
      * Calculate distance between two points in latitude and longitude taking
@@ -106,11 +201,24 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
                 (SearchView) searchItem.getActionView();
-//        searchView.setSearchableInfo(
-//                searchManager.getSearchableInfo(getComponentName()));
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
 
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            public boolean onQueryTextChange(String newText) {
+                final List<ListItemModel> filteredModelList = filter(mModels, newText);
+                mAdapter.replaceAll(filteredModelList);
+                places.scrollToPosition(0);
+                return true;
+            }
 
-        searchView.setIconifiedByDefault(false);
+            public boolean onQueryTextSubmit(String query) {
+                // **Here you can get the value "query" which is entered in the search box.**
+                return false;
+            }
+        };
+        searchView.setOnQueryTextListener(queryTextListener);
+//        searchView.setIconifiedByDefault(false);
 
 
         return true;
@@ -185,13 +293,19 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         this.setWheelchairAccess(false);
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
+
+    private static List<ListItemModel> filter(List<ListItemModel> models, String query) {
+        final String lowerCaseQuery = query.toLowerCase();
+
+        final List<ListItemModel> filteredModelList = new ArrayList<>();
+        for (ListItemModel model : models) {
+            final String titleText = model.getTitle().toLowerCase();
+            final String placeTypeText = model.getPlaceType().toLowerCase();
+            if (titleText.contains(lowerCaseQuery) || placeTypeText.contains(lowerCaseQuery)) {
+                filteredModelList.add(model);
+            }
+        }
+        return filteredModelList;
     }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
-    }
 }

@@ -29,7 +29,7 @@ public class CurrentCoordinates implements Serializable {
     }
 
     public static LatLng getCoords() {
-        return coords;
+        return new LatLng(coords.latitude,coords.longitude);
     }
 
     public static void setCoords(LatLng coords) {
