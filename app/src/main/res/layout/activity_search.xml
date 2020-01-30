@@ -165,7 +165,7 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/places_list"
-                    android:layout_width="wrap_content"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/filters"
                     android:layout_centerInParent="true"

@@ -25,6 +25,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.nearchitectural.R;
 import com.nearchitectural.fragments.AboutFragment;
 import com.nearchitectural.fragments.HelpFragment;
+import com.nearchitectural.fragments.LocationFragment;
 import com.nearchitectural.fragments.MapFragment;
 import com.nearchitectural.fragments.SettingsFragment;
 import com.nearchitectural.fragments.TimelineFragment;
@@ -56,6 +57,10 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
+
 
         /* Set these settings again here instead of saving them to the device like suggested */
 
@@ -105,12 +110,39 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
         getLocationPermission();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                new MapFragment()).addToBackStack(null).commit();
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
 
-        navigationView.getMenu().getItem(0).setChecked(true);
 
-        currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (bundle != null) {
+            if (bundle.get("openPlacePage") != null) {
+                LocationFragment lf = new LocationFragment();
+                Bundle arguments = new Bundle();
+                String placeName = bundle.getString("openPlacePage");
+                arguments.putString("placeName", placeName);
+                lf.setArguments(arguments);
+                bundle.remove("openPlacePage");
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        lf).addToBackStack(null).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new MapFragment()).addToBackStack(null).commit();
+
+                navigationView.getMenu().getItem(0).setChecked(true);
+
+
+                currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            }
+        } else {
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new MapFragment()).addToBackStack(null).commit();
+
+            navigationView.getMenu().getItem(0).setChecked(true);
+
+
+            currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        }
     }
 
 

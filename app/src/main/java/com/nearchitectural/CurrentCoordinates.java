@@ -9,7 +9,7 @@ public class CurrentCoordinates implements Serializable {
     private static volatile CurrentCoordinates soleInstance;
     private static LatLng coords;
 
-    //private constructor.
+    //private constructor
     private CurrentCoordinates(){
 
         //Prevent form the reflection api.

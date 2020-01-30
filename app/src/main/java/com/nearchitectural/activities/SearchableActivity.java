@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -296,4 +297,12 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         return filteredModelList;
     }
 
+    public void openPlacePage(View view) {
+        TextView textView = (TextView) view.findViewById(R.id.list_item_title);
+        String placeName = textView.getText().toString();
+        Toast.makeText(this, placeName, Toast.LENGTH_SHORT).show();
+        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
+        myIntent.putExtra("openPlacePage", placeName); //Optional parameters
+        SearchableActivity.this.startActivity(myIntent);
+    }
 }
