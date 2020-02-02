@@ -144,12 +144,11 @@
                             android:layout_width="180dp"
                             android:layout_height="100dp"
                             android:layout_gravity="center_horizontal"
-                            android:stepSize="10"
+                            android:stepSize="5"
                             android:theme="@style/AppTheme"
                             android:value="0"
                             android:valueFrom="0"
-                            android:valueTo="100"
-                            app:floatingLabel="true" />
+                            android:valueTo="100"/>
 
                         <TextView
                             android:id="@+id/seekbar_progress"

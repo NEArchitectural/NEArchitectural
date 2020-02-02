@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -28,22 +27,25 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.CurrentCoordinates;
 import com.nearchitectural.CustomInfoWindowAdapter;
 import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
 
-import java.util.Locale;
-
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String TAG = "MapFragment";
-    private EditText mSearchText;
+
     private MapView mapView;
     private GoogleMap googleMap;
+    private FirebaseFirestore db;
     private Boolean mLocationPermissionsGranted;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
+    private LatLng currentLocation;
 
 
     @Override
@@ -57,15 +59,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         try {
             if (mLocationPermissionsGranted) {
+                // This warning cannot be evaded as we're using the Task api
                 Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: found location!");
-                            Location currentLocation = (Location) task.getResult();
-                            CurrentCoordinates.setCoords(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
-                            moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 15f);
+                            Log.d(TAG, "onComplete: found location! ");
+                            Location currentLocationFound = (Location) task.getResult();
+                            if (currentLocationFound != null) {
+                                currentLocation = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
+                                CurrentCoordinates.setCoords(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
+                                moveCamera(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
+                            }
                         } else {
                             Log.d(TAG, "onComplete: current location is nullT");
                             Toast.makeText(getActivity(), "Unable to get current location", Toast.LENGTH_SHORT).show();
@@ -81,16 +87,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
-        mLocationPermissionsGranted = parentActivity.mLocationPermissionsGranted;
+        // Instance of the db for requesting/updating data
+        db = FirebaseFirestore.getInstance();
+        // Check if the user has allowed us to use their location
+        if (parentActivity != null) {
+            mLocationPermissionsGranted = parentActivity.mLocationPermissionsGranted;
+        }
+
+        getDeviceLocation();
+
+        // Set up the map
         mapView = (MapView) view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
-        mapView.getMapAsync(this);//when you already implement OnMapReadyCallback in your fragment
+        // The first parameter means that the callback has been implemented in this class
+        mapView.getMapAsync(this);
     }
 
 
-    private void moveCamera(LatLng latLng, float zoom) {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+    private void moveCamera(LatLng latLng) {
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, (float) 15.0));
     }
 
     @Override
@@ -152,13 +168,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         );
 
 
-        // TODO: Get all places from db and set a marker foreach here
+        // Get all places from db and set a marker foreach here
+         /* TODO: Get the settings currently applied from the Settings singleton and
+             only add the necessary locations to the map that answer the criteria
+              (e.g. maximum distance from current location, child friendly,
+               wheelchair accessible locations only and so on) by calling the calculateDistance()
+                method from the SearchableActivity class on each location before adding it to the map*/
+        db.collection("locations")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-        // Add a marker in Newcastle and move the camera
-        LatLng newcastle = new LatLng(54.966667, -1.600000);
-        int avgPrice = 8;
+                                Log.d(TAG, document.getId() + " => " + document.getData());
 
-        getDeviceLocation();
+//                                if (SearchableActivity.calculateDistance(currentLocation.latitude,
+//                                        (double) document.getData().get("latitude"),
+//                                        currentLocation.longitude,
+//                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
+//                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
+//                                }
+
+                                googleMap.addMarker(new MarkerOptions()
+                                        .position(new LatLng((double) document.getData().get("latitude"),
+                                                (double) document.getData().get("longitude")))
+                                        .title((String) document.getData().get("name"))
+                                        .snippet((String) document.getData().get("summary")));
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
         googleMap.setMyLocationEnabled(true);
 
@@ -171,19 +214,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
 
-
         rlp.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
         rlp.addRule(RelativeLayout.ALIGN_END, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
 
-
-        googleMap.addMarker(new MarkerOptions().position(newcastle)
-                .title("Newcastle")
-                 .snippet(String.format(Locale.ENGLISH, "This is some summary about the location. It can also be" +
-                        "pretty long, depending on the need.\n\nAverage fee: %d £" +
-                        "\nWheelchair accessible\nSuitable for kids", avgPrice)));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(newcastle));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
 
         googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
     }

@@ -3,18 +3,23 @@ package com.nearchitectural.ui.models;
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
 public class ListItemModel implements SortedListAdapter.ViewModel {
-    /* Set this to the id from the db */
-    private final long mId;
+    /* After each entry in the db contains all the
+     necessary fields they can all be added here,
+      but for now only these are being used */
+    private final String mId;
     private final String mTitle;
-    private final String mPlaceType;
+    private final String mLocationType;
+    // No setter for this field as it will necessarily be provided in the constructor
+    private double mDistanceFromCurrentPosInMeters;
 
-    public ListItemModel(long id, String title, String placeType) {
+    public ListItemModel(String id, String title, String placeType, double distance) {
         this.mId = id;
         this.mTitle = title;
-        this.mPlaceType = placeType;
+        this.mLocationType = placeType;
+        this.mDistanceFromCurrentPosInMeters = distance;
     }
 
-    public long getId() {
+    public String getId() {
         return mId;
     }
 
@@ -22,8 +27,8 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         return mTitle;
     }
 
-    public String getPlaceType() {
-        return mPlaceType;
+    public String getLocationType() {
+        return mLocationType;
     }
 
 
@@ -34,19 +39,22 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
 
         ListItemModel model = (ListItemModel) o;
 
-        if (mId != model.mId) return false;
-        return mPlaceType != null ? mPlaceType.equals(model.getPlaceType()) : model.getPlaceType() == null
+        if (!mId.equals(model.mId)) return false;
+        return mLocationType != null ? mLocationType.equals(model.getLocationType()) : model.getLocationType() == null
                 && mTitle != null ? mTitle.equals(model.getTitle()) : model.getTitle() == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (mId ^ (mId >>> 32));
+        int result = (mId.hashCode());
         result = 31 * result + (mTitle != null ? mTitle.hashCode() : 0) +
-                (mPlaceType != null ? mPlaceType.hashCode() : 0);
+                (mLocationType != null ? mLocationType.hashCode() : 0);
         return result;
     }
 
 
+    public double getmDistanceFromCurrentPosInMeters() {
+        return mDistanceFromCurrentPosInMeters;
+    }
 }
