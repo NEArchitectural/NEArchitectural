@@ -96,9 +96,9 @@
                                 android:id="@+id/child_friendly_cb"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="8dp"
-                                android:onClick="setChildFriendly" />
+                                android:layout_marginTop="8dp" />
                         </LinearLayout>
+                        <!--                                android:onClick="setChildFriendly" />-->
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -114,8 +114,8 @@
                                 android:id="@+id/accessible_cb"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="8dp"
-                                android:onClick="setAccessible" />
+                                android:layout_marginTop="8dp" />
+                            <!--                                android:onClick="setAccessible"-->
 
                             <ImageView
                                 android:id="@+id/options"
@@ -148,7 +148,7 @@
                             android:theme="@style/AppTheme"
                             android:value="0"
                             android:valueFrom="0"
-                            android:valueTo="100"/>
+                            android:valueTo="100" />
 
                         <TextView
                             android:id="@+id/seekbar_progress"

@@ -9,13 +9,23 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private final String mId;
     private final String mTitle;
     private final String mLocationType;
+    private final boolean mIsWheelChairAccessible;
+    private final boolean mIsChildFriendly;
+    private final boolean mHasCheapEntry;
+    private final boolean mHasFreeEntry;
     // No setter for this field as it will necessarily be provided in the constructor
     private double mDistanceFromCurrentPosInMeters;
 
-    public ListItemModel(String id, String title, String placeType, double distance) {
+    public ListItemModel(String id, String title, String placeType, boolean mIsWheelChairAccessible,
+                         boolean mIsChildFriendly, boolean mHasCheapEntry, boolean mHasFreeEntry,
+                         double distance) {
         this.mId = id;
         this.mTitle = title;
         this.mLocationType = placeType;
+        this.mIsWheelChairAccessible = mIsWheelChairAccessible;
+        this.mIsChildFriendly = mIsChildFriendly;
+        this.mHasCheapEntry = mHasCheapEntry;
+        this.mHasFreeEntry = mHasFreeEntry;
         this.mDistanceFromCurrentPosInMeters = distance;
     }
 
@@ -56,5 +66,21 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
 
     public double getmDistanceFromCurrentPosInMeters() {
         return mDistanceFromCurrentPosInMeters;
+    }
+
+    public boolean mIsWheelChairAccessible() {
+        return mIsWheelChairAccessible;
+    }
+
+    public boolean mIsChildFriendly() {
+        return mIsChildFriendly;
+    }
+
+    public boolean mHasCheapEntry() {
+        return mHasCheapEntry;
+    }
+
+    public boolean mHasFreeEntry() {
+        return mHasFreeEntry;
     }
 }

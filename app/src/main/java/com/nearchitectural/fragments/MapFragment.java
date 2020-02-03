@@ -70,7 +70,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             if (currentLocationFound != null) {
                                 currentLocation = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
                                 CurrentCoordinates.setCoords(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
-                                moveCamera(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
+                                if (googleMap != null) {
+                                    moveCamera(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
+                                }
                             }
                         } else {
                             Log.d(TAG, "onComplete: current location is nullT");
@@ -218,8 +220,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_END, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
-
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
 
         googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
     }

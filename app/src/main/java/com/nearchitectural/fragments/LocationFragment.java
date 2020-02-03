@@ -24,6 +24,7 @@ public class LocationFragment extends Fragment {
     private Bundle arguments;
     // Database reference field
     private FirebaseFirestore db;
+    private String locationId;
 
     @Nullable
     @Override
@@ -50,6 +51,49 @@ public class LocationFragment extends Fragment {
         /* Get an instance of the database in order to
          retrieve/update the data for the specific location */
         db = FirebaseFirestore.getInstance();
+
+
+        /* You can increment/decrement the likes count by finding the location in the db and
+        * setting the likes field like shown below - use this code in the OnClick listener for the
+        * like button */
+//        db.collection("locations").whereEqualTo("name",placeName)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                // If you get here it means the query has been successful
+//
+//                                Map<String, Object> newData = new HashMap<>();
+//                                newData.put("likes", ((int) document.getData().get("likes") + 1));
+//
+//                                db.collection("locations")
+//                                        .document(document.getId())
+//                                        .set(newData)
+//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                            @Override
+//                                            public void onSuccess(Void aVoid) {
+//                                                Log.d(TAG, "DocumentSnapshot successfully written!");
+//                                            }
+//                                        })
+//                                        .addOnFailureListener(new OnFailureListener() {
+//                                            @Override
+//                                            public void onFailure(@NonNull Exception e) {
+//                                                Log.w(TAG, "Error writing document", e);
+//                                            }
+//                                        });
+//
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                            }
+//                        } else {
+//                            /* If this block executes, either no document was found
+//                             * matching the search name or some other error occurred*/
+//                            Log.d(TAG, "Error getting documents: ", task.getException());
+//                        }
+//                    }
+//                });
+
 
         // Retrieve all the information about the current location via its name
         db.collection("locations").whereEqualTo("name", placeName)

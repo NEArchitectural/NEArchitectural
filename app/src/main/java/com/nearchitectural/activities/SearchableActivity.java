@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,12 +54,16 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private ActivitySearchBinding searchBinding;
     private TextView seekbarProg;
     private Slider slider;
+    private AppCompatCheckBox wheelChairCheckBox;
+    private AppCompatCheckBox childFriendlyCheckBox;
     private List<ListItemModel> mModels;
     private ListItemBinding mBinding;
     private ListItemAdapter mAdapter;
+    private DialogFragment dialogFragment;
     private FirebaseFirestore db;
     private double distanceSelected;
     private String currentQuery;
+
 
     private static final Comparator<ListItemModel> ALPHABETICAL_COMPARATOR = new Comparator<ListItemModel>() {
         @Override
@@ -78,6 +83,26 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         seekbarProg = (TextView) searchBinding.seekbarProgress;
 
         slider = (Slider) searchBinding.slider;
+
+        wheelChairCheckBox = (AppCompatCheckBox) searchBinding.accessibleCb;
+
+        childFriendlyCheckBox = (AppCompatCheckBox) searchBinding.childFriendlyCb;
+
+        childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setChildFriendly(isChecked);
+                filterAndRearrange();
+            }
+        });
+
+        wheelChairCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setWheelchairAccess(isChecked);
+                filterAndRearrange();
+            }
+        });
 
         // Currently the cards with locations are being sorted alphabetically
         mAdapter = new ListItemAdapter(this, ALPHABETICAL_COMPARATOR);
@@ -115,13 +140,20 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                                 // For each location create aa new Location instance and add it to the list
                                 LatLng coords = new LatLng((double) document.getData().get("latitude"),
                                         (double) document.getData().get("longitude"));
-                                locationsToShow.add(new Location(id, name, placeType, coords));
+                                boolean wheelChairAccessible = (boolean) document.getData().get("wheelChairAccessible");
+                                boolean childFriendly = (boolean) document.getData().get("childFriendly");
+                                boolean cheapEntry = (boolean) document.getData().get("cheapEntry");
+                                boolean freeEntry = (boolean) document.getData().get("freeEntry");
+
+                                locationsToShow.add(new Location(id, name, placeType, coords, wheelChairAccessible, childFriendly, cheapEntry, freeEntry));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                             mModels = new ArrayList<>();
                             for (Location location : locationsToShow) {
                                 mModels.add(new ListItemModel(location.getId(), location.getName(),
                                         location.getLocationType(),
+                                        location.isWheelChairAccessible(), location.isChildFriendly(),
+                                        location.hasCheapEntry(), location.hasFreeEntry(),
                                         calculateDistance(currentLocation.latitude, location.getLatitude(),
                                                 currentLocation.longitude, location.getLongitude())));
                             }
@@ -140,10 +172,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                 seekbarProg.setText("Distance: " + (int) slider.getValue() + "km");
                 distanceSelected = slider.getValue();
 
-                final List<ListItemModel> filteredModelList = filter(mModels,
-                        currentQuery, distanceSelected);
-                mAdapter.replaceAll(filteredModelList);
-                places.scrollToPosition(0);
+                filterAndRearrange();
             }
         });
 
@@ -230,9 +259,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
             public boolean onQueryTextChange(String newText) {
                 currentQuery = newText;
-                final List<ListItemModel> filteredModelList = filter(mModels, newText, distanceSelected);
-                mAdapter.replaceAll(filteredModelList);
-                places.scrollToPosition(0);
+                filterAndRearrange();
                 return true;
             }
 
@@ -272,20 +299,28 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
     /* Handle the popup for more filters */
     public void openOptions(View view) {
-        // Create an instance of the dialog fragment and show it
+        // Create an instance of the dialogFragment fragment and show it
         /* Get the values for each filter and send them to the popup as an argument (order matters) */
-        DialogFragment dialog = new OptionsDialogFragment(this.cheapEntry, this.freeEntry);
-        dialog.show(getSupportFragmentManager(), "OptionsDialogFragment");
+        dialogFragment = new OptionsDialogFragment(this.cheapEntry, this.freeEntry);
+        dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
     }
 
     @Override
     public void onDialogPositiveClick(Bundle bundle) {
-
+        filterAndRearrange();
     }
 
     @Override
     public void onDialogNegativeClick(Bundle bundle) {
+        filterAndRearrange();
+    }
 
+
+    public void filterAndRearrange() {
+        final List<ListItemModel> filteredModelList =
+                filter(mModels, currentQuery, distanceSelected, wheelchairAccess, childFriendly, cheapEntry, freeEntry);
+        mAdapter.replaceAll(filteredModelList);
+        places.scrollToPosition(0);
     }
 
     /* Methods for handling the different checkboxes being clicked */
@@ -305,34 +340,16 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         this.freeEntry = freeEntry;
     }
 
-    /* These 2 sit directly in the search view and not in the popup */
-    public void setChildFriendly(View view) {
-        AppCompatCheckBox cb = (AppCompatCheckBox) view;
-
-        if (cb.isChecked()) {
-            setChildFriendly(true);
-            return;
-        }
-        this.setChildFriendly(false);
-    }
-
-    public void setAccessible(View view) {
-        AppCompatCheckBox cb = (AppCompatCheckBox) view;
-
-        if (cb.isChecked()) {
-            setWheelchairAccess(true);
-            return;
-        }
-        this.setWheelchairAccess(false);
-    }
-
 
     /* Filters the locations from the db according to user input (search text and distance/filters) */
-    private static List<ListItemModel> filter(List<ListItemModel> models, String query, double distanceSelected) {
+    private static List<ListItemModel> filter(List<ListItemModel> models, String query, double distanceSelected, boolean wheelchairAccessNeeded,
+                                              boolean childFriendlyNeeded, boolean cheapEntryNeeded,
+                                              boolean freeEntryNeeded) {
         final String lowerCaseQuery = query.toLowerCase();
 
         final List<ListItemModel> filteredModelList = new ArrayList<>();
         for (ListItemModel model : models) {
+
             final String titleText = model.getTitle().toLowerCase();
             final String placeTypeText = model.getLocationType().toLowerCase();
             final double distance = model.getmDistanceFromCurrentPosInMeters();
@@ -353,6 +370,44 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             }
         }
         Log.d(TAG, "Filtering current distance: " + distanceSelected * 1000);
+
+        ArrayList<ListItemModel> modelsThatDontMatch = new ArrayList<>();
+
+        if (wheelchairAccessNeeded) {
+            for (ListItemModel model :
+                    filteredModelList) {
+                if (!model.mIsWheelChairAccessible()) {
+                    modelsThatDontMatch.add(model);
+                }
+            }
+        }
+        if (childFriendlyNeeded) {
+            for (ListItemModel model :
+                    filteredModelList) {
+                if (!model.mIsChildFriendly()) {
+                    modelsThatDontMatch.add(model);
+                }
+            }
+        }
+        if (cheapEntryNeeded) {
+            for (ListItemModel model :
+                    filteredModelList) {
+                if (!model.mHasCheapEntry()) {
+                    modelsThatDontMatch.add(model);
+                }
+            }
+        }
+        if (freeEntryNeeded) {
+            for (ListItemModel model :
+                    filteredModelList) {
+                if (!model.mHasFreeEntry()) {
+                    modelsThatDontMatch.add(model);
+                }
+            }
+        }
+
+        filteredModelList.removeAll(modelsThatDontMatch);
+
         return filteredModelList;
     }
 

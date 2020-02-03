@@ -20,6 +20,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivityMapsBinding;
@@ -39,6 +40,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private FragmentManager fragmentManager;
     private Fragment currentFragment;
+    private LatLng currentLocation;
     public Boolean mLocationPermissionsGranted;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -100,7 +102,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
         // Acquire permissions to use users location
         getLocationPermission();
-
 
         /* Check the extras provided with launching this activity, e.g any strings like a place page
          * to be opened, as the Location Fragment is making use of the fragment container in this

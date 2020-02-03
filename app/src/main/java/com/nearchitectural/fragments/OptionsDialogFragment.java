@@ -48,11 +48,13 @@ public class OptionsDialogFragment extends DialogFragment {
                                     if (which == 0) {
                                         cheapEntry = true;
                                         ((SearchableActivity) getActivity()).setCheapEntry(true);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
                                     // If free entry was selected - check it
                                     if (which == 1) {
                                         freeEntry = true;
                                         ((SearchableActivity) getActivity()).setFreeEntry(true);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
 
                                 } else if (selectedItems.contains(which)) {
@@ -62,21 +64,25 @@ public class OptionsDialogFragment extends DialogFragment {
                                     if (which == 0) {
                                         cheapEntry = false;
                                         ((SearchableActivity) getActivity()).setCheapEntry(false);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
                                     // Uncheck free entry
                                     if (which == 1) {
                                         freeEntry = false;
                                         ((SearchableActivity) getActivity()).setFreeEntry(false);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
                                 }else {
                                     if (which == 0) {
                                         cheapEntry = false;
                                         ((SearchableActivity) getActivity()).setCheapEntry(false);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
                                     // Uncheck free entry
                                     if (which == 1) {
                                         freeEntry = false;
                                         ((SearchableActivity) getActivity()).setFreeEntry(false);
+                                        ((SearchableActivity) getActivity()).filterAndRearrange();
                                     }
                                 }
                             }
