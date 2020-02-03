@@ -7,10 +7,10 @@ import java.util.Comparator;
  *  @since 28/01/20
  *  purpose: Compare locations by alphabetical order of name
  */
-public class AlphabeticComparator implements Comparator<Location> {
+public class AlphabeticComparator implements Comparator<LocationInfo> {
 
     @Override
-    public int compare(Location firstLocation, Location secondLocation) {
+    public int compare(LocationInfo firstLocation, LocationInfo secondLocation) {
         return firstLocation.getName().compareToIgnoreCase(secondLocation.getName());
     }
 }

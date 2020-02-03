@@ -7,10 +7,10 @@ import java.util.Comparator;
  *  @since 28/01/20
  *  purpose: Compare locations by newest to oldest (opening date)
  */
-public class NewestToOldestComparator implements Comparator<Location> {
+public class NewestToOldestComparator implements Comparator<LocationInfo> {
 
     @Override
-    public int compare(Location firstLocation, Location secondLocation) {
+    public int compare(LocationInfo firstLocation, LocationInfo secondLocation) {
         return firstLocation.getDateOpened().compareTo(secondLocation.getDateOpened());
     }
 }

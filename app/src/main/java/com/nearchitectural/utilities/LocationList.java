@@ -13,27 +13,28 @@ import java.util.List;
  */
 public class LocationList {
 
-    private List<Location> activeLocations; // Locations to be displayed within the application
-    private List<Location> inactiveLocations; // Locations to be hidden within the application
+    private List<LocationInfo> activeLocations; // Locations to be displayed within the application
+    private List<LocationInfo> inactiveLocations; // Locations to be hidden within the application
     private List<Tag> activeTags; // Currently active tags as chosen by the user
     private double distanceRadius; // Radius of distance within which locations should be shown
     // TODO: implement UserSettings class
     // private UserSettings userSettings;
+    private UserLocation userLocation;
 
     // TODO: implement LocationList constructor with DatabaseManager class
-    public LocationList() {
-
+    public LocationList(UserLocation userLocation) {
+        this.userLocation = userLocation;
         filter();
         sort(new AlphabeticComparator());
     }
 
     // Returns the list containing currently active locations
-    public List<Location> getActiveLocations() {
+    public List<LocationInfo> getActiveLocations() {
         return activeLocations;
     }
 
     // Sorts both the active and inactive list using the provided comparator
-    public void sort(Comparator<Location> locationComparator) {
+    public void sort(Comparator<LocationInfo> locationComparator) {
         Collections.sort(activeLocations, locationComparator);
         Collections.sort(inactiveLocations, locationComparator);
     }
@@ -44,22 +45,22 @@ public class LocationList {
         List<Tag> activeLocationTags; // Stores the union of active tags and a given locations tags
 
         // Swaps locations from inactive location list to active location list when appropriate
-        for (Location l : inactiveLocations) {
+        for (LocationInfo l : inactiveLocations) {
             activeLocationTags = new ArrayList<>(l.getTags());
             activeLocationTags.retainAll(activeTags);
-            // TODO: Add additional conditions for user settings and distance radius
-            if (!activeLocationTags.isEmpty()) {
+            // TODO: Add additional conditions for user settings
+            if (!activeLocationTags.isEmpty() && userLocation.distanceFromUser(l) <= distanceRadius) {
                 activeLocations.add(l);
                 inactiveLocations.remove(l);
             }
         }
 
         // Swaps locations from active location list to inactive location list when appropriate
-        for (Location l : activeLocations) {
+        for (LocationInfo l : activeLocations) {
             activeLocationTags = new ArrayList<>(l.getTags());
             activeLocationTags.retainAll(activeTags);
-            // TODO: Add additional conditions for user settings and distance radius
-            if (activeLocationTags.isEmpty()) {
+            // TODO: Add additional conditions for user settings
+            if (activeLocationTags.isEmpty() || userLocation.distanceFromUser(l) > distanceRadius) {
                 inactiveLocations.add(l);
                 activeLocations.remove(l);
             }
