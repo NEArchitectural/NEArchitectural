@@ -78,8 +78,10 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof MapFragment) {
+                if(fragmentManager.getBackStackEntryCount() <= 1){
                     navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
+                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof MapFragment) {
+                     navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
                 } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof SettingsFragment) {
                     navigationView.getMenu().findItem(R.id.nav_settings).setChecked(true);
                 } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof TimelineFragment) {
@@ -119,11 +121,11 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                 lf.setArguments(arguments);
                 bundle.remove("openPlacePage");
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        lf).addToBackStack(null).commit();
+                        lf).commit();
             } else {
                 /* If no place page needs to be opened, do the default - launch the map fragment */
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new MapFragment()).addToBackStack(null).commit();
+                        new MapFragment()).commit();
 
                 navigationView.getMenu().getItem(0).setChecked(true);
 
@@ -133,7 +135,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
             /* Same as before, but this is for when the bundle is null, a.k.a no arguments were
              * provided when launching this activity */
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    new MapFragment()).addToBackStack(null).commit();
+                    new MapFragment()).commit();
 
             navigationView.getMenu().getItem(0).setChecked(true);
 
@@ -165,7 +167,8 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Close the nav drawer if open
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+        else {
             // Else switch to the last used fragment
             if (currentFragment instanceof MapFragment) {
                 navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);

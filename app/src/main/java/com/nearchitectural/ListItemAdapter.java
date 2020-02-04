@@ -111,4 +111,5 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
     public int getItemCount() {
         return mSortedList.size();
     }
+
 }

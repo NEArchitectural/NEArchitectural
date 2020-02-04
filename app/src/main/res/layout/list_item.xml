@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -21,15 +22,11 @@
             android:layout_gravity="center">
 
             <RelativeLayout
-                android:onClick="openPlacePage"
                 android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:layout_marginStart="50dp"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="50dp"
+                android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingBottom="10dp">
+                android:onClick="openPlacePage">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -44,6 +41,9 @@
                         android:id="@+id/list_item_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:textColor="@color/black"
                         android:text="@{model.title, default=Title}"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -52,6 +52,8 @@
                         android:id="@+id/list_item_place_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
                         android:text="@{model.locationType, default=PlaceType}"
                         android:textSize="12sp" />
 
@@ -59,11 +61,11 @@
 
                 <ImageView
                     android:id="@+id/list_item_image"
-                    android:layout_width="150dp"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentBottom="true" />
-                <!-- TODO set contentDescription from code on each image
-                android:contentDescription="" -->
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentBottom="true"
+                    android:contentDescription="Thumbnail Image"
+                    bind:thumbnail="@{model.thumbnailURL}"/>
 
 
             </RelativeLayout>

@@ -73,15 +73,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 if (googleMap != null) {
                                     moveCamera(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
                                 }
+                            } else {
+                                CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
+                                moveCamera(CurrentCoordinates.getCoords());
+                                Log.d(TAG, "onComplete: current location is null. Fallback to default location");
                             }
                         } else {
-                            Log.d(TAG, "onComplete: current location is nullT");
+                            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
+                            CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
+                            moveCamera(CurrentCoordinates.getCoords());
                             Toast.makeText(getActivity(), "Unable to get current location", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         } catch (SecurityException se) {
+            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
+            CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
+            moveCamera(CurrentCoordinates.getCoords());
             Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage());
         }
     }
@@ -161,7 +170,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         Bundle arguments = new Bundle();
                         arguments.putString("placeName", marker.getTitle());
                         lf.setArguments(arguments);
-                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, lf).commit();
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, lf)
+                                .addToBackStack(LocationFragment.TAG)
+                                .commit();
 
                         /* Code to load DetailsPage for the place will sit here */
                         MessageBox(marker.getTitle() + " was pressed!");
@@ -192,7 +204,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 //                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
 //                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
 //                                }
-
                                 googleMap.addMarker(new MarkerOptions()
                                         .position(new LatLng((double) document.getData().get("latitude"),
                                                 (double) document.getData().get("longitude")))
@@ -222,6 +233,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.setMargins(0, 0, 0, 80);
 
         googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
+
+        getDeviceLocation();
     }
 
 

@@ -13,50 +13,12 @@ public class Location {
     private boolean isChildFriendly;
     private boolean hasCheapEntry;
     private boolean hasFreeEntry;
+    private String thumbnailURL;
     // We also will need some image for the thumbnail
 
-    public Location(String id, String name, String locationType, String locationInfo,
-                    double latitude, double longitude, boolean isWheelChairAccessible,
-                    boolean isChildFriendly, boolean hasCheapEntry, boolean hasFreeEntry) {
-        this.id = id;
-        this.name = name;
-        this.locationType = locationType;
-        this.locationInfo = locationInfo;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.isWheelChairAccessible = isWheelChairAccessible;
-        this.isChildFriendly = isChildFriendly;
-        this.hasCheapEntry = hasCheapEntry;
-        this.hasFreeEntry = hasFreeEntry;
-    }
-
-    public Location(String id) {
-        this.id = id;
-    }
-
-    public Location(String id, String name, String locationType, String locationInfo) {
-        this.id = id;
-        this.name = name;
-        this.locationType = locationType;
-        this.locationInfo = locationInfo;
-    }
-
-    public Location(String id, String name, String locationType) {
-        this.id = id;
-        this.name = name;
-        this.locationType = locationType;
-    }
-
-    public Location(String id, String name, String locationType, LatLng coords) {
-        this.id = id;
-        this.name = name;
-        this.locationType = locationType;
-        this.latitude = coords.latitude;
-        this.longitude = coords.longitude;
-    }
-
-    public Location(String id, String name, String placeType, LatLng coords, boolean wheelChairAccessible,
-                    boolean childFriendly, boolean cheapEntry, boolean freeEntry) {
+    public Location(String id, String name, String placeType, LatLng coords,
+                    boolean wheelChairAccessible, boolean childFriendly,
+                    boolean cheapEntry, boolean freeEntry, String thumbnailAddress) {
         this.id = id;
         this.name = name;
         this.locationType = placeType;
@@ -66,6 +28,7 @@ public class Location {
         this.isChildFriendly = childFriendly;
         this.hasCheapEntry = cheapEntry;
         this.hasFreeEntry = freeEntry;
+        this.thumbnailURL = thumbnailAddress;
     }
 
 
@@ -129,4 +92,11 @@ public class Location {
         return hasFreeEntry;
     }
 
+    public String getThumbnailURL() {
+        return thumbnailURL;
+    }
+
+    public void setThumbnailURL(String thumbnailURL) {
+        this.thumbnailURL = thumbnailURL;
+    }
 }

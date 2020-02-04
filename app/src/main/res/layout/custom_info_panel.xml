@@ -23,20 +23,21 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/picture"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="8dp" />-->
+<!--        <ImageView-->
+<!--            android:id="@+id/picture"-->
+<!--            android:layout_below="@+id/title"-->
+<!--            android:layout_width="100dp"-->
+<!--            android:layout_height="100dp"-->
+<!--            android:layout_marginTop="8dp" />-->
 
         <TextView
             android:id="@+id/snippet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
             android:ellipsize="end"
             android:maxWidth="200dp"
             android:maxLines="10"
-            android:layout_below="@+id/title"
             android:textColor="#000"
             android:textSize="14sp" />
         <!--            android:layout_toRightOf="@+id/picture"-->

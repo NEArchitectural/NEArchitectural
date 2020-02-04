@@ -33,7 +33,6 @@ import com.nearchitectural.ListItemAdapter;
 import com.nearchitectural.Location;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivitySearchBinding;
-import com.nearchitectural.databinding.ListItemBinding;
 import com.nearchitectural.fragments.OptionsDialogFragment;
 import com.nearchitectural.ui.models.ListItemModel;
 
@@ -57,7 +56,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private AppCompatCheckBox wheelChairCheckBox;
     private AppCompatCheckBox childFriendlyCheckBox;
     private List<ListItemModel> mModels;
-    private ListItemBinding mBinding;
     private ListItemAdapter mAdapter;
     private DialogFragment dialogFragment;
     private FirebaseFirestore db;
@@ -144,8 +142,10 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                                 boolean childFriendly = (boolean) document.getData().get("childFriendly");
                                 boolean cheapEntry = (boolean) document.getData().get("cheapEntry");
                                 boolean freeEntry = (boolean) document.getData().get("freeEntry");
+                                String thumbnailAddress = (String) document.getData().get("thumbnail");
 
-                                locationsToShow.add(new Location(id, name, placeType, coords, wheelChairAccessible, childFriendly, cheapEntry, freeEntry));
+                                locationsToShow.add(new Location(id, name, placeType, coords,
+                                        wheelChairAccessible, childFriendly, cheapEntry, freeEntry, thumbnailAddress));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                             mModels = new ArrayList<>();
@@ -154,6 +154,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                                         location.getLocationType(),
                                         location.isWheelChairAccessible(), location.isChildFriendly(),
                                         location.hasCheapEntry(), location.hasFreeEntry(),
+                                        location.getThumbnailURL(),
                                         calculateDistance(currentLocation.latitude, location.getLatitude(),
                                                 currentLocation.longitude, location.getLongitude())));
                             }
@@ -188,9 +189,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         /* If when starting this activity you passed in a key-value pair
          This is how you retrieve it */
         String value = intent.getStringExtra("key"); //if it's a string you stored.
-
-
-        handleIntent(getIntent());
     }
 
     /**
@@ -221,24 +219,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         distance = Math.pow(distance, 2);
 
         return Math.sqrt(distance);
-    }
-
-
-    /* The handle intent and onNewIntent methods are
-     useless for now and may be removed in further update */
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            //use the query to search your data somehow
-            attemptSearch(query);
-        }
     }
 
     // This handles creating the magnifying glass expanding search field
@@ -279,16 +259,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     }
 
 
-    /**
-     * Performs a search and passes the results to the container
-     * Activity that holds your Fragments.
-     * Also will be removed in future version.
-     */
-    public void attemptSearch(String query) {
-        // TODO: implement this
-    }
-
-
     /* Handle a press on the map button */
     public void openMaps(View view) {
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
@@ -316,13 +286,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     }
 
 
-    public void filterAndRearrange() {
-        final List<ListItemModel> filteredModelList =
-                filter(mModels, currentQuery, distanceSelected, wheelchairAccess, childFriendly, cheapEntry, freeEntry);
-        mAdapter.replaceAll(filteredModelList);
-        places.scrollToPosition(0);
-    }
-
     /* Methods for handling the different checkboxes being clicked */
     public void setWheelchairAccess(boolean wheelchairAccess) {
         this.wheelchairAccess = wheelchairAccess;
@@ -342,7 +305,8 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
 
     /* Filters the locations from the db according to user input (search text and distance/filters) */
-    private static List<ListItemModel> filter(List<ListItemModel> models, String query, double distanceSelected, boolean wheelchairAccessNeeded,
+    private static List<ListItemModel> filter(List<ListItemModel> models, String query,
+                                              double distanceSelected, boolean wheelchairAccessNeeded,
                                               boolean childFriendlyNeeded, boolean cheapEntryNeeded,
                                               boolean freeEntryNeeded) {
         final String lowerCaseQuery = query.toLowerCase();
@@ -355,16 +319,17 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             final double distance = model.getmDistanceFromCurrentPosInMeters();
             Log.w(TAG, String.valueOf(distance));
 
+            boolean textMatchFound = titleText.contains(lowerCaseQuery)
+                    || placeTypeText.contains(lowerCaseQuery);
+
             if (distanceSelected == 0) {
-                if (titleText.contains(lowerCaseQuery)
-                        || placeTypeText.contains(lowerCaseQuery)) {
+                if (textMatchFound) {
                     filteredModelList.add(model);
                 }
             } else {
-
-                if ((titleText.contains(lowerCaseQuery)
-                        || placeTypeText.contains(lowerCaseQuery))
-                        && (distanceSelected > 0 && distanceSelected * 1000 >= distance)) {
+                if (textMatchFound
+                        && (distanceSelected > 0
+                        && distanceSelected * 1000 >= distance)) {
                     filteredModelList.add(model);
                 }
             }
@@ -409,6 +374,14 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         filteredModelList.removeAll(modelsThatDontMatch);
 
         return filteredModelList;
+    }
+
+    public void filterAndRearrange() {
+        final List<ListItemModel> filteredModelList =
+                filter(mModels, currentQuery, distanceSelected,
+                        wheelchairAccess, childFriendly, cheapEntry, freeEntry);
+        mAdapter.replaceAll(filteredModelList);
+        places.scrollToPosition(0);
     }
 
     /* Handle a place card being pressed and take the user to the according Location page */
