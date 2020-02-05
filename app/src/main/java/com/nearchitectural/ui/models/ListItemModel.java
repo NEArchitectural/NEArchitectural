@@ -72,8 +72,12 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     }
 
 
-    public double getmDistanceFromCurrentPosInMeters() {
+    public double getMDistanceFromCurrentPosInMeters() {
         return mDistanceFromCurrentPosInMeters;
+    }
+
+    public void setMDistanceFromCurrentPosInMeters(double distanceFromCurrentPosInMeters) {
+        this.mDistanceFromCurrentPosInMeters = distanceFromCurrentPosInMeters;
     }
 
     public boolean mIsWheelChairAccessible() {
@@ -96,16 +100,13 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         return thumbnailURL;
     }
 
-    public void setThumbnailURL(String thumbnailURL) {
-        this.thumbnailURL = thumbnailURL;
-    }
-
     @BindingAdapter({"thumbnail"})
     public static void loadImage(ImageView imageView, String imageURL) {
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
+                .override(500, 500)
                 .error(R.drawable.ic_launcher_background)
-                .fitCenter()
+                .placeholder(R.drawable.ic_launcher_background)
                 .into(imageView);
 
     }

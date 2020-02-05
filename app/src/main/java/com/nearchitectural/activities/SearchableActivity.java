@@ -63,10 +63,12 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private String currentQuery;
 
 
-    private static final Comparator<ListItemModel> ALPHABETICAL_COMPARATOR = new Comparator<ListItemModel>() {
+    private static final Comparator<ListItemModel> SMALLEST_DISTANCE_COMPARATOR = new Comparator<ListItemModel>() {
         @Override
         public int compare(ListItemModel a, ListItemModel b) {
-            return a.getTitle().compareTo(b.getTitle());
+            if (a.getMDistanceFromCurrentPosInMeters() == b.getMDistanceFromCurrentPosInMeters())
+                return 0;
+            return a.getMDistanceFromCurrentPosInMeters() > b.getMDistanceFromCurrentPosInMeters() ? 1 : -1;
         }
     };
 
@@ -103,7 +105,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         });
 
         // Currently the cards with locations are being sorted alphabetically
-        mAdapter = new ListItemAdapter(this, ALPHABETICAL_COMPARATOR);
+        mAdapter = new ListItemAdapter(this, SMALLEST_DISTANCE_COMPARATOR);
 
         // Get the device's location for distance calculations
         this.currentLocation = CurrentCoordinates.getCoords();
@@ -316,7 +318,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
             final String titleText = model.getTitle().toLowerCase();
             final String placeTypeText = model.getLocationType().toLowerCase();
-            final double distance = model.getmDistanceFromCurrentPosInMeters();
+            final double distance = model.getMDistanceFromCurrentPosInMeters();
             Log.w(TAG, String.valueOf(distance));
 
             boolean textMatchFound = titleText.contains(lowerCaseQuery)

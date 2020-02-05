@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.nearchitectural.R;
+import com.nearchitectural.activities.MapsActivity;
 
 public class TimelineFragment extends Fragment {
 
@@ -21,4 +22,10 @@ public class TimelineFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_timeline,container,false);
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);
+    }
 }

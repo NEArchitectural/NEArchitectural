@@ -97,7 +97,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
         // Instance of the db for requesting/updating data
         db = FirebaseFirestore.getInstance();
         // Check if the user has allowed us to use their location
@@ -204,7 +206,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 //                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
 //                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
 //                                }
-                                googleMap.addMarker(new MarkerOptions()
+                                googleMap.addMarker(new MarkerOptions().flat(false)
                                         .position(new LatLng((double) document.getData().get("latitude"),
                                                 (double) document.getData().get("longitude")))
                                         .title((String) document.getData().get("name"))

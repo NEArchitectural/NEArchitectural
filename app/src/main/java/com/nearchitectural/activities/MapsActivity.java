@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -39,7 +38,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     private ActivityMapsBinding mapsBinding;
     private NavigationView navigationView;
     private FragmentManager fragmentManager;
-    private Fragment currentFragment;
     private LatLng currentLocation;
     public Boolean mLocationPermissionsGranted;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -73,27 +71,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Set the menu to use the listener provided in this class
         navigationView.setNavigationItemSelectedListener(this);
 
-        /* What this attempts to do is manage which menu item is highlighted by keeping track of
-         * which fragment is currently on the screen */
-        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if(fragmentManager.getBackStackEntryCount() <= 1){
-                    navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof MapFragment) {
-                     navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof SettingsFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_settings).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof TimelineFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_timeline).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof AboutFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_info).setChecked(true);
-                } else if (fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1) instanceof HelpFragment) {
-                    navigationView.getMenu().findItem(R.id.nav_help).setChecked(true);
-                }
-            }
-        });
-
         // The "hamburger" button for the menu
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -120,28 +97,27 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                 arguments.putString("placeName", placeName);
                 lf.setArguments(arguments);
                 bundle.remove("openPlacePage");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         lf).commit();
             } else {
                 /* If no place page needs to be opened, do the default - launch the map fragment */
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new MapFragment()).commit();
 
                 navigationView.getMenu().getItem(0).setChecked(true);
-
-                currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
             }
         } else {
             /* Same as before, but this is for when the bundle is null, a.k.a no arguments were
              * provided when launching this activity */
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+            fragmentManager.beginTransaction().replace(R.id.fragment_container,
                     new MapFragment()).commit();
 
             navigationView.getMenu().getItem(0).setChecked(true);
-
-
-            currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         }
+    }
+
+    public NavigationView getNavigationView() {
+        return this.navigationView;
     }
 
     /* Requesting a users permission to use location services */
@@ -168,20 +144,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else {
-            // Else switch to the last used fragment
-            if (currentFragment instanceof MapFragment) {
-                navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
-            } else if (currentFragment instanceof SettingsFragment) {
-                navigationView.getMenu().findItem(R.id.nav_settings).setChecked(true);
-            } else if (currentFragment instanceof HelpFragment) {
-                navigationView.getMenu().findItem(R.id.nav_help).setChecked(true);
-            } else if (currentFragment instanceof AboutFragment) {
-                navigationView.getMenu().findItem(R.id.nav_info).setChecked(true);
-            } else if (currentFragment instanceof TimelineFragment) {
-                navigationView.getMenu().findItem(R.id.nav_timeline).setChecked(true);
-            }
-        }
         super.onBackPressed();
     }
 
@@ -196,51 +158,37 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_timeline:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new TimelineFragment()).addToBackStack(TimelineFragment.TAG).commit();
-                setCurrent(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
                 drawer.closeDrawer(GravityCompat.START);
                 break;
             case R.id.nav_map:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new MapFragment()).addToBackStack(MapFragment.TAG).commit();
-                setCurrent(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
                 drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_settings:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new SettingsFragment()).addToBackStack(SettingsFragment.TAG).commit();
-                setCurrent(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
                 drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_info:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new AboutFragment()).addToBackStack(AboutFragment.TAG).commit();
-                setCurrent(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
                 drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_help:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new HelpFragment()).addToBackStack(HelpFragment.TAG).commit();
-                setCurrent(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
                 drawer.closeDrawer(GravityCompat.START);
                 break;
         }
         return true;
     }
 
-    /* Get the fragment currently in the fragment container */
-    public Fragment getCurrent() {
-        return currentFragment;
-    }
-
-    /* Set the current fragment */
-    public void setCurrent(Fragment current) {
-        this.currentFragment = current;
-    }
 
     /* On press of the magnifying glass open the search view */
     public void openSearch(View view) {

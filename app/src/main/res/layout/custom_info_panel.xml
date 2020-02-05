@@ -16,25 +16,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_gravity="center_horizontal"
+            android:layout_centerInParent="true"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="#000"
             android:textSize="14sp"
             android:textStyle="bold" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/picture"-->
-<!--            android:layout_below="@+id/title"-->
-<!--            android:layout_width="100dp"-->
-<!--            android:layout_height="100dp"-->
-<!--            android:layout_marginTop="8dp" />-->
+        <ImageView
+            android:id="@+id/picture"
+            android:layout_below="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="8dp"/>
 
         <TextView
             android:id="@+id/snippet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
+            android:layout_below="@+id/picture"
             android:ellipsize="end"
             android:maxWidth="200dp"
             android:maxLines="10"
