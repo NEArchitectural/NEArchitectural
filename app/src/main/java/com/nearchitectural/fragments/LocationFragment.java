@@ -11,28 +11,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.nearchitectural.models.Location;
 import com.nearchitectural.R;
 
 public class LocationFragment extends Fragment {
     public static final String TAG = "LocationFragment";
+
     private TextView title;
+    // Arguments that came in with the intent
     private Bundle arguments;
     // Database reference field
     private FirebaseFirestore db;
-    private String locationId;
+    // Location object to contain all the info
+    private Location location;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Initialize the arguments field with what came in from the previous activity
         arguments = getArguments();
-        /* Set values like name of the place, details, images and such passed from the activity
-         * by using the following syntax */
-//        String placeName = getArguments().getString("name");
 
         return inflater.inflate(R.layout.fragment_location, container, false);
     }
@@ -54,8 +57,8 @@ public class LocationFragment extends Fragment {
 
 
         /* You can increment/decrement the likes count by finding the location in the db and
-        * setting the likes field like shown below - use this code in the OnClick listener for the
-        * like button */
+         * setting the likes field like shown below - use this code in the OnClick listener for the
+         * like button */
 //        db.collection("locations").whereEqualTo("name",placeName)
 //                .get()
 //                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -103,10 +106,38 @@ public class LocationFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                // If you get here it means the query has been successful
-                                /* You can now work with the documents data
-                                like name, type, summary and so on
-                                 by using document.getData.get("key") */
+                                String name = document.getData().get("name") == null ? "Unknown" : (String) document.getData().get("name");
+                                String placeType = document.getData().get("placeType") == null ? "Unknown" : (String) document.getData().get("placeType");
+                                String id = document.getId();
+                                boolean wheelChairAccessible =
+                                        document.getData().get("wheelChairAccessible") != null
+                                                && (boolean) document.getData().get("wheelChairAccessible");
+                                boolean childFriendly = document.getData().get("childFriendly") != null
+                                        && (boolean) document.getData().get("childFriendly");
+                                boolean cheapEntry = document.getData().get("cheapEntry") != null
+                                        && (boolean) document.getData().get("cheapEntry");
+                                boolean freeEntry = document.getData().get("freeEntry") != null
+                                        && (boolean) document.getData().get("freeEntry");
+                                String thumbnailAddress = document.getData().get("thumbnail") == null ?
+                                        "" : (String) document.getData().get("thumbnail");
+
+                                double latitude = document.getData().get("latitude") == null ?
+                                        0 : (double) document.getData().get("latitude");
+
+                                double longitude = document.getData().get("longitude") == null ?
+                                        0 : (double) document.getData().get("longitude");
+
+                                // All the information about the current location
+                                location = new Location(id,
+                                        name,
+                                        placeType,
+                                        new LatLng(latitude, longitude),
+                                        wheelChairAccessible,
+                                        childFriendly,
+                                        cheapEntry,
+                                        freeEntry,
+                                        thumbnailAddress);
+
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                         } else {
@@ -116,6 +147,15 @@ public class LocationFragment extends Fragment {
                         }
                     }
                 });
-        ;
     }
+
+
+    /* These lines are for navigating through Google maps forcefully
+     * will be used when someone presses "Take me here" button or whatever we call it */
+
+//                        Uri uri = Uri.parse(String.format(Locale.ENGLISH,
+//                        "google.navigation:q=%f,%f", location.getLatitude(),location.getLongitude()));
+//                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+//                        mapIntent.setPackage("com.google.android.apps.maps");
+//                        startActivity(mapIntent);
 }

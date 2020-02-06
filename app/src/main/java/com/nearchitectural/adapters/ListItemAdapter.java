@@ -1,4 +1,4 @@
-package com.nearchitectural;
+package com.nearchitectural.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

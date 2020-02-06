@@ -22,6 +22,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private String thumbnailURL;
     // No setter for this field as it will necessarily be provided in the constructor
     private double mDistanceFromCurrentPosInMeters;
+    private String distanceStringForListItem;
 
     public ListItemModel(String mId, String mTitle, String mLocationType, boolean mIsWheelChairAccessible,
                          boolean mIsChildFriendly, boolean mHasCheapEntry, boolean mHasFreeEntry,
@@ -35,7 +36,14 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         this.mHasFreeEntry = mHasFreeEntry;
         this.thumbnailURL = thumbnailURL;
         this.mDistanceFromCurrentPosInMeters = mDistanceFromCurrentPosInMeters;
+        if ((int) mDistanceFromCurrentPosInMeters / 1000 <= 0) {
+            this.distanceStringForListItem = (int) mDistanceFromCurrentPosInMeters + " meters away";
+        } else {
+
+            this.distanceStringForListItem = (int) mDistanceFromCurrentPosInMeters / 1000 + " km away";
+        }
     }
+
 
     public String getId() {
         return mId;
@@ -109,5 +117,9 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(imageView);
 
+    }
+
+    public String getDistanceStringForListItem() {
+        return distanceStringForListItem;
     }
 }

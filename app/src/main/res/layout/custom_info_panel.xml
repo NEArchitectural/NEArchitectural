@@ -1,49 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:orientation="horizontal"
+    android:background="@color/grey"
+    android:orientation="vertical"
     android:padding="10dp">
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:ellipsize="end"
+        android:maxWidth="150dp"
+        android:textAlignment="center"
+        android:maxLines="3"
+        android:textColor="#000"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerInParent="true"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="#000"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+    <ImageView
+        android:id="@+id/picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="5dp" />
 
-        <ImageView
-            android:id="@+id/picture"
-            android:layout_below="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="8dp"/>
-
-        <TextView
-            android:id="@+id/snippet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/picture"
-            android:ellipsize="end"
-            android:maxWidth="200dp"
-            android:maxLines="10"
-            android:textColor="#000"
-            android:textSize="14sp" />
-        <!--            android:layout_toRightOf="@+id/picture"-->
-
-    </RelativeLayout>
-
+    <TextView
+        android:id="@+id/snippet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/picture"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"
+        android:maxWidth="150dp"
+        android:maxLines="5"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
 
 </RelativeLayout>

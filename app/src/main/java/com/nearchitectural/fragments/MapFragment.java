@@ -30,10 +30,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.nearchitectural.CurrentCoordinates;
-import com.nearchitectural.CustomInfoWindowAdapter;
 import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
+import com.nearchitectural.adapters.CustomInfoWindowAdapter;
+import com.nearchitectural.utils.CurrentCoordinates;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -158,16 +158,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new GoogleMap.OnInfoWindowClickListener() {
                     public void onInfoWindowClick(Marker marker) {
 
-                        /* These lines are for navigating through Google maps forcefully
-                         * will be used in detailsPage when someone presses "Take me here"
-                         * button or whatever we call it */
-
-//                        Uri uri = Uri.parse(String.format(Locale.ENGLISH,
-//                        "google.navigation:q=%f,%f", marker.getPosition().latitude,marker.getPosition().longitude));
-//                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
-//                        mapIntent.setPackage("com.google.android.apps.maps");
-//                        startActivity(mapIntent);
-
                         LocationFragment lf = new LocationFragment();
                         Bundle arguments = new Bundle();
                         arguments.putString("placeName", marker.getTitle());
@@ -184,12 +174,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         );
 
 
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.getUiSettings().setCompassEnabled(true);
+
+        googleMap.getUiSettings().setRotateGesturesEnabled(true);
+        googleMap.getUiSettings().setScrollGesturesEnabled(true);
+        googleMap.getUiSettings().setTiltGesturesEnabled(true);
+        googleMap.getUiSettings().setZoomGesturesEnabled(true);
+
         // Get all places from db and set a marker foreach here
          /* TODO: Get the settings currently applied from the Settings singleton and
              only add the necessary locations to the map that answer the criteria
               (e.g. maximum distance from current location, child friendly,
                wheelchair accessible locations only and so on) by calling the calculateDistance()
-                method from the SearchableActivity class on each location before adding it to the map*/
+                method on each location before adding it to the map*/
         db.collection("locations")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -200,17 +198,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                 Log.d(TAG, document.getId() + " => " + document.getData());
 
-//                                if (SearchableActivity.calculateDistance(currentLocation.latitude,
+//                                if (CalculateDistance.calculateDistance(currentLocation.latitude,
 //                                        (double) document.getData().get("latitude"),
 //                                        currentLocation.longitude,
 //                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
 //                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
 //                                }
+                                String name = document.getData().get("name") == null ?
+                                        "Unknown" : (String) document.getData().get("name");
+
+                                String summary = document.getData().get("summary") == null ?
+                                        "Unknown" : (String) document.getData().get("summary");
+
+                                double latitude = document.getData().get("latitude") == null ?
+                                        0 : (double) document.getData().get("latitude");
+
+                                double longitude = document.getData().get("longitude") == null ?
+                                        0 : (double) document.getData().get("longitude");
+
+
                                 googleMap.addMarker(new MarkerOptions().flat(false)
-                                        .position(new LatLng((double) document.getData().get("latitude"),
-                                                (double) document.getData().get("longitude")))
-                                        .title((String) document.getData().get("name"))
-                                        .snippet((String) document.getData().get("summary")));
+                                        .position(new LatLng(latitude, longitude))
+                                        .title(name)
+                                        .snippet(summary));
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
@@ -221,7 +231,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         googleMap.setMyLocationEnabled(true);
 
         /* Move the "Center on my location" button to the bottom left */
-        View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+        View locationButton =
+                ((View) mapView.findViewById(Integer.parseInt("1"))
+                        .getParent())
+                        .findViewById(Integer.parseInt("2"));
         RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
@@ -234,8 +247,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
 
+        /* Set the map to use our custom info window */
         googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
 
+        /* Get the device's location again to update the current coordinates */
         getDeviceLocation();
     }
 

@@ -1,4 +1,4 @@
-package com.nearchitectural;
+package com.nearchitectural.models;
 
 import com.google.android.gms.maps.model.LatLng;
 

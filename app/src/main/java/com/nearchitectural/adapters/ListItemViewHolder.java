@@ -1,4 +1,4 @@
-package com.nearchitectural;
+package com.nearchitectural.adapters;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.databinding.ListItemBinding;

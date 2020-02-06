@@ -98,7 +98,6 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="8dp" />
                         </LinearLayout>
-                        <!--                                android:onClick="setChildFriendly" />-->
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -115,7 +114,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="8dp" />
-                            <!--                                android:onClick="setAccessible"-->
+
 
                             <ImageView
                                 android:id="@+id/options"
@@ -144,11 +143,11 @@
                             android:layout_width="180dp"
                             android:layout_height="100dp"
                             android:layout_gravity="center_horizontal"
-                            android:stepSize="5"
+                            android:stepSize="1"
                             android:theme="@style/AppTheme"
                             android:value="0"
                             android:valueFrom="0"
-                            android:valueTo="100" />
+                            android:valueTo="10" />
 
                         <TextView
                             android:id="@+id/seekbar_progress"
@@ -168,6 +167,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/filters"
                     android:layout_centerInParent="true"
+                    android:layout_marginBottom="10dp"
                     android:background="@color/grey"
                     android:scrollbars="none"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

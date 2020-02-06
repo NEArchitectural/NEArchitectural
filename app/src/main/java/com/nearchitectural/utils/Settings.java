@@ -1,4 +1,4 @@
-package com.nearchitectural;
+package com.nearchitectural.utils;
 
 import java.io.Serializable;
 
