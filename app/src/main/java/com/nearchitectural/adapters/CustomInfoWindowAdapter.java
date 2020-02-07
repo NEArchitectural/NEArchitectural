@@ -38,7 +38,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         return thumbnailURL;
     }
 
-    public void setThumbnailURL(String thumbnailURL) {
+    private void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
     }
 
@@ -53,6 +53,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private void renderWindowText(final Marker marker, final View view) {
         String title = marker.getTitle();
         TextView textViewTitle = view.findViewById(R.id.title);
+        pic = view.findViewById(R.id.picture);
         final Context context = view.getContext();
 
 
@@ -88,7 +89,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                                                     return false;
                                                 }
                                             })
-                                            .into((ImageView) view.findViewById(R.id.picture));
+                                            .into(pic);
 
                                 }
                             } else {
@@ -103,7 +104,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                for (final QueryDocumentSnapshot document : task.getResult()) {
 
                                     thumbnailURL = (String) document.getData().get("thumbnail");
 
@@ -111,7 +112,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
                                     GlideApp.with(context)
                                             .load(thumbnailURL)
-                                            .override(300, 300)
+                                            .override(500, 500)
                                             .error(R.drawable.ic_launcher_background)
                                             .signature(new ObjectKey(thumbnailURL.hashCode()))
                                             .listener(new RequestListener<Drawable>() {
@@ -128,8 +129,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                                                     return false;
                                                 }
                                             })
-                                            .into((ImageView) view.findViewById(R.id.picture));
-
+                                            .into(pic);
                                 }
                             } else {
                                 Log.d(TAG, "Error getting documents: ", task.getException());
@@ -155,6 +155,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             textViewSnippet.setText("");
         }
         ;
+
+        pic.setContentDescription(title);
     }
 
     @Override

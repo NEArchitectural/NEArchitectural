@@ -90,7 +90,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
         childFriendlyCheckBox = (AppCompatCheckBox) searchBinding.childFriendlyCb;
 
-        /* Set listeners to be able to filter when the user checks/unchecks a CheckBox */
+        /* Set listeners to be able to apply when the user checks/unchecks a CheckBox */
         childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -119,7 +119,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         // Query string is empty in the beginning
         currentQuery = "";
 
-        // Adapter to filter the data
+        // Adapter to apply the data
         places.setAdapter(mAdapter);
 
         // List of locations
@@ -278,7 +278,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     /* Handle the popup for more filters */
     public void openOptions(View view) {
         // Create an instance of the dialogFragment fragment and show it
-        /* Get the values for each filter and send them to the popup as an argument (order matters) */
+        /* Get the values for each apply and send them to the popup as an argument (order matters) */
         dialogFragment = new OptionsDialogFragment(this.cheapEntry, this.freeEntry);
         dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
     }
@@ -313,10 +313,10 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         this.freeEntry = freeEntry;
     }
 
-    /* Apply filter method and replace the current list with the list of matches and rearrange */
+    /* Apply apply method and replace the current list with the list of matches and rearrange */
     public void filterAndRearrange() {
         final List<ListItemModel> filteredModelList =
-                Filters.filter(mModels, currentQuery, distanceSelected,
+                Filters.apply(mModels, currentQuery, distanceSelected,
                         wheelchairAccess, childFriendly, cheapEntry, freeEntry);
         mAdapter.replaceAll(filteredModelList);
         places.scrollToPosition(0);

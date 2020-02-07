@@ -11,10 +11,10 @@ public class Filters {
     private static final String TAG = "Filter Class";
 
     /* Filters the locations from the db according to user input (search text and distance/filters) */
-    public static List<ListItemModel> filter(List<ListItemModel> models, String query,
-                                              double distanceSelected, boolean wheelchairAccessNeeded,
-                                              boolean childFriendlyNeeded, boolean cheapEntryNeeded,
-                                              boolean freeEntryNeeded) {
+    public static List<ListItemModel> apply(List<ListItemModel> models, String query,
+                                            double distanceSelected, boolean wheelchairAccessNeeded,
+                                            boolean childFriendlyNeeded, boolean cheapEntryNeeded,
+                                            boolean freeEntryNeeded) {
         final String lowerCaseQuery = query.toLowerCase();
 
         final List<ListItemModel> filteredModelList = new ArrayList<>();

@@ -50,7 +50,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 
         @Override
         public boolean areItemsTheSame(ListItemModel item1, ListItemModel item2) {
-            return item1.getId() == item2.getId();
+            return item1.getId().equals(item2.getId());
         }
     });
 
