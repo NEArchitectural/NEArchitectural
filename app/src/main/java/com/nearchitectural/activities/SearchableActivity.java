@@ -28,18 +28,18 @@ import com.google.android.material.slider.Slider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.nearchitectural.utils.CurrentCoordinates;
-import com.nearchitectural.adapters.ListItemAdapter;
-import com.nearchitectural.models.Location;
 import com.nearchitectural.R;
+import com.nearchitectural.adapters.ListItemAdapter;
+import com.nearchitectural.comparators.Comparators;
 import com.nearchitectural.databinding.ActivitySearchBinding;
 import com.nearchitectural.fragments.OptionsDialogFragment;
+import com.nearchitectural.models.Location;
 import com.nearchitectural.ui.models.ListItemModel;
 import com.nearchitectural.utils.CalculateDistance;
+import com.nearchitectural.utils.CurrentCoordinates;
 import com.nearchitectural.utils.Filters;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener {
@@ -64,15 +64,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private double distanceSelected;
     private String currentQuery;
 
-
-    private static final Comparator<ListItemModel> SMALLEST_DISTANCE_COMPARATOR = new Comparator<ListItemModel>() {
-        @Override
-        public int compare(ListItemModel a, ListItemModel b) {
-            if (a.getMDistanceFromCurrentPosInMeters() == b.getMDistanceFromCurrentPosInMeters())
-                return 0;
-            return a.getMDistanceFromCurrentPosInMeters() > b.getMDistanceFromCurrentPosInMeters() ? 1 : -1;
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,7 +99,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         });
 
         // Currently the cards with locations are being sorted by distance from the user
-        mAdapter = new ListItemAdapter(this, SMALLEST_DISTANCE_COMPARATOR);
+        mAdapter = new ListItemAdapter(this, Comparators.SMALLEST_DISTANCE_COMPARATOR);
 
         // Get the device's location for distance calculations
         this.currentLocation = CurrentCoordinates.getCoords();
