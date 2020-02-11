@@ -1,4 +1,4 @@
-package com.nearchitectural.fragments;
+package com.nearchitectural.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.nearchitectural.R;
-import com.nearchitectural.activities.MapsActivity;
+import com.nearchitectural.ui.activities.MapsActivity;
 
 /**author: Kristiyan Doykov
  * since: TODO: Fill in date
@@ -32,5 +32,6 @@ public class TimelineFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);
+        parentActivity.setActionBarTitle("Timeline");
     }
 }

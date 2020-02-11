@@ -31,17 +31,10 @@ public class TagMapper {
         tagDisplayNameMap = new LinkedHashMap<>();
 
         // Sets all tags to be inactive by default
-        tagValuesMap.put(TagID.WHEELCHAIR_ACCESSIBLE, false);
-        tagDisplayNameMap.put("Wheelchair Accessible", TagID.WHEELCHAIR_ACCESSIBLE);
-
-        tagValuesMap.put(TagID.CHILD_FRIENDLY, false);
-        tagDisplayNameMap.put("Child Friendly", TagID.CHILD_FRIENDLY);
-
-        tagValuesMap.put(TagID.CHEAP_ENTRY, false);
-        tagDisplayNameMap.put("Cheap Entry", TagID.CHEAP_ENTRY);
-
-        tagValuesMap.put(TagID.FREE_ENTRY, false);
-        tagDisplayNameMap.put("Free Entry", TagID.FREE_ENTRY);
+        for (TagID tag : TagID.values()) {
+            tagValuesMap.put(tag, false);
+            tagDisplayNameMap.put(tag.displayName, tag);
+        }
     }
 
     // Constructor for tag mapper with values read in from database (i.e. location specific set tags)
@@ -51,26 +44,12 @@ public class TagMapper {
         tagDisplayNameMap = new LinkedHashMap<>();
 
         // Reads values from database for a given location and sets tags to appropriate boolean value
-        tagValuesMap.put(TagID.WHEELCHAIR_ACCESSIBLE,
-                document.getData().get("wheelChairAccessible") != null
-                        && (boolean) document.getData().get("wheelChairAccessible"));
-        tagDisplayNameMap.put("Wheelchair Accessible", TagID.WHEELCHAIR_ACCESSIBLE);
-
-        tagValuesMap.put(TagID.CHILD_FRIENDLY,
-                document.getData().get("childFriendly") != null
-                        && (boolean) document.getData().get("childFriendly"));
-        tagDisplayNameMap.put("Child Friendly", TagID.CHILD_FRIENDLY);
-
-        tagValuesMap.put(TagID.CHEAP_ENTRY,
-                document.getData().get("cheapEntry") != null
-                        && (boolean) document.getData().get("cheapEntry"));
-        tagDisplayNameMap.put("Cheap Entry", TagID.CHEAP_ENTRY);
-
-        tagValuesMap.put(TagID.FREE_ENTRY,
-                document.getData().get("freeEntry") != null
-                        && (boolean) document.getData().get("freeEntry"));
-        tagDisplayNameMap.put("Free Entry", TagID.FREE_ENTRY);
-
+        for (TagID tag : TagID.values()) {
+            tagValuesMap.put(tag,
+                    document.getData().get(tag.databaseReference) != null
+                            && (boolean) document.getData().get(tag.databaseReference));
+            tagDisplayNameMap.put(tag.displayName, tag);
+        }
     }
 
     // Getter for map of Tag IDs to their respective state
@@ -84,15 +63,15 @@ public class TagMapper {
     }
 
     // Removes a tag from both internal maps
-    public void removeTagFromMapper(TagID tagID, String displayName) {
-        tagValuesMap.remove(tagID);
-        tagDisplayNameMap.remove(displayName);
+    public void removeTagFromMapper(TagID tag) {
+        tagValuesMap.remove(tag);
+        tagDisplayNameMap.remove(tag.displayName);
     }
 
     // Adds a tag to both internal maps
-    public void addTagToMapper(TagID tagID, boolean isActive, String displayName) {
-        tagValuesMap.put(tagID, isActive);
-        tagDisplayNameMap.put(displayName, tagID);
+    public void addTagToMapper(TagID tag, boolean isActive) {
+        tagValuesMap.put(tag, isActive);
+        tagDisplayNameMap.put(tag.displayName, tag);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.nearchitectural.fragments;
+package com.nearchitectural.ui.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
-import com.nearchitectural.activities.SearchableActivity;
+import com.nearchitectural.ui.activities.SearchableActivity;
 import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
 
@@ -24,7 +24,6 @@ import java.util.List;
  */
 public class OptionsDialogFragment extends DialogFragment {
 
-    private ArrayList<Integer> selectedItems; // Represents the items (tags) currently active
     private TagMapper tagMapper; // Tag utility used to store/manipulate tag states
 
     // Prepares a new duplicate TagMapper containing only dialogue tags
@@ -34,15 +33,14 @@ public class OptionsDialogFragment extends DialogFragment {
         this.tagMapper = new TagMapper(tagMapper);
 
         // Removing the two tags that are handled separately
-        this.tagMapper.removeTagFromMapper(TagID.WHEELCHAIR_ACCESSIBLE, "Wheelchair Accessible");
-        this.tagMapper.removeTagFromMapper(TagID.CHILD_FRIENDLY, "Child Friendly");
+        this.tagMapper.removeTagFromMapper(TagID.WHEELCHAIR_ACCESSIBLE);
+        this.tagMapper.removeTagFromMapper(TagID.CHILD_FRIENDLY);
     }
 
     // Manages the creation and event handling involved with the dialogue
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        selectedItems = new ArrayList<>();  // Where we track the checked items
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         // Stores tag display names as a CharSequence array to pass into onClick handler
@@ -67,20 +65,17 @@ public class OptionsDialogFragment extends DialogFragment {
                         new DialogInterface.OnMultiChoiceClickListener() {
                             // Handles filtering of locations when a checkbox is ticked or unticked
                             @Override
-                            public void onClick(DialogInterface dialog, int which,
-                                                boolean isChecked) {
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 
                                 if (isChecked) { // If a tag is activated it, add to selected items and apply
-                                    selectedItems.add(which);
                                     ((SearchableActivity) getActivity())
                                             .setTag(tagMapper.getTagDisplayNameMap()
-                                                    .get(items[which]), true, items[which].toString());
+                                                    .get(items[which]), true);
                                     ((SearchableActivity) getActivity()).filterAndRearrange();
                                 } else { // If a tag is deactivated, remove from selected items and apply
-                                    selectedItems.remove(Integer.valueOf(which));
                                     ((SearchableActivity) getActivity())
                                             .setTag(tagMapper.getTagDisplayNameMap()
-                                                    .get(items[which]), false, items[which].toString());
+                                                    .get(items[which]), false);
                                     ((SearchableActivity) getActivity()).filterAndRearrange();
                                 }
                             }

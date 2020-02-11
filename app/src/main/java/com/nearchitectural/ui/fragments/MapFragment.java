@@ -1,4 +1,4 @@
-package com.nearchitectural.fragments;
+package com.nearchitectural.ui.fragments;
 
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -31,9 +31,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
-import com.nearchitectural.activities.MapsActivity;
-import com.nearchitectural.adapters.CustomInfoWindowAdapter;
+import com.nearchitectural.ui.activities.MapsActivity;
+import com.nearchitectural.ui.adapters.CustomInfoWindowAdapter;
 import com.nearchitectural.utilities.CurrentCoordinates;
+import com.nearchitectural.utilities.Settings;
 
 /**author: Kristiyan Doykov
  * since: TODO: Fill in date
@@ -47,7 +48,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private MapView mapView; // View object displaying the map
     private GoogleMap googleMap; // Object representing the map itself
     private FirebaseFirestore db; // The firebase database containing location information
-    private Boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
+    private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
     private FusedLocationProviderClient mFusedLocationProviderClient; // Used to get user's current location
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
     private LatLng currentLocation; // User's current location
@@ -114,13 +115,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
+        parentActivity.setActionBarTitle("Map");
         // Instance of the db for requesting/updating data
         db = FirebaseFirestore.getInstance();
         // Check if the user has allowed us to use their location
         if (parentActivity != null) {
             mLocationPermissionsGranted = parentActivity.mLocationPermissionsGranted;
         }
-
+        mLocationPermissionsGranted = Settings.getInstance().ismLocationPermissionsGranted();
         getDeviceLocation();
 
         // Set up the map
@@ -144,12 +146,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (grantResults.length > 0) {
                 for (int i : grantResults) {
                     if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                        mLocationPermissionsGranted = false;
+                        // If the result is not PERMISSION_GRANTED do nothing
                         return;
                     }
                 }
+                // Else set it to true
                 mLocationPermissionsGranted = true;
-
             }
         }
     }
@@ -187,10 +189,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
         );
 
-
+        // Enable all gestures
         googleMap.getUiSettings().setZoomControlsEnabled(true);
-        googleMap.getUiSettings().setCompassEnabled(true);
-
         googleMap.getUiSettings().setRotateGesturesEnabled(true);
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
         googleMap.getUiSettings().setTiltGesturesEnabled(true);
@@ -218,6 +218,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 //                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
 //                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
 //                                }
+
+                                // Gather only information needed for marker
                                 String name = document.getData().get("name") == null ?
                                         "Unknown" : (String) document.getData().get("name");
 
@@ -230,11 +232,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 double longitude = document.getData().get("longitude") == null ?
                                         0 : (double) document.getData().get("longitude");
 
-
-                                googleMap.addMarker(new MarkerOptions().flat(false)
-                                        .position(new LatLng(latitude, longitude))
-                                        .title(name)
-                                        .snippet(summary));
+                                // Only add a marker if name and coordinates are identified (since both are necessary)
+                                if (!(name.equals("Unknown") || (latitude == 0 && longitude == 0))) {
+                                    googleMap.addMarker(new MarkerOptions().flat(false)
+                                            .position(new LatLng(latitude, longitude))
+                                            .title(name)
+                                            .snippet(summary));
+                                }
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());

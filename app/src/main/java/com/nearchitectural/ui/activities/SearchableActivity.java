@@ -1,4 +1,4 @@
-package com.nearchitectural.activities;
+package com.nearchitectural.ui.activities;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -10,36 +10,39 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.Slider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
-import com.nearchitectural.adapters.ListItemAdapter;
 import com.nearchitectural.databinding.ActivitySearchBinding;
-import com.nearchitectural.fragments.OptionsDialogFragment;
-import com.nearchitectural.models.Location;
+import com.nearchitectural.ui.adapters.ListItemAdapter;
+import com.nearchitectural.ui.fragments.OptionsDialogFragment;
 import com.nearchitectural.ui.models.ListItemModel;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.DistanceCalculator;
-import com.nearchitectural.utilities.Filters;
+import com.nearchitectural.utilities.Filter;
 import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
 import com.nearchitectural.utilities.comparators.ShortestDistanceComparator;
+import com.nearchitectural.utilities.models.Location;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,7 @@ import java.util.List;
  * purpose: Activity which handles searching through list of locations through numerous approaches
  * i.e. text search, tag filtration, distance to user
  */
-public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener {
+public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener, NavigationView.OnNavigationItemSelectedListener {
 
     private TagMapper searchTagMapper; // Utility object used to aid in handling search by tag
     private LatLng currentLocation; // User's current latitude and longitude
@@ -64,6 +67,9 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private Slider slider;
     private AppCompatCheckBox wheelChairCheckBox;
     private AppCompatCheckBox childFriendlyCheckBox;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private TextView actionBarTitle;
 
     private List<ListItemModel> mModels; // Location cards
     private ListItemAdapter mAdapter; // Adapter for filtering location cards
@@ -85,6 +91,31 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         slider = searchBinding.slider;
         wheelChairCheckBox = searchBinding.accessibleCb;
         childFriendlyCheckBox = searchBinding.childFriendlyCb;
+
+        // Set up the toolbar
+        Toolbar searchViewToolbar = searchBinding.searchToolbar;
+        setSupportActionBar(searchViewToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+
+        // Set the activity title
+        actionBarTitle = searchBinding.actionBarTitle;
+        actionBarTitle.setText("Search");
+
+        // Map the drawer pop up
+        drawer = searchBinding.drawerLayout;
+        // Map the drawer menu
+        navigationView = searchBinding.navView;
+        // Set the menu to use the listener provided in this class
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // The "hamburger" button for the menu
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+
+        // This is to make sure the button closes/opens the menu accordingly
+        toggle.syncState();
 
         // Currently the cards with locations are being sorted by distance from the user
         mAdapter = new ListItemAdapter(this, new ShortestDistanceComparator());
@@ -111,7 +142,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setTag(TagID.CHILD_FRIENDLY, isChecked, "Wheelchair Accessible");
+                setTag(TagID.CHILD_FRIENDLY, isChecked);
                 filterAndRearrange();
             }
         });
@@ -119,7 +150,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         wheelChairCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setTag(TagID.WHEELCHAIR_ACCESSIBLE, isChecked, "Child Friendly");
+                setTag(TagID.WHEELCHAIR_ACCESSIBLE, isChecked);
                 filterAndRearrange();
             }
         });
@@ -144,12 +175,6 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
             }
         });
-
-        // Set up the toolbar
-        Toolbar searchViewToolbar = searchBinding.searchToolbar;
-        setSupportActionBar(searchViewToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
 
         Intent intent = getIntent();
         /* If when starting this activity you passed in a key-value pair
@@ -247,22 +272,18 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         return true;
     }
 
-
-    /* Handle a press on the map button */
-    public void openMaps(View view) {
-        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-        // Pass optional parameters to the map activity
-        myIntent.putExtra("key", "value_here"); //Optional parameters
-        SearchableActivity.this.startActivity(myIntent);
-    }
-
     /* Handle a place card being pressed and take the user to the according Location page */
     public void openPlacePage(View view) {
         TextView textView = view.findViewById(R.id.list_item_title);
         String placeName = textView.getText().toString();
-        Toast.makeText(this, placeName, Toast.LENGTH_SHORT).show();
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         myIntent.putExtra("openPlacePage", placeName); //Optional parameters
+        SearchableActivity.this.startActivity(myIntent);
+    }
+
+    public void openFragment(String fragmentName){
+        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
+        myIntent.putExtra("openFragment", fragmentName); //Optional parameters
         SearchableActivity.this.startActivity(myIntent);
     }
 
@@ -270,6 +291,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     public void openOptions(View view) {
         // Create an instance of the dialogFragment fragment and show it
         /* Get the values for each apply and send them to the popup as an argument (order matters) */
+        Log.d("Yeet", this.searchTagMapper.getTagValuesMap().toString());
         DialogFragment dialogFragment = new OptionsDialogFragment(searchTagMapper);
         dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
     }
@@ -287,16 +309,57 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     }
 
     // Sets a tag to active or inactive
-    public void setTag(TagID tag, boolean isActive, String tagName) {
-        this.searchTagMapper.addTagToMapper(tag, isActive, tagName);
+    public void setTag(TagID tag, boolean isActive) {
+        this.searchTagMapper.addTagToMapper(tag, isActive);
     }
 
     /* Apply apply method and replace the current list with the list of matches and rearrange */
     public void filterAndRearrange() {
         final List<ListItemModel> filteredModelList =
-                Filters.apply(mModels, currentQuery, distanceSelected,
+                Filter.apply(mModels, currentQuery, distanceSelected,
                         searchTagMapper.getTagValuesMap());
         mAdapter.replaceAll(filteredModelList);
         places.scrollToPosition(0);
+    }
+
+    /* If the back button is pressed */
+    @Override
+    public void onBackPressed() {
+        // Close the nav drawer if open
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        super.onBackPressed();
+    }
+
+    /* Manages the drawer menu click events */
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_timeline:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Timeline");
+                break;
+            case R.id.nav_map:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Map");
+                break;
+
+            case R.id.nav_settings:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Settings");
+                break;
+
+            case R.id.nav_info:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("About");
+                break;
+
+            case R.id.nav_help:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Help");
+                break;
+        }
+        return true;
     }
 }

@@ -1,6 +1,6 @@
 package com.nearchitectural.utilities.comparators;
 
-import com.nearchitectural.models.Location;
+import com.nearchitectural.utilities.models.Location;
 
 import java.util.Comparator;
 

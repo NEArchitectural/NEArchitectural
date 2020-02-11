@@ -1,4 +1,4 @@
-package com.nearchitectural.models;
+package com.nearchitectural.utilities.models;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.nearchitectural.utilities.TagID;

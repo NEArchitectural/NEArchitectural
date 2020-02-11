@@ -3,179 +3,176 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/grey"
-        android:orientation="vertical">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/search_toolbar"
-            android:layout_width="350dp"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="10dp"
-            android:background="@color/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:fitsSystemWindows="true"
+        tools:openDrawer="start"
+        android:id="@+id/drawer_layout">
 
 
-            <ImageView
-                android:id="@+id/search_toolbar_back"
-                android:layout_width="35dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_marginStart="0dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:contentDescription="Back Button to Map Screen"
-                android:onClick="openMaps"
-                android:src="@drawable/ic_map"
-                android:tint="#fff" />
-
-
-            <TextView
-                android:id="@+id/search_toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="100dp"
-                android:layout_marginLeft="100dp"
-                android:gravity="center"
-                android:text="Search"
-
-                android:textColor="#fff"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-        </androidx.appcompat.widget.Toolbar>
-
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:background="@color/grey"
+            android:orientation="vertical">
 
-            <RelativeLayout
-                android:id="@+id/root_of_search_fragment"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/search_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/grey"
-                android:orientation="vertical">
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/action_bar_title"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:layout_marginTop="14dp"
+                    android:textColor="@color/white"/>
 
 
-                <LinearLayout
-                    android:id="@+id/filters"
+            </androidx.appcompat.widget.Toolbar>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:id="@+id/root_of_search_fragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="30dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
-
-                            <ImageView
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:layout_marginTop="8dp"
-                                android:src="@drawable/ic_child_friendly" />
-
-                            <androidx.appcompat.widget.AppCompatCheckBox
-                                android:id="@+id/child_friendly_cb"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="8dp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
-
-                            <ImageView
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:layout_marginTop="8dp"
-                                android:src="@drawable/ic_accessible" />
-
-                            <androidx.appcompat.widget.AppCompatCheckBox
-                                android:id="@+id/accessible_cb"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="8dp" />
-
-
-                            <ImageView
-                                android:id="@+id/options"
-                                android:layout_width="30dp"
-                                android:layout_height="36dp"
-                                android:layout_marginTop="0dp"
-                                android:layout_marginEnd="5dp"
-                                android:layout_marginRight="5dp"
-                                android:onClick="openOptions"
-                                android:paddingTop="10dp"
-                                android:src="@drawable/ic_arrow_down"
-                                android:tint="@color/black" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginLeft="20dp"
-                        android:orientation="vertical">
-
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/slider"
-                            android:layout_width="180dp"
-                            android:layout_height="100dp"
-                            android:layout_gravity="center_horizontal"
-                            android:stepSize="1"
-                            android:theme="@style/AppTheme"
-                            android:value="0"
-                            android:valueFrom="0"
-                            android:valueTo="10" />
-
-                        <TextView
-                            android:id="@+id/seekbar_progress"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:textColor="@color/black" />
-
-                    </LinearLayout>
-
-
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/places_list"
-                    android:layout_width="300dp"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/filters"
-                    android:layout_centerInParent="true"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
                     android:background="@color/grey"
-                    android:scrollbars="none"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/list_item" />
-
-            </RelativeLayout>
-        </FrameLayout>
+                    android:orientation="vertical">
 
 
-    </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/filters"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="30dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_marginTop="8dp"
+                                    android:src="@drawable/ic_child_friendly" />
+
+                                <androidx.appcompat.widget.AppCompatCheckBox
+                                    android:id="@+id/child_friendly_cb"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginTop="8dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_marginTop="8dp"
+                                    android:src="@drawable/ic_accessible" />
+
+                                <androidx.appcompat.widget.AppCompatCheckBox
+                                    android:id="@+id/accessible_cb"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginTop="8dp" />
+
+
+                                <ImageView
+                                    android:id="@+id/options"
+                                    android:layout_width="30dp"
+                                    android:layout_height="36dp"
+                                    android:layout_marginTop="0dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:layout_marginRight="5dp"
+                                    android:onClick="openOptions"
+                                    android:paddingTop="10dp"
+                                    android:src="@drawable/ic_arrow_down"
+                                    android:tint="@color/black" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginLeft="20dp"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/slider"
+                                android:layout_width="180dp"
+                                android:layout_height="100dp"
+                                android:layout_gravity="center_horizontal"
+                                android:stepSize="1"
+                                android:theme="@style/AppTheme"
+                                android:value="0"
+                                android:valueFrom="0"
+                                android:valueTo="10" />
+
+                            <TextView
+                                android:id="@+id/seekbar_progress"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:textColor="@color/black" />
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/places_list"
+                        android:layout_width="300dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/filters"
+                        android:layout_centerInParent="true"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/grey"
+                        android:scrollbars="none"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/list_item" />
+
+                </RelativeLayout>
+            </FrameLayout>
+
+
+        </LinearLayout>
+
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:headerLayout="@layout/nav_header"
+            app:menu="@menu/drawer_menu">
+
+        </com.google.android.material.navigation.NavigationView>
+    </androidx.drawerlayout.widget.DrawerLayout>
+
 </layout>

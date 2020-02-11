@@ -1,4 +1,4 @@
-package com.nearchitectural.fragments;
+package com.nearchitectural.ui.fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -18,8 +18,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
-import com.nearchitectural.models.Location;
+import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.models.Location;
 
 /**author: Kristiyan Doykov
  * since: TODO: Fill in date
@@ -49,7 +50,12 @@ public class LocationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        title = view.findViewById(R.id.title);
+        title = view.findViewById(R.id.title); // Gets name of location to set as title
+
+        // Get a reference to the parent activity
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        // Set the title of the action bar
+        parentActivity.setActionBarTitle("Details");
 
         // Name of the current place the user clicked on
         String placeName = arguments.getString("placeName");

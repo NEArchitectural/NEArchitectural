@@ -7,7 +7,7 @@ import androidx.databinding.BindingAdapter;
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
-import com.nearchitectural.models.Location;
+import com.nearchitectural.utilities.models.Location;
 
 /**author: Kristiyan Doykov
  * since: TODO: Fill in date

@@ -11,10 +11,10 @@ public class Settings implements Serializable {
 
     // A place to store all the global settings and user preferences
     private static volatile Settings soleInstance;
-    private static boolean wheelchairAccessNeeded;
-    private static boolean childFriendlyNeeded;
+    private static TagMapper activeTags;
     private static int fontSize;
     private double maxDistance;
+    private boolean mLocationPermissionsGranted;
 
     //private constructor
     private Settings() {
@@ -38,20 +38,12 @@ public class Settings implements Serializable {
 
     /* Use these methods to update or get a specific setting */
 
-    public static boolean isWheelchairAccessNeeded() {
-        return wheelchairAccessNeeded;
+    public static boolean getTagValue(TagID tag) {
+        return activeTags.getTagValuesMap().get(tag);
     }
 
-    public static void setWheelchairAccessNeeded(boolean wheelchairAccessNeeded) {
-        Settings.wheelchairAccessNeeded = wheelchairAccessNeeded;
-    }
-
-    public static boolean isChildFriendlyNeeded() {
-        return childFriendlyNeeded;
-    }
-
-    public static void setChildFriendlyNeeded(boolean childFriendlyNeeded) {
-        Settings.childFriendlyNeeded = childFriendlyNeeded;
+    public static void setTagValue(TagID tag, boolean isActive) {
+        Settings.activeTags.addTagToMapper(tag, isActive);
     }
 
     public static int getFontSize() {
@@ -74,5 +66,13 @@ public class Settings implements Serializable {
 
     public void setMaxDistance(double maxDistance) {
         this.maxDistance = maxDistance;
+    }
+
+    public boolean ismLocationPermissionsGranted() {
+        return mLocationPermissionsGranted;
+    }
+
+    public void setmLocationPermissionsGranted(boolean mLocationPermissionsGranted) {
+        this.mLocationPermissionsGranted = mLocationPermissionsGranted;
     }
 }
