@@ -1,7 +1,12 @@
-package com.nearchitectural.utils;
+package com.nearchitectural.utilities;
 
 import java.io.Serializable;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Settings singleton class which stores and allows manipulation of application-wide settings
+ */
 public class Settings implements Serializable {
 
     // A place to store all the global settings and user preferences

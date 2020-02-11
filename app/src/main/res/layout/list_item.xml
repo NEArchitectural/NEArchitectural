@@ -66,8 +66,8 @@
                         android:layout_marginStart="10dp"
                         android:layout_marginLeft="10dp"
                         android:text="@{model.distanceStringForListItem}"
-                        android:textSize="12sp"
-                        android:textColor="@color/black" />
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 

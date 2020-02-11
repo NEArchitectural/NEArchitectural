@@ -14,6 +14,11 @@ import com.nearchitectural.ui.models.ListItemModel;
 import java.util.Comparator;
 import java.util.List;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: TODO: Fill in purpose
+ */
 public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 
     private final SortedList<ListItemModel> mSortedList = new SortedList<>(ListItemModel.class, new SortedList.Callback<ListItemModel>() {
@@ -50,7 +55,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 
         @Override
         public boolean areItemsTheSame(ListItemModel item1, ListItemModel item2) {
-            return item1.getId() == item2.getId();
+            return item1.getLocationInfo().getId().equals(item2.getLocationInfo().getId());
         }
     });
 

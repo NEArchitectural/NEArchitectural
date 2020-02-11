@@ -10,80 +10,78 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.nearchitectural.activities.SearchableActivity;
+import com.nearchitectural.utilities.TagID;
+import com.nearchitectural.utilities.TagMapper;
 
 import java.util.ArrayList;
+import java.util.List;
 
+/**author: Kristiyan Doykov, Joel Bell-Wilding
+ * since: TODO: Fill in date
+ * version: 1.1
+ * purpose: Handle the activation/deactivation of additional dialogue box tags to apply locations
+ * when using the search function
+ */
 public class OptionsDialogFragment extends DialogFragment {
-    private ArrayList<Integer> selectedItems;
-    private boolean cheapEntry;
-    private boolean freeEntry;
 
-    public OptionsDialogFragment(boolean cheapEntry, boolean freeEntry) {
-        this.cheapEntry = cheapEntry;
-        this.freeEntry = freeEntry;
+    private ArrayList<Integer> selectedItems; // Represents the items (tags) currently active
+    private TagMapper tagMapper; // Tag utility used to store/manipulate tag states
+
+    // Prepares a new duplicate TagMapper containing only dialogue tags
+    public OptionsDialogFragment(TagMapper tagMapper) {
+
+        // Creates a copy of original TagMapper to be modified
+        this.tagMapper = new TagMapper(tagMapper);
+
+        // Removing the two tags that are handled separately
+        this.tagMapper.removeTagFromMapper(TagID.WHEELCHAIR_ACCESSIBLE, "Wheelchair Accessible");
+        this.tagMapper.removeTagFromMapper(TagID.CHILD_FRIENDLY, "Child Friendly");
     }
 
+    // Manages the creation and event handling involved with the dialogue
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         selectedItems = new ArrayList<>();  // Where we track the checked items
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        CharSequence[] items = {"Cheap Entry", "Free Entry"};
-        // Set the dialog title
-        boolean[] currentStateOfItems = new boolean[items.length];
-        currentStateOfItems[0] = this.cheapEntry;
-        currentStateOfItems[1] = this.freeEntry;
+
+        // Stores tag display names as a CharSequence array to pass into onClick handler
+        final CharSequence[] items = new CharSequence[tagMapper.getTagDisplayNameMap().size()];
+        List<String> tagDisplayNames  = new ArrayList<>(tagMapper.getTagDisplayNameMap().keySet());
+        for (int i = 0; i < tagMapper.getTagDisplayNameMap().size(); i++) {
+            items[i] = tagDisplayNames.get(i);
+        }
+
+        // Stores tag boolean values (i.e. if they are active) as a boolean array to pass into onClick handler
+        final boolean[] currentStateOfItems = new boolean[tagMapper.getTagValuesMap().size()];
+        List<Boolean> tagValues = new ArrayList<>(tagMapper.getTagValuesMap().values());
+        for (int i = 0; i < tagMapper.getTagValuesMap().size(); i++) {
+            currentStateOfItems[i] = tagValues.get(i);
+        }
+
+        // Set the dialogue title
         builder.setTitle("Select filters")
                 // Specify the list array, the items to be selected by default (null for none),
                 // and the listener through which to receive callbacks when items are selected
                 .setMultiChoiceItems(items, currentStateOfItems,
                         new DialogInterface.OnMultiChoiceClickListener() {
+                            // Handles filtering of locations when a checkbox is ticked or unticked
                             @Override
                             public void onClick(DialogInterface dialog, int which,
                                                 boolean isChecked) {
-                                if (isChecked) {
-                                    // If the user checked the item, add it to the selected items
-                                    selectedItems.add(which);
-                                    // If cheap entry was selected - check it
-                                    if (which == 0) {
-                                        cheapEntry = true;
-                                        ((SearchableActivity) getActivity()).setCheapEntry(true);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
-                                    // If free entry was selected - check it
-                                    if (which == 1) {
-                                        freeEntry = true;
-                                        ((SearchableActivity) getActivity()).setFreeEntry(true);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
 
-                                } else if (selectedItems.contains(which)) {
-                                    // Else, if the item is already in the array, remove it
+                                if (isChecked) { // If a tag is activated it, add to selected items and apply
+                                    selectedItems.add(which);
+                                    ((SearchableActivity) getActivity())
+                                            .setTag(tagMapper.getTagDisplayNameMap()
+                                                    .get(items[which]), true, items[which].toString());
+                                    ((SearchableActivity) getActivity()).filterAndRearrange();
+                                } else { // If a tag is deactivated, remove from selected items and apply
                                     selectedItems.remove(Integer.valueOf(which));
-                                    // Uncheck cheap entry
-                                    if (which == 0) {
-                                        cheapEntry = false;
-                                        ((SearchableActivity) getActivity()).setCheapEntry(false);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
-                                    // Uncheck free entry
-                                    if (which == 1) {
-                                        freeEntry = false;
-                                        ((SearchableActivity) getActivity()).setFreeEntry(false);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
-                                }else {
-                                    if (which == 0) {
-                                        cheapEntry = false;
-                                        ((SearchableActivity) getActivity()).setCheapEntry(false);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
-                                    // Uncheck free entry
-                                    if (which == 1) {
-                                        freeEntry = false;
-                                        ((SearchableActivity) getActivity()).setFreeEntry(false);
-                                        ((SearchableActivity) getActivity()).filterAndRearrange();
-                                    }
+                                    ((SearchableActivity) getActivity())
+                                            .setTag(tagMapper.getTagDisplayNameMap()
+                                                    .get(items[which]), false, items[which].toString());
+                                    ((SearchableActivity) getActivity()).filterAndRearrange();
                                 }
                             }
                         })

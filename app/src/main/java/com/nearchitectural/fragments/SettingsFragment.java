@@ -12,6 +12,11 @@ import androidx.fragment.app.Fragment;
 import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: TODO: Fill in purpose
+ */
 public class SettingsFragment extends Fragment {
 
     public static final String TAG = "SettingsFragment";

@@ -33,19 +33,26 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
 import com.nearchitectural.adapters.CustomInfoWindowAdapter;
-import com.nearchitectural.utils.CurrentCoordinates;
+import com.nearchitectural.utilities.CurrentCoordinates;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Handles events and presentation related to the Google Maps section of the home screen
+ */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-    public static final String TAG = "MapFragment";
+    public static final String TAG = "MapFragment"; // Tag used for logging status of application
 
-    private MapView mapView;
-    private GoogleMap googleMap;
-    private FirebaseFirestore db;
-    private Boolean mLocationPermissionsGranted;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private MapView mapView; // View object displaying the map
+    private GoogleMap googleMap; // Object representing the map itself
+    private FirebaseFirestore db; // The firebase database containing location information
+    private Boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
+    private FusedLocationProviderClient mFusedLocationProviderClient; // Used to get user's current location
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
-    private LatLng currentLocation;
+    private LatLng currentLocation; // User's current location
+    // The default location used in cases where user's actual location cannot be determined
+    private static final LatLng DEFAULT_LOCATION = new LatLng(54.9695, -1.6074);
 
 
     @Override
@@ -54,9 +61,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
+    // Attempts to get device's location if permissions are granted, otherwise returns a default location
     private void getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        // Sets current location to default position in case actual location cannot be determined
+        if (currentLocation != null) {
+            CurrentCoordinates.setCoords(DEFAULT_LOCATION);
+        } else {
+            currentLocation = DEFAULT_LOCATION;
+            CurrentCoordinates.setCoords(currentLocation);
+        }
+
+        // Attempts to get device's location initially
         try {
             if (mLocationPermissionsGranted) {
                 // This warning cannot be evaded as we're using the Task api
@@ -70,18 +87,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             if (currentLocationFound != null) {
                                 currentLocation = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
                                 CurrentCoordinates.setCoords(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
-                                if (googleMap != null) {
-                                    moveCamera(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
-                                }
                             } else {
-                                CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
-                                moveCamera(CurrentCoordinates.getCoords());
+                                // TODO: Remove log tags and else statements at end of development
                                 Log.d(TAG, "onComplete: current location is null. Fallback to default location");
                             }
                         } else {
                             Log.d(TAG, "onComplete: current location is null. Fallback to default location");
-                            CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
-                            moveCamera(CurrentCoordinates.getCoords());
                             Toast.makeText(getActivity(), "Unable to get current location", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -89,9 +100,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         } catch (SecurityException se) {
             Log.d(TAG, "onComplete: current location is null. Fallback to default location");
-            CurrentCoordinates.setCoords(new LatLng(54.966667, -1.600000));
-            moveCamera(CurrentCoordinates.getCoords());
             Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage());
+        }
+
+        // Moves camera to user's location
+        if (googleMap != null) {
+            moveCamera(CurrentCoordinates.getCoords());
         }
     }
 
@@ -110,14 +124,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         getDeviceLocation();
 
         // Set up the map
-        mapView = (MapView) view.findViewById(R.id.mapView);
+        mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         // The first parameter means that the callback has been implemented in this class
         mapView.getMapAsync(this);
     }
 
-
+    // Move camera overlooking map to be positioned over provided location
     private void moveCamera(LatLng latLng) {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, (float) 15.0));
     }
@@ -141,7 +155,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-    /**
+    /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera.
@@ -198,7 +212,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                 Log.d(TAG, document.getId() + " => " + document.getData());
 
-//                                if (CalculateDistance.calculateDistance(currentLocation.latitude,
+//                                if (DistanceCalculator.calculateDistance(currentLocation.latitude,
 //                                        (double) document.getData().get("latitude"),
 //                                        currentLocation.longitude,
 //                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {

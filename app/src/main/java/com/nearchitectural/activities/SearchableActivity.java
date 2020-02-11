@@ -28,87 +28,67 @@ import com.google.android.material.slider.Slider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.nearchitectural.utils.CurrentCoordinates;
-import com.nearchitectural.adapters.ListItemAdapter;
-import com.nearchitectural.models.Location;
 import com.nearchitectural.R;
+import com.nearchitectural.adapters.ListItemAdapter;
 import com.nearchitectural.databinding.ActivitySearchBinding;
 import com.nearchitectural.fragments.OptionsDialogFragment;
+import com.nearchitectural.models.Location;
 import com.nearchitectural.ui.models.ListItemModel;
-import com.nearchitectural.utils.CalculateDistance;
-import com.nearchitectural.utils.Filters;
+import com.nearchitectural.utilities.CurrentCoordinates;
+import com.nearchitectural.utilities.DistanceCalculator;
+import com.nearchitectural.utilities.Filters;
+import com.nearchitectural.utilities.TagID;
+import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.comparators.ShortestDistanceComparator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
+/**author: Kristyan Doykov, Joel Bell-Wilding
+ * since: TODO: Fill in date
+ * version: 1.1
+ * purpose: Activity which handles searching through list of locations through numerous approaches
+ * i.e. text search, tag filtration, distance to user
+ */
 public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener {
 
-    private boolean wheelchairAccess;
-    private boolean childFriendly;
-    private boolean cheapEntry;
-    private boolean freeEntry;
-    private LatLng currentLocation;
-    public static final String TAG = "SearchableActivity";
+    private TagMapper searchTagMapper; // Utility object used to aid in handling search by tag
+    private LatLng currentLocation; // User's current latitude and longitude
+    public static final String TAG = "SearchableActivity"; // Tag used for logging status of application
 
+    private ActivitySearchBinding searchBinding; // Binds all views in this activity
+
+    // Objects representing UI elements
     private RecyclerView places;
-    private ActivitySearchBinding searchBinding;
     private TextView seekbarProg;
     private Slider slider;
     private AppCompatCheckBox wheelChairCheckBox;
     private AppCompatCheckBox childFriendlyCheckBox;
-    private List<ListItemModel> mModels;
-    private ListItemAdapter mAdapter;
-    private DialogFragment dialogFragment;
-    private FirebaseFirestore db;
-    private double distanceSelected;
-    private String currentQuery;
 
+    private List<ListItemModel> mModels; // Location cards
+    private ListItemAdapter mAdapter; // Adapter for filtering location cards
 
-    private static final Comparator<ListItemModel> SMALLEST_DISTANCE_COMPARATOR = new Comparator<ListItemModel>() {
-        @Override
-        public int compare(ListItemModel a, ListItemModel b) {
-            if (a.getMDistanceFromCurrentPosInMeters() == b.getMDistanceFromCurrentPosInMeters())
-                return 0;
-            return a.getMDistanceFromCurrentPosInMeters() > b.getMDistanceFromCurrentPosInMeters() ? 1 : -1;
-        }
-    };
+    private FirebaseFirestore db; // Represents the database storing location information
+    private double distanceSelected; // The user-selected distance outside of which locations will not be displayed
+    private String currentQuery; // The string value stored in the text search bar
 
+    // Handles initialisation of activity upon opening
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Use data binding to bind all views in this activity
         searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
-        places = (RecyclerView) searchBinding.placesList;
-
-        seekbarProg = (TextView) searchBinding.seekbarProgress;
-
-        slider = (Slider) searchBinding.slider;
-
-        wheelChairCheckBox = (AppCompatCheckBox) searchBinding.accessibleCb;
-
-        childFriendlyCheckBox = (AppCompatCheckBox) searchBinding.childFriendlyCb;
-
-        /* Set listeners to be able to filter when the user checks/unchecks a CheckBox */
-        childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setChildFriendly(isChecked);
-                filterAndRearrange();
-            }
-        });
-
-        wheelChairCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setWheelchairAccess(isChecked);
-                filterAndRearrange();
-            }
-        });
+        // Initialises UI elements
+        places = searchBinding.placesList;
+        seekbarProg = searchBinding.seekbarProgress;
+        slider = searchBinding.slider;
+        wheelChairCheckBox = searchBinding.accessibleCb;
+        childFriendlyCheckBox = searchBinding.childFriendlyCb;
 
         // Currently the cards with locations are being sorted by distance from the user
-        mAdapter = new ListItemAdapter(this, SMALLEST_DISTANCE_COMPARATOR);
+        mAdapter = new ListItemAdapter(this, new ShortestDistanceComparator());
+        mModels = new ArrayList<>();
 
         // Get the device's location for distance calculations
         this.currentLocation = CurrentCoordinates.getCoords();
@@ -116,74 +96,33 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         // Initialize database reference
         db = FirebaseFirestore.getInstance();
 
+        // Sets all active search tags to false (i.e. not activated by the user)
+        this.searchTagMapper = new TagMapper();
+
         // Query string is empty in the beginning
         currentQuery = "";
 
-        // Adapter to filter the data
+        // Adapter to apply the data
         places.setAdapter(mAdapter);
 
-        // List of locations
-        final List<Location> locationsToShow = new ArrayList<>();
+        createLocationsCardsFromDatabase();
 
-        // Get all locations from the db
-        db.collection("locations")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, String.valueOf(document.getData().get("name")));
+        /* Set listeners to be able to apply when the user checks/unchecks a CheckBox */
+        childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setTag(TagID.CHILD_FRIENDLY, isChecked, "Wheelchair Accessible");
+                filterAndRearrange();
+            }
+        });
 
-                                // For each location create aa new Location instance and add it to the list
-                                String id = document.getId();
-
-                                String name = document.getData().get("name") == null ?
-                                        "Unknown" : (String) document.getData().get("name");
-
-                                String placeType = document.getData().get("placeType") == null ?
-                                        "Unknown" : (String) document.getData().get("placeType");
-
-                                LatLng coords = document.getData().get("latitude") == null || document.getData().get("longitude") == null ?
-                                        new LatLng(0, 0) : new LatLng((double) document.getData().get("latitude"),
-                                        (double) document.getData().get("longitude"));
-
-                                boolean wheelChairAccessible = document.getData().get("wheelChairAccessible") != null
-                                        && (boolean) document.getData().get("wheelChairAccessible");
-
-                                boolean childFriendly = document.getData().get("childFriendly") != null
-                                        && (boolean) document.getData().get("childFriendly");
-
-                                boolean cheapEntry = document.getData().get("cheapEntry") != null
-                                        && (boolean) document.getData().get("cheapEntry");
-
-                                boolean freeEntry = document.getData().get("freeEntry") != null
-                                        && (boolean) document.getData().get("freeEntry");
-                                String thumbnailAddress = document.getData().get("thumbnail") == null ?
-                                        "" : (String) document.getData().get("thumbnail");
-
-                                locationsToShow.add(new Location(id, name, placeType, coords,
-                                        wheelChairAccessible, childFriendly, cheapEntry, freeEntry, thumbnailAddress));
-
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            mModels = new ArrayList<>();
-                            for (Location location : locationsToShow) {
-                                mModels.add(new ListItemModel(location.getId(), location.getName(),
-                                        location.getLocationType(),
-                                        location.isWheelChairAccessible(), location.isChildFriendly(),
-                                        location.hasCheapEntry(), location.hasFreeEntry(),
-                                        location.getThumbnailURL(),
-                                        CalculateDistance.calculateDistance(currentLocation.latitude, location.getLatitude(),
-                                                currentLocation.longitude, location.getLongitude())));
-                            }
-                            mAdapter.add(mModels);
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-
+        wheelChairCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setTag(TagID.WHEELCHAIR_ACCESSIBLE, isChecked, "Child Friendly");
+                filterAndRearrange();
+            }
+        });
 
         /* When the user uses the slider to choose max distance, update the list of locations shown */
         slider.addOnChangeListener(new Slider.OnChangeListener() {
@@ -218,8 +157,60 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         String value = intent.getStringExtra("key"); //if it's a string you stored.
     }
 
+    // Creates location cards from the database
+    private void createLocationsCardsFromDatabase() {
 
-    // This handles creating the magnifying glass expanding search field
+        // Read in all locations from the database
+        db.collection("locations")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        if (task.isSuccessful()) {
+
+                            Location nextLocation; // Represents next location to read in from database
+                            TagMapper locationTagMapper; // Maps tags to boolean values for each location
+
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                // For each location in database create a new Location instance and add it to the list
+                                String id = document.getId();
+
+                                String name = document.getData().get("name") == null ?
+                                        "Unknown" : (String) document.getData().get("name");
+
+                                String placeType = document.getData().get("placeType") == null ?
+                                        "Unknown" : (String) document.getData().get("placeType");
+
+                                LatLng coords = document.getData().get("latitude") == null || document.getData().get("longitude") == null ?
+                                        new LatLng(0, 0) : new LatLng((double) document.getData().get("latitude"),
+                                        (double) document.getData().get("longitude"));
+
+                                // Stores information about which tags are active for this location
+                                locationTagMapper = new TagMapper(document);
+
+                                String thumbnailAddress = document.getData().get("thumbnail") == null ?
+                                        "" : (String) document.getData().get("thumbnail");
+
+                                // Instantiate new location using database values
+                                nextLocation = new Location(id, name, placeType, coords,
+                                        locationTagMapper.getTagValuesMap(), thumbnailAddress);
+
+                                // Add location to location cards list
+                                mModels.add(new ListItemModel(nextLocation,
+                                                DistanceCalculator.calculateDistance(currentLocation.latitude, nextLocation.getLatitude(),
+                                                        currentLocation.longitude, nextLocation.getLongitude())));
+                            }
+                            mAdapter.add(mModels); // Add location cards to adapter
+                        } else {
+                            Log.d(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    // Handles creating the magnifying glass expanding search field
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.search_menu, menu);
@@ -261,13 +252,13 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     public void openMaps(View view) {
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         // Pass optional parameters to the map activity
-        myIntent.putExtra("key", "yolo"); //Optional parameters
+        myIntent.putExtra("key", "value_here"); //Optional parameters
         SearchableActivity.this.startActivity(myIntent);
     }
 
     /* Handle a place card being pressed and take the user to the according Location page */
     public void openPlacePage(View view) {
-        TextView textView = (TextView) view.findViewById(R.id.list_item_title);
+        TextView textView = view.findViewById(R.id.list_item_title);
         String placeName = textView.getText().toString();
         Toast.makeText(this, placeName, Toast.LENGTH_SHORT).show();
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
@@ -278,8 +269,8 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     /* Handle the popup for more filters */
     public void openOptions(View view) {
         // Create an instance of the dialogFragment fragment and show it
-        /* Get the values for each filter and send them to the popup as an argument (order matters) */
-        dialogFragment = new OptionsDialogFragment(this.cheapEntry, this.freeEntry);
+        /* Get the values for each apply and send them to the popup as an argument (order matters) */
+        DialogFragment dialogFragment = new OptionsDialogFragment(searchTagMapper);
         dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
     }
 
@@ -295,29 +286,16 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         filterAndRearrange();
     }
 
-
-    /* Methods for handling the different checkboxes being set */
-    public void setWheelchairAccess(boolean wheelchairAccess) {
-        this.wheelchairAccess = wheelchairAccess;
+    // Sets a tag to active or inactive
+    public void setTag(TagID tag, boolean isActive, String tagName) {
+        this.searchTagMapper.addTagToMapper(tag, isActive, tagName);
     }
 
-    public void setChildFriendly(boolean childFriendly) {
-        this.childFriendly = childFriendly;
-    }
-
-    public void setCheapEntry(boolean cheapEntry) {
-        this.cheapEntry = cheapEntry;
-    }
-
-    public void setFreeEntry(boolean freeEntry) {
-        this.freeEntry = freeEntry;
-    }
-
-    /* Apply filter method and replace the current list with the list of matches and rearrange */
+    /* Apply apply method and replace the current list with the list of matches and rearrange */
     public void filterAndRearrange() {
         final List<ListItemModel> filteredModelList =
-                Filters.filter(mModels, currentQuery, distanceSelected,
-                        wheelchairAccess, childFriendly, cheapEntry, freeEntry);
+                Filters.apply(mModels, currentQuery, distanceSelected,
+                        searchTagMapper.getTagValuesMap());
         mAdapter.replaceAll(filteredModelList);
         places.scrollToPosition(0);
     }

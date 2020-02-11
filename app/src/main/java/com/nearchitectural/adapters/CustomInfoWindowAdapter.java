@@ -26,6 +26,11 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: TODO: Fill in purpose
+ */
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final View mWindow;
@@ -33,16 +38,15 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private FirebaseFirestore db;
     private final String TAG = "CustomInfoWindowAdapter";
     private ImageView pic;
+    private String thumbnailURL;
 
     public String getThumbnailURL() {
         return thumbnailURL;
     }
 
-    public void setThumbnailURL(String thumbnailURL) {
+    private void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
     }
-
-    private String thumbnailURL;
 
     public CustomInfoWindowAdapter(Context mContext) {
         this.mContext = mContext;
@@ -53,6 +57,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private void renderWindowText(final Marker marker, final View view) {
         String title = marker.getTitle();
         TextView textViewTitle = view.findViewById(R.id.title);
+        pic = view.findViewById(R.id.picture);
         final Context context = view.getContext();
 
 
@@ -88,7 +93,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                                                     return false;
                                                 }
                                             })
-                                            .into((ImageView) view.findViewById(R.id.picture));
+                                            .into(pic);
 
                                 }
                             } else {
@@ -103,7 +108,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                for (final QueryDocumentSnapshot document : task.getResult()) {
 
                                     thumbnailURL = (String) document.getData().get("thumbnail");
 
@@ -111,7 +116,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
                                     GlideApp.with(context)
                                             .load(thumbnailURL)
-                                            .override(300, 300)
+                                            .override(500, 500)
                                             .error(R.drawable.ic_launcher_background)
                                             .signature(new ObjectKey(thumbnailURL.hashCode()))
                                             .listener(new RequestListener<Drawable>() {
@@ -128,8 +133,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                                                     return false;
                                                 }
                                             })
-                                            .into((ImageView) view.findViewById(R.id.picture));
-
+                                            .into(pic);
                                 }
                             } else {
                                 Log.d(TAG, "Error getting documents: ", task.getException());
@@ -144,7 +148,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         } else {
             textViewTitle.setText("");
         }
-        ;
 
         String snippet = marker.getSnippet();
         TextView textViewSnippet = view.findViewById(R.id.snippet);
@@ -154,7 +157,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         } else {
             textViewSnippet.setText("");
         }
-        ;
+
+        pic.setContentDescription(title);
     }
 
     @Override

@@ -30,22 +30,29 @@ import com.nearchitectural.fragments.MapFragment;
 import com.nearchitectural.fragments.SettingsFragment;
 import com.nearchitectural.fragments.TimelineFragment;
 
-
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Handle events and presentation of locations on Maps home screen
+ */
 public class MapsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 
-    private DrawerLayout drawer;
-    private ActivityMapsBinding mapsBinding;
-    private NavigationView navigationView;
-    private FragmentManager fragmentManager;
-    private LatLng currentLocation;
+    private static final String TAG = "MapActivity"; // Tag used for logging status of application
+
+    private DrawerLayout drawer; // Layout showing the sidebar menu
+    private ActivityMapsBinding mapsBinding; // Binding between to the maps activity layout
+    private NavigationView navigationView; // View containing the drawer menu
+    private FragmentManager fragmentManager; // Utility for switching between fragments
+    private LatLng currentLocation; // User's current location
+
+    // Boolean representing whether location permissions have been granted
     public Boolean mLocationPermissionsGranted;
+    // Location permission constant representing GPS access has been granted
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    // Location permission constant representing Network access has been granted
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
-
-    private static final String TAG = "MapActivity";
-
 
     /* Upon creation of the activity, bind all the view components */
     @Override
@@ -116,6 +123,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // Getter for navigationView
     public NavigationView getNavigationView() {
         return this.navigationView;
     }
@@ -194,7 +202,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     public void openSearch(View view) {
         Intent myIntent = new Intent(MapsActivity.this, SearchableActivity.class);
         /* Optional key value pairs if you need to provide info to the Search view*/
-        myIntent.putExtra("key", "yolo");
+        myIntent.putExtra("key", "value_here");
         MapsActivity.this.startActivity(myIntent);
     }
 }

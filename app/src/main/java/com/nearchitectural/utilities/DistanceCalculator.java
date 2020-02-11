@@ -1,14 +1,18 @@
-package com.nearchitectural.utils;
+package com.nearchitectural.utilities;
 
-public class CalculateDistance {
-    /**
-     * Calculate distance between two points in latitude and longitude taking
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Utility class which calculates the distance between two points on
+ * earth (i.e. location to location, or user position to location)
+ */
+public class DistanceCalculator {
+
+    /* Calculate distance between two points in latitude and longitude taking
      * into account height difference (optionally), which I've disabled for now.
      * Uses Haversine method as its base.
      * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
      * el2 End altitude in meters
-     *
-     * @returns Distance in Meters
      */
 //    public static double calculateDistance(double lat1, double lat2, double lon1,
 //                                           double lon2, double el1, double el2) {
@@ -24,7 +28,7 @@ public class CalculateDistance {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = R * c * 1000; // convert to meters
 
-//        double height = el1 - el2;
+        // double height = el1 - el2;
 
         distance = Math.pow(distance, 2);
 

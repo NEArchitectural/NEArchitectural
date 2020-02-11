@@ -1,9 +1,14 @@
-package com.nearchitectural.utils;
+package com.nearchitectural.utilities;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Singleton class which stores and manipulates the user's current coordinates
+ */
 public class CurrentCoordinates implements Serializable {
 
     private static volatile CurrentCoordinates soleInstance;

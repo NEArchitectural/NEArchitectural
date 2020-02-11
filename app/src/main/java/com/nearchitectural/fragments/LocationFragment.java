@@ -17,9 +17,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.nearchitectural.models.Location;
 import com.nearchitectural.R;
+import com.nearchitectural.models.Location;
+import com.nearchitectural.utilities.TagMapper;
 
+/**author: Kristiyan Doykov
+ * since: TODO: Fill in date
+ * version: 1.0
+ * purpose: Presents information and images regarding a given location
+ */
 public class LocationFragment extends Fragment {
     public static final String TAG = "LocationFragment";
 
@@ -43,7 +49,7 @@ public class LocationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        title = (TextView) view.findViewById(R.id.title);
+        title = view.findViewById(R.id.title);
 
         // Name of the current place the user clicked on
         String placeName = arguments.getString("placeName");
@@ -109,15 +115,9 @@ public class LocationFragment extends Fragment {
                                 String name = document.getData().get("name") == null ? "Unknown" : (String) document.getData().get("name");
                                 String placeType = document.getData().get("placeType") == null ? "Unknown" : (String) document.getData().get("placeType");
                                 String id = document.getId();
-                                boolean wheelChairAccessible =
-                                        document.getData().get("wheelChairAccessible") != null
-                                                && (boolean) document.getData().get("wheelChairAccessible");
-                                boolean childFriendly = document.getData().get("childFriendly") != null
-                                        && (boolean) document.getData().get("childFriendly");
-                                boolean cheapEntry = document.getData().get("cheapEntry") != null
-                                        && (boolean) document.getData().get("cheapEntry");
-                                boolean freeEntry = document.getData().get("freeEntry") != null
-                                        && (boolean) document.getData().get("freeEntry");
+
+                                TagMapper locationTagMapper = new TagMapper(document); // Get Tag information from document
+
                                 String thumbnailAddress = document.getData().get("thumbnail") == null ?
                                         "" : (String) document.getData().get("thumbnail");
 
@@ -132,10 +132,7 @@ public class LocationFragment extends Fragment {
                                         name,
                                         placeType,
                                         new LatLng(latitude, longitude),
-                                        wheelChairAccessible,
-                                        childFriendly,
-                                        cheapEntry,
-                                        freeEntry,
+                                        locationTagMapper.getTagValuesMap(),
                                         thumbnailAddress);
 
                                 Log.d(TAG, document.getId() + " => " + document.getData());
