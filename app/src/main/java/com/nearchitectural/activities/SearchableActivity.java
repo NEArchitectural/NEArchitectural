@@ -10,20 +10,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.Slider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -42,7 +45,7 @@ import com.nearchitectural.utils.Filters;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener {
+public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener, NavigationView.OnNavigationItemSelectedListener {
 
     private boolean wheelchairAccess;
     private boolean childFriendly;
@@ -63,6 +66,9 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private FirebaseFirestore db;
     private double distanceSelected;
     private String currentQuery;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private TextView actionBarTitle;
 
 
     @Override
@@ -70,6 +76,31 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         super.onCreate(savedInstanceState);
         // Use data binding to bind all views in this activity
         searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+
+        // Set up the toolbar
+        Toolbar searchViewToolbar = searchBinding.searchToolbar;
+        setSupportActionBar(searchViewToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+
+        actionBarTitle = searchBinding.actionBarTitle;
+
+        actionBarTitle.setText("Search");
+
+        // Map the drawer pop up
+        drawer = searchBinding.drawerLayout;
+        // Map the drawer menu
+        navigationView = searchBinding.navView;
+        // Set the menu to use the listener provided in this class
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // The "hamburger" button for the menu
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+
+        // This is to make sure the button closes/opens the menu accordingly
+        toggle.syncState();
 
         places = (RecyclerView) searchBinding.placesList;
 
@@ -197,18 +228,13 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             }
         });
 
-        // Set up the toolbar
-        Toolbar searchViewToolbar = searchBinding.searchToolbar;
-        setSupportActionBar(searchViewToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
+
 
         Intent intent = getIntent();
         /* If when starting this activity you passed in a key-value pair
          This is how you retrieve it */
         String value = intent.getStringExtra("key"); //if it's a string you stored.
     }
-
 
     // This handles creating the magnifying glass expanding search field
     @Override
@@ -248,21 +274,18 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     }
 
 
-    /* Handle a press on the map button */
-    public void openMaps(View view) {
-        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-        // Pass optional parameters to the map activity
-        myIntent.putExtra("key", "yolo"); //Optional parameters
-        SearchableActivity.this.startActivity(myIntent);
-    }
-
     /* Handle a place card being pressed and take the user to the according Location page */
     public void openPlacePage(View view) {
         TextView textView = (TextView) view.findViewById(R.id.list_item_title);
         String placeName = textView.getText().toString();
-        Toast.makeText(this, placeName, Toast.LENGTH_SHORT).show();
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         myIntent.putExtra("openPlacePage", placeName); //Optional parameters
+        SearchableActivity.this.startActivity(myIntent);
+    }
+
+    public void openFragment(String fragmentName){
+        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
+        myIntent.putExtra("openFragment", fragmentName); //Optional parameters
         SearchableActivity.this.startActivity(myIntent);
     }
 
@@ -311,5 +334,47 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                         wheelchairAccess, childFriendly, cheapEntry, freeEntry);
         mAdapter.replaceAll(filteredModelList);
         places.scrollToPosition(0);
+    }
+
+    /* If the back button is pressed */
+    @Override
+    public void onBackPressed() {
+        // Close the nav drawer if open
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        super.onBackPressed();
+    }
+
+
+    /* Manages the drawer menu click events */
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_timeline:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Timeline");
+                break;
+            case R.id.nav_map:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Map");
+                break;
+
+            case R.id.nav_settings:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Settings");
+                break;
+
+            case R.id.nav_info:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("About");
+                break;
+
+            case R.id.nav_help:
+                drawer.closeDrawer(GravityCompat.START);
+                openFragment("Help");
+                break;
+        }
+        return true;
     }
 }

@@ -27,5 +27,6 @@ public class HelpFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_help).setChecked(true);
+        parentActivity.setActionBarTitle("Help");
     }
 }

@@ -27,5 +27,6 @@ public class TimelineFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);
+        parentActivity.setActionBarTitle("Timeline");
     }
 }

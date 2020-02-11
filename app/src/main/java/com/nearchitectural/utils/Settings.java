@@ -10,6 +10,7 @@ public class Settings implements Serializable {
     private static boolean childFriendlyNeeded;
     private static int fontSize;
     private double maxDistance;
+    private boolean mLocationPermissionsGranted;
 
     //private constructor
     private Settings() {
@@ -69,5 +70,13 @@ public class Settings implements Serializable {
 
     public void setMaxDistance(double maxDistance) {
         this.maxDistance = maxDistance;
+    }
+
+    public boolean ismLocationPermissionsGranted() {
+        return mLocationPermissionsGranted;
+    }
+
+    public void setmLocationPermissionsGranted(boolean mLocationPermissionsGranted) {
+        this.mLocationPermissionsGranted = mLocationPermissionsGranted;
     }
 }

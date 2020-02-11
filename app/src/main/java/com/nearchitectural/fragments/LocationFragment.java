@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.nearchitectural.activities.MapsActivity;
 import com.nearchitectural.models.Location;
 import com.nearchitectural.R;
 
@@ -44,6 +45,11 @@ public class LocationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         title = (TextView) view.findViewById(R.id.title);
+
+        // Get a reference to the parent activity
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        // Set the title of the action bar
+        parentActivity.setActionBarTitle("Details");
 
         // Name of the current place the user clicked on
         String placeName = arguments.getString("placeName");

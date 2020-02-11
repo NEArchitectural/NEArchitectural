@@ -34,6 +34,7 @@ import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
 import com.nearchitectural.adapters.CustomInfoWindowAdapter;
 import com.nearchitectural.utils.CurrentCoordinates;
+import com.nearchitectural.utils.Settings;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -42,7 +43,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private MapView mapView;
     private GoogleMap googleMap;
     private FirebaseFirestore db;
-    private Boolean mLocationPermissionsGranted;
+    private boolean mLocationPermissionsGranted;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
     private LatLng currentLocation;
@@ -100,13 +101,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
+        parentActivity.setActionBarTitle("Map");
         // Instance of the db for requesting/updating data
         db = FirebaseFirestore.getInstance();
         // Check if the user has allowed us to use their location
-        if (parentActivity != null) {
-            mLocationPermissionsGranted = parentActivity.mLocationPermissionsGranted;
-        }
+        mLocationPermissionsGranted = Settings.getInstance().ismLocationPermissionsGranted();
 
+        // Whenever the map gets created - update the current location
         getDeviceLocation();
 
         // Set up the map
@@ -122,6 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, (float) 15.0));
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         mLocationPermissionsGranted = false;
@@ -130,10 +132,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (grantResults.length > 0) {
                 for (int i : grantResults) {
                     if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                        mLocationPermissionsGranted = false;
+                        // If the result is not PERMISSION_GRANTED do nothing
                         return;
                     }
                 }
+                // Else set it to true
                 mLocationPermissionsGranted = true;
 
             }
@@ -174,9 +177,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         );
 
 
+        // Enable all gestures
         googleMap.getUiSettings().setZoomControlsEnabled(true);
-        googleMap.getUiSettings().setCompassEnabled(true);
-
         googleMap.getUiSettings().setRotateGesturesEnabled(true);
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
         googleMap.getUiSettings().setTiltGesturesEnabled(true);

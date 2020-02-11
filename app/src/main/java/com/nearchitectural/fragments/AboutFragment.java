@@ -27,5 +27,6 @@ public class AboutFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_info).setChecked(true);
+        parentActivity.setActionBarTitle("About");
     }
 }

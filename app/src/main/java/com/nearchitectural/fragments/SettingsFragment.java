@@ -27,5 +27,6 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_settings).setChecked(true);
+        parentActivity.setActionBarTitle("Settings");
     }
 }
