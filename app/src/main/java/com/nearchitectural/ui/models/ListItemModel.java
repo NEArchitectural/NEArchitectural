@@ -20,13 +20,14 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private final boolean mHasCheapEntry;
     private final boolean mHasFreeEntry;
     private String thumbnailURL;
+    private long likes;
     // No setter for this field as it will necessarily be provided in the constructor
     private double mDistanceFromCurrentPosInMeters;
     private String distanceStringForListItem;
 
     public ListItemModel(String mId, String mTitle, String mLocationType, boolean mIsWheelChairAccessible,
                          boolean mIsChildFriendly, boolean mHasCheapEntry, boolean mHasFreeEntry,
-                         String thumbnailURL, double mDistanceFromCurrentPosInMeters) {
+                         String thumbnailURL, double mDistanceFromCurrentPosInMeters, long likes) {
         this.mId = mId;
         this.mTitle = mTitle;
         this.mLocationType = mLocationType;
@@ -35,6 +36,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         this.mHasCheapEntry = mHasCheapEntry;
         this.mHasFreeEntry = mHasFreeEntry;
         this.thumbnailURL = thumbnailURL;
+        this.likes = likes;
         this.mDistanceFromCurrentPosInMeters = mDistanceFromCurrentPosInMeters;
         if ((int) mDistanceFromCurrentPosInMeters / 1000 <= 0) {
             this.distanceStringForListItem = (int) mDistanceFromCurrentPosInMeters + " meters away";
@@ -121,5 +123,13 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
 
     public String getDistanceStringForListItem() {
         return distanceStringForListItem;
+    }
+
+    public long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(long likes) {
+        this.likes = likes;
     }
 }

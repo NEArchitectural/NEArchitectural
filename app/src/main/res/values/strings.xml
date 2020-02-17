@@ -3,4 +3,12 @@
     <string name="title_activity_maps">NE Architectural</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="wheelChair_accessibility_text">Wheelchair accessible</string>
+    <string name="cheap_entry_text">Cheap entry</string>
+    <string name="free_entry_text">No entry fee</string>
+    <string name="child_friendly_text">Suitable for children</string>
+    <string name="general_information">General Information</string>
+    <string name="photos">Photos</string>
+    <string name="take_me_here">Take me here!</string>
+    <string name="like_button_text">I like this place</string>
 </resources>

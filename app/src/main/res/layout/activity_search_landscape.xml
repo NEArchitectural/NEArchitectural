@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:background="@color/grey"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
 
                     <LinearLayout
@@ -59,13 +59,12 @@
                         android:layout_marginLeft="15dp"
                         android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:layout_marginBottom="30dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:orientation="horizontal">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -116,12 +115,12 @@
                         </LinearLayout>
 
 
-                        <LinearLayout
+                        <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginLeft="20dp"
-                            android:orientation="vertical">
+                            android:orientation="horizontal">
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/slider"
@@ -138,11 +137,14 @@
                                 android:id="@+id/seekbar_progress"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toEndOf="@+id/slider"
+                                android:layout_toRightOf="@+id/slider"
                                 android:textAlignment="center"
-                                android:textSize="16sp"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
 
-                        </LinearLayout>
+                        </RelativeLayout>
 
 
                     </LinearLayout>

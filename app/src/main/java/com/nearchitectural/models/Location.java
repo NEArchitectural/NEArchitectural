@@ -2,11 +2,16 @@ package com.nearchitectural.models;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+
 public class Location {
     private final String id;
     private String name;
     private String locationType;
-    private String locationInfo;
+    private String summary;
+    private String firstParagraph;
+    private String secondParagraph;
+    private String thirdParagraph;
     private double latitude;
     private double longitude;
     private boolean isWheelChairAccessible;
@@ -14,14 +19,21 @@ public class Location {
     private boolean hasCheapEntry;
     private boolean hasFreeEntry;
     private String thumbnailURL;
-    // We also will need some image for the thumbnail
+    private ArrayList<String> imageURLs;
+    private long likes;
 
-    public Location(String id, String name, String placeType, LatLng coords,
+
+    public Location(String id, String name, String placeType, String summary, String firstParagraph,
+                    String secondParagraph, String thirdParagraph, LatLng coords,
                     boolean wheelChairAccessible, boolean childFriendly,
-                    boolean cheapEntry, boolean freeEntry, String thumbnailAddress) {
+                    boolean cheapEntry, boolean freeEntry, String thumbnailAddress, ArrayList<String> imageURLs, long likes) {
         this.id = id;
         this.name = name;
         this.locationType = placeType;
+        this.summary = summary;
+        this.firstParagraph = firstParagraph;
+        this.secondParagraph = secondParagraph;
+        this.thirdParagraph = thirdParagraph;
         this.latitude = coords.latitude;
         this.longitude = coords.longitude;
         this.isWheelChairAccessible = wheelChairAccessible;
@@ -29,8 +41,9 @@ public class Location {
         this.hasCheapEntry = cheapEntry;
         this.hasFreeEntry = freeEntry;
         this.thumbnailURL = thumbnailAddress;
+        this.imageURLs = imageURLs;
+        this.likes = likes;
     }
-
 
     private void setName(String name) {
         this.name = name;
@@ -40,8 +53,8 @@ public class Location {
         this.locationType = placeType;
     }
 
-    private void setLocationInfo(String info) {
-        this.locationInfo = info;
+    private void setSummary(String info) {
+        this.summary = info;
     }
 
     public String getName() {
@@ -52,8 +65,8 @@ public class Location {
         return locationType;
     }
 
-    public String getLocationInfo() {
-        return locationInfo;
+    public String getSummary() {
+        return summary;
     }
 
     public String getId() {
@@ -98,5 +111,49 @@ public class Location {
 
     public void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
+    }
+
+    public String getFirstParagraph() {
+        return firstParagraph;
+    }
+
+    public void setFirstParagraph(String firstParagraph) {
+        this.firstParagraph = firstParagraph;
+    }
+
+    public String getSecondParagraph() {
+        return secondParagraph;
+    }
+
+    public void setSecondParagraph(String secondParagraph) {
+        this.secondParagraph = secondParagraph;
+    }
+
+    public String getThirdParagraph() {
+        return thirdParagraph;
+    }
+
+    public void setThirdParagraph(String thirdParagraph) {
+        this.thirdParagraph = thirdParagraph;
+    }
+
+    public ArrayList<String> getImageURLs() {
+        return imageURLs;
+    }
+
+    public void setImageURLs(ArrayList<String> imageURLs) {
+        this.imageURLs = imageURLs;
+    }
+
+    public long getLikes() {
+        return likes;
+    }
+
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes(){
+        this.likes--;
     }
 }

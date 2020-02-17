@@ -1,36 +1,76 @@
 package com.nearchitectural.fragments;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.nearchitectural.activities.MapsActivity;
-import com.nearchitectural.models.Location;
+import com.like.LikeButton;
+import com.like.OnLikeListener;
+import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
+import com.nearchitectural.activities.MapsActivity;
+import com.nearchitectural.adapters.ViewPagerAdapter;
+import com.nearchitectural.databinding.FragmentLocationBinding;
+import com.nearchitectural.models.Location;
+
+import java.util.ArrayList;
+import java.util.Locale;
+
 
 public class LocationFragment extends Fragment {
     public static final String TAG = "LocationFragment";
 
+    private String name;
+    FragmentLocationBinding locationBinding;
+
+    private ImageView thumbnail;
     private TextView title;
+    private TextView locationType;
+    private TextView summary;
+    private TextView wheelChairTag;
+    private TextView childFriendlyTag;
+    private TextView cheapTag;
+    private TextView freeTag;
+    private TextView firstParagraph;
+    private TextView secondParagraph;
+    private TextView thirdParagraph;
+    private TextView likesCount;
+    private Drawable ic_accessible;
+    private Drawable ic_child;
+    private Drawable ic_cheap;
+    private Drawable ic_free;
+    private ViewPager slideshow;
+    private Button navigateButton;
+    private ViewPagerAdapter viewPagerAdapter;
+    private com.like.LikeButton likeButton;
     // Arguments that came in with the intent
     private Bundle arguments;
     // Database reference field
     private FirebaseFirestore db;
+
     // Location object to contain all the info
     private Location location;
+
+    public LocationFragment(Location location) {
+        this.location = location;
+    }
 
     @Nullable
     @Override
@@ -38,122 +78,201 @@ public class LocationFragment extends Fragment {
         // Initialize the arguments field with what came in from the previous activity
         arguments = getArguments();
 
-        return inflater.inflate(R.layout.fragment_location, container, false);
+        locationBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_location, container, false);
+
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+
+        // Get data for location here -> db call or passed in in the Bundle
+
+        locationBinding.setModel(location);
+
+        thumbnail = locationBinding.thumbnail;
+
+        title = locationBinding.title;
+
+        locationType = locationBinding.locationType;
+
+        wheelChairTag = locationBinding.wheelChairTag;
+
+        childFriendlyTag = locationBinding.childTag;
+
+        cheapTag = locationBinding.cheapTag;
+
+        freeTag = locationBinding.freeTag;
+
+        firstParagraph = locationBinding.firstParagraph;
+
+        secondParagraph = locationBinding.secondParagraph;
+
+        thirdParagraph = locationBinding.thirdParagraph;
+
+        ic_accessible = getResources().getDrawable(R.drawable.ic_accessible);
+
+        ic_child = getResources().getDrawable(R.drawable.ic_child_friendly);
+
+        ic_cheap = getResources().getDrawable(R.drawable.ic_cheap);
+
+        ic_free = getResources().getDrawable(R.drawable.ic_free);
+
+        likesCount = locationBinding.likesCount;
+
+
+        navigateButton = locationBinding.navigateButton;
+
+        navigateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse(String.format(Locale.ENGLISH,
+                        "google.navigation:q=%f,%f", location.getLatitude(), location.getLongitude()));
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
+            }
+        });
+
+        navigateButton.setTransformationMethod(null);
+
+        slideshow = locationBinding.slideshow;
+
+        ArrayList<String> imageURLs = location.getImageURLs();
+
+        likeButton = locationBinding.likeButton;
+
+        likeButton.setOnLikeListener(new OnLikeListener() {
+            @Override
+            public void liked(LikeButton likeButton) {
+                final long[] likes = new long[1];
+                db.collection("locations")
+                        .document(location.getId())
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    if (task.getResult() != null) {
+                                        likes[0] = (long) task.getResult().getData().get("likes");
+                                        db.collection("locations")
+                                                .document(location.getId())
+                                                .update("likes", likes[0] + 1)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        likesCount.setText(String.valueOf(likes[0] + 1));
+                                                    }
+                                                });
+                                    }
+                                }
+                            }
+                        });
+
+
+            }
+
+            @Override
+            public void unLiked(LikeButton likeButton) {
+                final long[] likes = new long[1];
+                db.collection("locations")
+                        .document(location.getId())
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    if (task.getResult() != null) {
+                                        likes[0] = (long) task.getResult().getData().get("likes");
+                                        db.collection("locations")
+                                                .document(location.getId())
+                                                .update("likes", likes[0] - 1)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        likesCount.setText(String.valueOf(likes[0] - 1));
+                                                    }
+                                                });
+                                    }
+                                }
+                            }
+                        });
+            }
+        });
+
+        viewPagerAdapter = new ViewPagerAdapter(this.getContext(), imageURLs);
+
+        slideshow.setAdapter(viewPagerAdapter);
+
+        if (location.getFirstParagraph().equals("Unknown") || location.getFirstParagraph() == null) {
+            firstParagraph.setVisibility(View.GONE);
+        }
+        if (location.getSecondParagraph().equals("Unknown") || location.getSecondParagraph() == null) {
+            secondParagraph.setVisibility(View.GONE);
+        }
+        if (location.getThirdParagraph().equals("Unknown") || location.getThirdParagraph() == null) {
+            thirdParagraph.setVisibility(View.GONE);
+        }
+
+        if (location.isWheelChairAccessible()) {
+            wheelChairTag.setText(R.string.wheelChair_accessibility_text);
+            wheelChairTag.setCompoundDrawablesWithIntrinsicBounds(ic_accessible, null, null, null);
+        } else {
+            wheelChairTag.setVisibility(View.GONE);
+        }
+
+        if (location.isChildFriendly()) {
+            childFriendlyTag.setText(R.string.child_friendly_text);
+            childFriendlyTag.setCompoundDrawablesWithIntrinsicBounds(ic_child, null, null, null);
+        } else {
+            childFriendlyTag.setVisibility(View.GONE);
+        }
+
+        if (location.hasCheapEntry()) {
+            cheapTag.setText(R.string.cheap_entry_text);
+            cheapTag.setCompoundDrawablesWithIntrinsicBounds(ic_cheap, null, null, null);
+        } else {
+            cheapTag.setVisibility(View.GONE);
+        }
+
+        if (location.hasFreeEntry()) {
+            freeTag.setText(R.string.free_entry_text);
+            freeTag.setCompoundDrawablesWithIntrinsicBounds(ic_free, null, null, null);
+        } else {
+            freeTag.setVisibility(View.GONE);
+        }
+
+        GlideApp.with(parentActivity)
+                .load(location.getThumbnailURL())
+                .override(600, 600)
+                .error(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(thumbnail);
+
+        return locationBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        title = (TextView) view.findViewById(R.id.title);
 
         // Get a reference to the parent activity
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         // Set the title of the action bar
         parentActivity.setActionBarTitle("Details");
 
-        // Name of the current place the user clicked on
-        String placeName = arguments.getString("placeName");
 
-        // This is just a test to verify that the right info is passed in
-        title.setText(placeName + " details");
 
         /* Get an instance of the database in order to
          retrieve/update the data for the specific location */
         db = FirebaseFirestore.getInstance();
 
-
-        /* You can increment/decrement the likes count by finding the location in the db and
-         * setting the likes field like shown below - use this code in the OnClick listener for the
-         * like button */
-//        db.collection("locations").whereEqualTo("name",placeName)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                // If you get here it means the query has been successful
-//
-//                                Map<String, Object> newData = new HashMap<>();
-//                                newData.put("likes", ((int) document.getData().get("likes") + 1));
-//
-//                                db.collection("locations")
-//                                        .document(document.getId())
-//                                        .set(newData)
-//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                            @Override
-//                                            public void onSuccess(Void aVoid) {
-//                                                Log.d(TAG, "DocumentSnapshot successfully written!");
-//                                            }
-//                                        })
-//                                        .addOnFailureListener(new OnFailureListener() {
-//                                            @Override
-//                                            public void onFailure(@NonNull Exception e) {
-//                                                Log.w(TAG, "Error writing document", e);
-//                                            }
-//                                        });
-//
-//                                Log.d(TAG, document.getId() + " => " + document.getData());
-//                            }
-//                        } else {
-//                            /* If this block executes, either no document was found
-//                             * matching the search name or some other error occurred*/
-//                            Log.d(TAG, "Error getting documents: ", task.getException());
-//                        }
-//                    }
-//                });
-
-
-        // Retrieve all the information about the current location via its name
-        db.collection("locations").whereEqualTo("name", placeName)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String name = document.getData().get("name") == null ? "Unknown" : (String) document.getData().get("name");
-                                String placeType = document.getData().get("placeType") == null ? "Unknown" : (String) document.getData().get("placeType");
-                                String id = document.getId();
-                                boolean wheelChairAccessible =
-                                        document.getData().get("wheelChairAccessible") != null
-                                                && (boolean) document.getData().get("wheelChairAccessible");
-                                boolean childFriendly = document.getData().get("childFriendly") != null
-                                        && (boolean) document.getData().get("childFriendly");
-                                boolean cheapEntry = document.getData().get("cheapEntry") != null
-                                        && (boolean) document.getData().get("cheapEntry");
-                                boolean freeEntry = document.getData().get("freeEntry") != null
-                                        && (boolean) document.getData().get("freeEntry");
-                                String thumbnailAddress = document.getData().get("thumbnail") == null ?
-                                        "" : (String) document.getData().get("thumbnail");
-
-                                double latitude = document.getData().get("latitude") == null ?
-                                        0 : (double) document.getData().get("latitude");
-
-                                double longitude = document.getData().get("longitude") == null ?
-                                        0 : (double) document.getData().get("longitude");
-
-                                // All the information about the current location
-                                location = new Location(id,
-                                        name,
-                                        placeType,
-                                        new LatLng(latitude, longitude),
-                                        wheelChairAccessible,
-                                        childFriendly,
-                                        cheapEntry,
-                                        freeEntry,
-                                        thumbnailAddress);
-
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            /* If this block executes, either no document was found
-                             * matching the search name or some other error occurred*/
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
 
 
     /* These lines are for navigating through Google maps forcefully

@@ -34,7 +34,10 @@ import com.nearchitectural.R;
 import com.nearchitectural.activities.MapsActivity;
 import com.nearchitectural.adapters.CustomInfoWindowAdapter;
 import com.nearchitectural.utils.CurrentCoordinates;
+import com.nearchitectural.utils.DatabaseExtractor;
 import com.nearchitectural.utils.Settings;
+
+import java.util.ArrayList;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -100,7 +103,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
-        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
+        parentActivity.getNavigationView()
+                .getMenu()
+                .findItem(R.id.nav_map)
+                .setChecked(true);
         parentActivity.setActionBarTitle("Map");
         // Instance of the db for requesting/updating data
         db = FirebaseFirestore.getInstance();
@@ -114,6 +120,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapView = (MapView) view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
+
         // The first parameter means that the callback has been implemented in this class
         mapView.getMapAsync(this);
     }
@@ -161,17 +168,71 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new GoogleMap.OnInfoWindowClickListener() {
                     public void onInfoWindowClick(Marker marker) {
 
-                        LocationFragment lf = new LocationFragment();
-                        Bundle arguments = new Bundle();
-                        arguments.putString("placeName", marker.getTitle());
-                        lf.setArguments(arguments);
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, lf)
-                                .addToBackStack(LocationFragment.TAG)
-                                .commit();
+                        if (marker.getTitle() != null && !marker.getTitle().equals("Unknown")) {
+                            db.collection("locations").whereEqualTo("name", marker.getTitle())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
 
-                        /* Code to load DetailsPage for the place will sit here */
-                        MessageBox(marker.getTitle() + " was pressed!");
+                                                    com.nearchitectural.models.Location location = DatabaseExtractor.extractLocation(document);
+
+                                                    LocationFragment lf = new LocationFragment(location);
+                                                    getActivity()
+                                                            .getSupportFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, lf)
+                                                            .addToBackStack(LocationFragment.TAG)
+                                                            .commit();
+
+
+                                                }
+                                            }
+                                        }
+                                    });
+                        } else if (marker.getSnippet() != null && !marker.getSnippet().equals("Unknown")) {
+                            db.collection("locations").whereEqualTo("summary", marker.getSnippet())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                                    com.nearchitectural.models.Location location = DatabaseExtractor.extractLocation(document);
+
+                                                    LocationFragment lf = new LocationFragment(location);
+
+                                                    getActivity()
+                                                            .getSupportFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, lf)
+                                                            .addToBackStack(LocationFragment.TAG)
+                                                            .commit();
+                                                }
+                                            }
+                                        }
+                                    });
+                        } else {
+                            com.nearchitectural.models.Location location =
+                                    new com.nearchitectural.models.Location(
+                                            "Unknown", "Unknown", "Unknown",
+                                            "Unknown", "Unknown",
+                                            "Unknown", "Unknown",
+                                            new LatLng(0, 0), false,
+                                            false, false, false,
+                                            "", new ArrayList<String>(),0);
+
+                            LocationFragment lf = new LocationFragment(location);
+                            getActivity()
+                                    .getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, lf)
+                                    .addToBackStack(LocationFragment.TAG)
+                                    .commit();
+                        }
                     }
                 }
         );
@@ -219,7 +280,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         0 : (double) document.getData().get("longitude");
 
 
-                                googleMap.addMarker(new MarkerOptions().flat(false)
+                                googleMap.addMarker(new MarkerOptions()
+                                        .flat(false)
                                         .position(new LatLng(latitude, longitude))
                                         .title(name)
                                         .snippet(summary));

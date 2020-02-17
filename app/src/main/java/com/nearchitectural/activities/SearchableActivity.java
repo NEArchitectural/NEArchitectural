@@ -3,6 +3,7 @@ package com.nearchitectural.activities;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +22,9 @@ import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -31,16 +35,19 @@ import com.google.android.material.slider.Slider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
 import com.nearchitectural.R;
 import com.nearchitectural.adapters.ListItemAdapter;
 import com.nearchitectural.comparators.Comparators;
 import com.nearchitectural.databinding.ActivitySearchBinding;
+import com.nearchitectural.databinding.ActivitySearchLandscapeBinding;
 import com.nearchitectural.fragments.OptionsDialogFragment;
 import com.nearchitectural.models.Location;
 import com.nearchitectural.ui.models.ListItemModel;
-import com.nearchitectural.utils.CalculateDistance;
 import com.nearchitectural.utils.CurrentCoordinates;
+import com.nearchitectural.utils.DatabaseExtractor;
 import com.nearchitectural.utils.Filters;
+import com.nearchitectural.utils.SearchableActivityViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +62,9 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     public static final String TAG = "SearchableActivity";
 
     private RecyclerView places;
+    private SearchableActivityViewModel mViewModel;
     private ActivitySearchBinding searchBinding;
+    private ActivitySearchLandscapeBinding searchLandscapeBinding;
     private TextView seekbarProg;
     private Slider slider;
     private AppCompatCheckBox wheelChairCheckBox;
@@ -69,48 +78,103 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private TextView actionBarTitle;
+    private int columns;
+    private List<Location> locationsToShow;
+    private List<ListItemModel> filteredModelList;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         // Use data binding to bind all views in this activity
-        searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            columns = 1;
+            searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        } else {
+            columns = 2;
+            searchLandscapeBinding = DataBindingUtil.setContentView(this, R.layout.activity_search_landscape);
+        }
 
-        // Set up the toolbar
-        Toolbar searchViewToolbar = searchBinding.searchToolbar;
-        setSupportActionBar(searchViewToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        mViewModel = ViewModelProviders.of(this).get(SearchableActivityViewModel.class);
 
-        actionBarTitle = searchBinding.actionBarTitle;
+        if (searchBinding != null) {
 
-        actionBarTitle.setText("Search");
+            // Set up the toolbar
+            Toolbar searchViewToolbar = searchBinding.searchToolbar;
+            setSupportActionBar(searchViewToolbar);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
 
-        // Map the drawer pop up
-        drawer = searchBinding.drawerLayout;
-        // Map the drawer menu
-        navigationView = searchBinding.navView;
-        // Set the menu to use the listener provided in this class
-        navigationView.setNavigationItemSelectedListener(this);
+            actionBarTitle = searchBinding.actionBarTitle;
 
-        // The "hamburger" button for the menu
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+            actionBarTitle.setText("Search");
 
-        // This is to make sure the button closes/opens the menu accordingly
-        toggle.syncState();
+            // Map the drawer pop up
+            drawer = searchBinding.drawerLayout;
+            // Map the drawer menu
+            navigationView = searchBinding.navView;
+            // Set the menu to use the listener provided in this class
+            navigationView.setNavigationItemSelectedListener(this);
 
-        places = (RecyclerView) searchBinding.placesList;
+            // The "hamburger" button for the menu
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
+                    R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(toggle);
 
-        seekbarProg = (TextView) searchBinding.seekbarProgress;
+            // This is to make sure the button closes/opens the menu accordingly
+            toggle.syncState();
 
-        slider = (Slider) searchBinding.slider;
+            places = (RecyclerView) searchBinding.placesList;
 
-        wheelChairCheckBox = (AppCompatCheckBox) searchBinding.accessibleCb;
+            places.setLayoutManager(new GridLayoutManager(this, columns));
 
-        childFriendlyCheckBox = (AppCompatCheckBox) searchBinding.childFriendlyCb;
+            seekbarProg = (TextView) searchBinding.seekbarProgress;
+
+            slider = (Slider) searchBinding.slider;
+
+            wheelChairCheckBox = (AppCompatCheckBox) searchBinding.accessibleCb;
+
+            childFriendlyCheckBox = (AppCompatCheckBox) searchBinding.childFriendlyCb;
+
+        } else {
+            // Set up the toolbar
+            Toolbar searchViewToolbar = searchLandscapeBinding.searchToolbar;
+            setSupportActionBar(searchViewToolbar);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
+
+            actionBarTitle = searchLandscapeBinding.actionBarTitle;
+
+            actionBarTitle.setText("Search");
+
+            // Map the drawer pop up
+            drawer = searchLandscapeBinding.drawerLayout;
+            // Map the drawer menu
+            navigationView = searchLandscapeBinding.navView;
+            // Set the menu to use the listener provided in this class
+            navigationView.setNavigationItemSelectedListener(this);
+
+            // The "hamburger" button for the menu
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
+                    R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(toggle);
+
+            // This is to make sure the button closes/opens the menu accordingly
+            toggle.syncState();
+
+            places = (RecyclerView) searchLandscapeBinding.placesList;
+
+            places.setLayoutManager(new GridLayoutManager(this, columns));
+
+            seekbarProg = (TextView) searchLandscapeBinding.seekbarProgress;
+
+            slider = (Slider) searchLandscapeBinding.slider;
+
+            wheelChairCheckBox = (AppCompatCheckBox) searchLandscapeBinding.accessibleCb;
+
+            childFriendlyCheckBox = (AppCompatCheckBox) searchLandscapeBinding.childFriendlyCb;
+        }
 
         /* Set listeners to be able to apply when the user checks/unchecks a CheckBox */
         childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -145,67 +209,26 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         places.setAdapter(mAdapter);
 
         // List of locations
-        final List<Location> locationsToShow = new ArrayList<>();
+        locationsToShow = new ArrayList<>();
 
-        // Get all locations from the db
-        db.collection("locations")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, String.valueOf(document.getData().get("name")));
+        mViewModel.getLocationsToShow().observe(this, new Observer<List<Location>>() {
+            @Override
+            public void onChanged(List<Location> locations) {
+                locationsToShow.addAll(locations);
+            }
+        });
 
-                                // For each location create aa new Location instance and add it to the list
-                                String id = document.getId();
+        mModels = new ArrayList<>();
 
-                                String name = document.getData().get("name") == null ?
-                                        "Unknown" : (String) document.getData().get("name");
+        mViewModel.getmModels().observe(this, new Observer<List<ListItemModel>>() {
+            @Override
+            public void onChanged(List<ListItemModel> listItemModels) {
+                mModels.addAll(listItemModels);
+                filterAndRearrange();
+            }
+        });
 
-                                String placeType = document.getData().get("placeType") == null ?
-                                        "Unknown" : (String) document.getData().get("placeType");
-
-                                LatLng coords = document.getData().get("latitude") == null || document.getData().get("longitude") == null ?
-                                        new LatLng(0, 0) : new LatLng((double) document.getData().get("latitude"),
-                                        (double) document.getData().get("longitude"));
-
-                                boolean wheelChairAccessible = document.getData().get("wheelChairAccessible") != null
-                                        && (boolean) document.getData().get("wheelChairAccessible");
-
-                                boolean childFriendly = document.getData().get("childFriendly") != null
-                                        && (boolean) document.getData().get("childFriendly");
-
-                                boolean cheapEntry = document.getData().get("cheapEntry") != null
-                                        && (boolean) document.getData().get("cheapEntry");
-
-                                boolean freeEntry = document.getData().get("freeEntry") != null
-                                        && (boolean) document.getData().get("freeEntry");
-                                String thumbnailAddress = document.getData().get("thumbnail") == null ?
-                                        "" : (String) document.getData().get("thumbnail");
-
-                                locationsToShow.add(new Location(id, name, placeType, coords,
-                                        wheelChairAccessible, childFriendly, cheapEntry, freeEntry, thumbnailAddress));
-
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            mModels = new ArrayList<>();
-                            for (Location location : locationsToShow) {
-                                mModels.add(new ListItemModel(location.getId(), location.getName(),
-                                        location.getLocationType(),
-                                        location.isWheelChairAccessible(), location.isChildFriendly(),
-                                        location.hasCheapEntry(), location.hasFreeEntry(),
-                                        location.getThumbnailURL(),
-                                        CalculateDistance.calculateDistance(currentLocation.latitude, location.getLatitude(),
-                                                currentLocation.longitude, location.getLongitude())));
-                            }
-                            mAdapter.add(mModels);
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-
+        mAdapter.add(mModels);
 
         /* When the user uses the slider to choose max distance, update the list of locations shown */
         slider.addOnChangeListener(new Slider.OnChangeListener() {
@@ -229,12 +252,12 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         });
 
 
-
         Intent intent = getIntent();
         /* If when starting this activity you passed in a key-value pair
          This is how you retrieve it */
         String value = intent.getStringExtra("key"); //if it's a string you stored.
     }
+
 
     // This handles creating the magnifying glass expanding search field
     @Override
@@ -247,6 +270,8 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
                 (SearchView) searchItem.getActionView();
+        // Make sure search field takes up whole action bar even in landscape
+        searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
@@ -277,13 +302,34 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     /* Handle a place card being pressed and take the user to the according Location page */
     public void openPlacePage(View view) {
         TextView textView = (TextView) view.findViewById(R.id.list_item_title);
-        String placeName = textView.getText().toString();
-        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-        myIntent.putExtra("openPlacePage", placeName); //Optional parameters
-        SearchableActivity.this.startActivity(myIntent);
+
+        db.collection("locations").whereEqualTo("name", textView.getText())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Location location = DatabaseExtractor.extractLocation(document);
+
+                                Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
+                                myIntent.putExtra("openPlacePage", location.getName());
+                                Gson gson = new Gson();
+                                String locationJSON = gson.toJson(location);
+                                myIntent.putExtra("location", locationJSON);
+                                SearchableActivity.this.startActivity(myIntent);
+                            }
+                        } else {
+                            /* If this block executes, either no document was found
+                             * matching the search name or some other error occurred*/
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
     }
 
-    public void openFragment(String fragmentName){
+    public void openFragment(String fragmentName) {
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         myIntent.putExtra("openFragment", fragmentName); //Optional parameters
         SearchableActivity.this.startActivity(myIntent);
@@ -297,6 +343,9 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
     }
 
+    public void navigate (View view){
+
+    }
 
     /* Handlers for the closing of the pop-up for more filters */
     @Override
@@ -329,7 +378,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
 
     /* Apply apply method and replace the current list with the list of matches and rearrange */
     public void filterAndRearrange() {
-        final List<ListItemModel> filteredModelList =
+        filteredModelList =
                 Filters.apply(mModels, currentQuery, distanceSelected,
                         wheelchairAccess, childFriendly, cheapEntry, freeEntry);
         mAdapter.replaceAll(filteredModelList);

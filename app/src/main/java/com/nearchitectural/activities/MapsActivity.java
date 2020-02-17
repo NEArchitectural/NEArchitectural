@@ -3,6 +3,7 @@ package com.nearchitectural.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivityMapsBinding;
 import com.nearchitectural.fragments.AboutFragment;
@@ -30,6 +32,7 @@ import com.nearchitectural.fragments.LocationFragment;
 import com.nearchitectural.fragments.MapFragment;
 import com.nearchitectural.fragments.SettingsFragment;
 import com.nearchitectural.fragments.TimelineFragment;
+import com.nearchitectural.models.Location;
 import com.nearchitectural.utils.Settings;
 
 
@@ -96,11 +99,12 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
         if (bundle != null) {
             if (bundle.get("openPlacePage") != null) {
-                LocationFragment lf = new LocationFragment();
-                Bundle arguments = new Bundle();
-                String placeName = bundle.getString("openPlacePage");
-                arguments.putString("placeName", placeName);
-                lf.setArguments(arguments);
+                Gson gson = new Gson();
+                Location location = gson.fromJson(bundle.getString("location"),Location.class);
+                //  Create the new LocationFragment and set the location for the LocationFragment
+                LocationFragment lf = new LocationFragment(location);
+//                Bundle arguments = new Bundle();
+//                lf.setArguments(arguments);
                 bundle.remove("openPlacePage");
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         lf).commit();
@@ -148,6 +152,12 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
             fragmentManager.beginTransaction().replace(R.id.fragment_container,
                     new MapFragment()).commit();
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // do nothing, just override
     }
 
     public NavigationView getNavigationView() {

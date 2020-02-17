@@ -13,7 +13,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_view"
@@ -69,6 +71,17 @@
                         android:textColor="@color/black"
                         android:textSize="12sp" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="10dp"
+                        android:drawableEnd="@drawable/ic_liked"
+                        android:drawableRight="@drawable/ic_liked"
+                        android:text="@{String.valueOf(model.likes)}" />
+
                 </LinearLayout>
 
 
@@ -80,7 +93,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentBottom="true"
                     android:layout_centerVertical="true"
-                    android:contentDescription="Thumbnail Image"
+                    android:contentDescription="@{model.title}"
                     android:maxHeight="150dp"
                     bind:thumbnail="@{model.thumbnailURL}" />
 
