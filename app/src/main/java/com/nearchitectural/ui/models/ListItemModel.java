@@ -15,6 +15,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private final String mId;
     private final String mTitle;
     private final String mLocationType;
+    private final String mLocationSummary;
     private final boolean mIsWheelChairAccessible;
     private final boolean mIsChildFriendly;
     private final boolean mHasCheapEntry;
@@ -25,12 +26,13 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private double mDistanceFromCurrentPosInMeters;
     private String distanceStringForListItem;
 
-    public ListItemModel(String mId, String mTitle, String mLocationType, boolean mIsWheelChairAccessible,
+    public ListItemModel(String mId, String mTitle, String mLocationType, String mLocationSummary, boolean mIsWheelChairAccessible,
                          boolean mIsChildFriendly, boolean mHasCheapEntry, boolean mHasFreeEntry,
                          String thumbnailURL, double mDistanceFromCurrentPosInMeters, long likes) {
         this.mId = mId;
         this.mTitle = mTitle;
         this.mLocationType = mLocationType;
+        this.mLocationSummary = mLocationSummary;
         this.mIsWheelChairAccessible = mIsWheelChairAccessible;
         this.mIsChildFriendly = mIsChildFriendly;
         this.mHasCheapEntry = mHasCheapEntry;
@@ -115,6 +117,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
                 .override(500, 500)
+                .centerCrop()
                 .error(R.drawable.ic_launcher_background)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(imageView);
@@ -131,5 +134,9 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
 
     public void setLikes(long likes) {
         this.likes = likes;
+    }
+
+    public String getMLocationSummary() {
+        return mLocationSummary;
     }
 }

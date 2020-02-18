@@ -59,6 +59,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
                         android:text="@{model.locationType, default=PlaceType}"
                         android:textSize="12sp" />
 
@@ -67,6 +68,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
                         android:text="@{model.distanceStringForListItem}"
                         android:textColor="@color/black"
                         android:textSize="12sp" />
@@ -76,11 +78,23 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:drawableStart="@drawable/ic_liked"
+                        android:drawableLeft="@drawable/ic_liked"
+                        android:text="@{String.valueOf(model.likes)}"
+                        android:textColor="@color/black" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:maxWidth="200dp"
+                        android:maxLines="4"
+                        android:ellipsize="end"
+                        android:layout_marginTop="5dp"
                         android:textColor="@color/black"
-                        android:layout_marginTop="10dp"
-                        android:drawableEnd="@drawable/ic_liked"
-                        android:drawableRight="@drawable/ic_liked"
-                        android:text="@{String.valueOf(model.likes)}" />
+                        android:text="@{model.mLocationSummary}" />
 
                 </LinearLayout>
 

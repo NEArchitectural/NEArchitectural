@@ -65,6 +65,7 @@ public class SearchableActivityViewModel extends ViewModel {
 
                                 mModelsList.add(new ListItemModel(locationTemp.getId(), locationTemp.getName(),
                                         locationTemp.getLocationType(),
+                                        locationTemp.getSummary(),
                                         locationTemp.isWheelChairAccessible(), locationTemp.isChildFriendly(),
                                         locationTemp.hasCheapEntry(), locationTemp.hasFreeEntry(),
                                         locationTemp.getThumbnailURL(),

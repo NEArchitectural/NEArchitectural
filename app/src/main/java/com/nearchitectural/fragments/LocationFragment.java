@@ -44,6 +44,8 @@ public class LocationFragment extends Fragment {
     private TextView title;
     private TextView locationType;
     private TextView summary;
+    private TextView referencesHeading;
+    private TextView referencesBody;
     private TextView wheelChairTag;
     private TextView childFriendlyTag;
     private TextView cheapTag;
@@ -58,6 +60,7 @@ public class LocationFragment extends Fragment {
     private Drawable ic_free;
     private ViewPager slideshow;
     private Button navigateButton;
+    private Button showReferencesButton;
     private ViewPagerAdapter viewPagerAdapter;
     private com.like.LikeButton likeButton;
     // Arguments that came in with the intent
@@ -105,6 +108,33 @@ public class LocationFragment extends Fragment {
         secondParagraph = locationBinding.secondParagraph;
 
         thirdParagraph = locationBinding.thirdParagraph;
+
+        referencesHeading = locationBinding.referencesHeading;
+
+        referencesBody = locationBinding.references;
+
+        referencesBody.setVisibility(View.GONE);
+
+        referencesHeading.setVisibility(View.GONE);
+
+        showReferencesButton = locationBinding.showReferencesButton;
+
+        showReferencesButton.setTransformationMethod(null);
+
+        showReferencesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(referencesHeading.getVisibility() == View.GONE){
+                    referencesHeading.setVisibility(View.VISIBLE);
+                    referencesBody.setVisibility(View.VISIBLE);
+                    showReferencesButton.setText(R.string.hide_references);
+                } else {
+                    referencesHeading.setVisibility(View.GONE);
+                    referencesBody.setVisibility(View.GONE);
+                    showReferencesButton.setText(R.string.show_references);
+                }
+            }
+        });
 
         ic_accessible = getResources().getDrawable(R.drawable.ic_accessible);
 

@@ -34,6 +34,7 @@
             android:layout_below="@+id/title"
             android:maxWidth="150dp"
             android:maxLines="5"
+            android:ellipsize="end"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="14sp" />

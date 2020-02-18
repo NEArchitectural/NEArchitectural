@@ -11,4 +11,7 @@
     <string name="photos">Photos</string>
     <string name="take_me_here">Take me here!</string>
     <string name="like_button_text">I like this place</string>
+    <string name="show_references">Show references</string>
+    <string name="references">References</string>
+    <string name="hide_references">Hide references</string>
 </resources>
