@@ -4,10 +4,10 @@ import com.nearchitectural.ui.models.ListItemModel;
 
 import java.util.Comparator;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Comparator which compares location list models by closest distance to the user
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Comparator which compares location list models by closest distance to the user
  */
 public class ShortestDistanceComparator implements Comparator<ListItemModel> {
 

@@ -1,9 +1,9 @@
 package com.nearchitectural.utilities;
 
-/**author: Joel Bell-Wilding
- * since: 07/02/20
- * version: 1.0
- * purpose: Enumerator storing available Tag IDs for use with TagMapper utility class
+/* Author:  Joel Bell-Wilding
+ * Since:   07/02/20
+ * Version: 1.0
+ * Purpose: Enumerator storing available Tag IDs for use with TagMapper utility class
  */
 public enum TagID {
 

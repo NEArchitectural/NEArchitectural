@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**author: Kristiyan Doykov, Joel Bell-Wilding
- * since: TODO: Fill in date
- * version: 1.1
- * purpose: Filter a list of locations based on a set of factors (tags applied, distance to user etc)
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+ * Since:   TODO: Fill in date
+ * Version: 1.1
+ * Purpose: Filter a list of locations based on a set of factors (tags applied, distance to user etc)
  */
 public class Filter {
 
@@ -30,7 +30,7 @@ public class Filter {
         for (ListItemModel model : models) {
 
             final String titleText = model.getLocationInfo().getName().toLowerCase();
-            final String placeTypeText = model.getLocationInfo().getLocationType().toLowerCase();
+            final String placeTypeText = model.getLocationInfo().getType().toLowerCase();
             final double distance = model.getMDistanceFromCurrentPosInMeters();
             Log.w(TAG, String.valueOf(distance));
 

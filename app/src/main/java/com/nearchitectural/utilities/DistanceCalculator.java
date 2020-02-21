@@ -1,34 +1,32 @@
 package com.nearchitectural.utilities;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Utility class which calculates the distance between two points on
- * earth (i.e. location to location, or user position to location)
+/*
+ * Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Utility class which calculates the distance between two points on
+ *          earth (i.e. location to location, or user position to location)
  */
 public class DistanceCalculator {
 
-    /* Calculate distance between two points in latitude and longitude taking
-     * into account height difference (optionally), which I've disabled for now.
-     * Uses Haversine method as its base.
-     * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
-     * el2 End altitude in meters
-     */
-//    public static double calculateDistance(double lat1, double lat2, double lon1,
-//                                           double lon2, double el1, double el2) {
-    public static double calculateDistance(double lat1, double lat2, double lon1, double lon2) {
+    private final static int KILOMETER_CONVERSION = 1000; // Conversion to kilometer from meters
+    private final static int EARTH_RADIUS = 6371; // Radius of the earth
 
-        final int R = 6371; // Radius of the earth
+    /* Calculates the distance between two points on the map (using their latitude and
+     * longitude. Code fragment taken and modified from the following web-page:
+     * https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude
+     */
+    public static double calculateDistance(double lat1, double lat2, double lon1, double lon2) {
 
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+        double tempDistOne = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = R * c * 1000; // convert to meters
 
-        // double height = el1 - el2;
+        double tempDistTwo = 2 * Math.atan2(Math.sqrt(tempDistOne), Math.sqrt(1 - tempDistOne));
+
+        double distance = EARTH_RADIUS * tempDistTwo * KILOMETER_CONVERSION; // convert to meters
 
         distance = Math.pow(distance, 2);
 

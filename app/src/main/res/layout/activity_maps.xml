@@ -52,7 +52,7 @@
                         android:focusable="true"
                         android:onClick="openSearch"
                         android:src="@drawable/ic_search"
-                        android:title="Search" />
+                        android:title="@string/search" />
 
                 </RelativeLayout>
 

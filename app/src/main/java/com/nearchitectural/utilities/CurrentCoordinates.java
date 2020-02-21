@@ -4,10 +4,10 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Singleton class which stores and manipulates the user's current coordinates
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Singleton class which stores and manipulates the user's current coordinates
  */
 public class CurrentCoordinates implements Serializable {
 

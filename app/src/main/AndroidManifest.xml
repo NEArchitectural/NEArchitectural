@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="android.app.default_searchable"
-            android:value=".activities.SearchableActivity" />
+            android:value=".ui.activities.SearchableActivity" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -38,7 +38,8 @@
 
         <activity
             android:name=".ui.activities.MapsActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps"
+            android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,7 +47,8 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".ui.activities.SearchableActivity">
+        <activity android:name=".ui.activities.SearchableActivity"
+            android:configChanges="keyboardHidden|screenSize">
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />

@@ -4,10 +4,10 @@ import com.nearchitectural.utilities.models.Location;
 
 import java.util.Comparator;
 
-/** author Joel Bell-Wilding
- *  version 1.0
- *  since 11/02/20
- *  purpose: Compare locations by alphabetical order of name
+/* Author:  Joel Bell-Wilding
+ * Version: 1.0
+ * Since:   11/02/20
+ * Purpose: Compare locations by alphabetical order of name
  */
 public class AlphabeticComparator implements Comparator<Location> {
 

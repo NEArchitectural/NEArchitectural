@@ -14,10 +14,10 @@ import com.nearchitectural.ui.models.ListItemModel;
 import java.util.Comparator;
 import java.util.List;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: TODO: Fill in purpose
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: TODO: Fill in purpose
  */
 public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 

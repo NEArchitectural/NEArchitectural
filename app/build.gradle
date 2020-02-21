@@ -24,6 +24,11 @@ android {
 }
 
 dependencies {
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.2.0"
+    // LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata:2.2.0"
+    implementation 'android.arch.lifecycle:extensions:2.2.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.firebase:firebase-database:19.2.1'
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
@@ -38,7 +43,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.cardview:cardview:1.0.0"
     // For control over item selection of both touch and mouse driven selection
-    implementation "androidx.recyclerview:recyclerview-selection:1.1.0-beta01"
+    implementation "androidx.recyclerview:recyclerview-selection:1.1.0-rc01"
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.github.wrdlbrnft:sorted-list-adapter:0.2.0.1'
@@ -48,6 +53,8 @@ dependencies {
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
     implementation "com.android.support:support-annotations:28.0.0"
     annotationProcessor 'com.android.support:support-annotations:28.0.0'
+    // Heart button
+    implementation 'com.github.jd-alexander:LikeButton:0.2.3'
 }
 
 apply plugin: 'com.google.gms.google-services'

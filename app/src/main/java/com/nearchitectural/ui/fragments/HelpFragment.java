@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment;
 import com.nearchitectural.R;
 import com.nearchitectural.ui.activities.MapsActivity;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
  * purpose: TODO: Fill in purpose
  */
 public class HelpFragment extends Fragment {

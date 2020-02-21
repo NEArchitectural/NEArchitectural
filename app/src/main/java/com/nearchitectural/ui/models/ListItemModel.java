@@ -9,10 +9,10 @@ import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 import com.nearchitectural.utilities.models.Location;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Internally uses a Location object to model location information to be displayed visually
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Internally uses a Location object to model location information to be displayed visually
  */
 public class ListItemModel implements SortedListAdapter.ViewModel {
 
@@ -50,7 +50,11 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     }
 
     public String getLocationType() {
-        return locationInfo.getLocationType();
+        return locationInfo.getType();
+    }
+
+    public String getSummary() {
+        return locationInfo.getSummary();
     }
 
     // Getters for distance from user (double value and string representation)
@@ -68,6 +72,10 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
 
     public String getDistanceStringForListItem() {
         return distanceStringForListItem;
+    }
+
+    public long getLikes() {
+        return locationInfo.getLikes();
     }
 
     @Override
@@ -96,6 +104,5 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
                 .error(R.drawable.ic_launcher_background)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(imageView);
-
     }
 }

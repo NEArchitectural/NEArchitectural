@@ -1,7 +1,6 @@
 package com.nearchitectural.ui.fragments;
 
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,12 +33,15 @@ import com.nearchitectural.R;
 import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.CustomInfoWindowAdapter;
 import com.nearchitectural.utilities.CurrentCoordinates;
+import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.Settings;
+import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.models.Location;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Handles events and presentation related to the Google Maps section of the home screen
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Handles events and presentation related to the Google Maps section of the home screen
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -47,7 +49,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private MapView mapView; // View object displaying the map
     private GoogleMap googleMap; // Object representing the map itself
-    private FirebaseFirestore db; // The firebase database containing location information
+    private FirebaseFirestore db; // The Firebase database containing location information
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
     private FusedLocationProviderClient mFusedLocationProviderClient; // Used to get user's current location
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
@@ -84,7 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: found location! ");
-                            Location currentLocationFound = (Location) task.getResult();
+                            android.location.Location currentLocationFound = (android.location.Location) task.getResult();
                             if (currentLocationFound != null) {
                                 currentLocation = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
                                 CurrentCoordinates.setCoords(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
@@ -119,16 +121,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Instance of the db for requesting/updating data
         db = FirebaseFirestore.getInstance();
         // Check if the user has allowed us to use their location
-        if (parentActivity != null) {
-            mLocationPermissionsGranted = parentActivity.mLocationPermissionsGranted;
-        }
-        mLocationPermissionsGranted = Settings.getInstance().ismLocationPermissionsGranted();
+        mLocationPermissionsGranted = Settings.getInstance().isLocationPermissionsGranted();
+
+        // Whenever the map gets created - update the current location
         getDeviceLocation();
 
         // Set up the map
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
+
         // The first parameter means that the callback has been implemented in this class
         mapView.getMapAsync(this);
     }
@@ -174,17 +176,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new GoogleMap.OnInfoWindowClickListener() {
                     public void onInfoWindowClick(Marker marker) {
 
-                        LocationFragment lf = new LocationFragment();
-                        Bundle arguments = new Bundle();
-                        arguments.putString("placeName", marker.getTitle());
-                        lf.setArguments(arguments);
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, lf)
-                                .addToBackStack(LocationFragment.TAG)
-                                .commit();
+                        if (marker.getTitle() != null && !marker.getTitle().equals("Unknown")) {
+                            db.collection("locations").whereEqualTo("name", marker.getTitle())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
 
-                        /* Code to load DetailsPage for the place will sit here */
-                        MessageBox(marker.getTitle() + " was pressed!");
+                                                    Location location = DatabaseExtractor.extractLocation(document);
+
+                                                    LocationFragment lf = new LocationFragment(location);
+                                                    getActivity()
+                                                            .getSupportFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, lf)
+                                                            .addToBackStack(LocationFragment.TAG)
+                                                            .commit();
+
+
+                                                }
+                                            }
+                                        }
+                                    });
+                        } else if (marker.getSnippet() != null && !marker.getSnippet().equals("Unknown")) {
+                            db.collection("locations").whereEqualTo("summary", marker.getSnippet())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                                    Location location = DatabaseExtractor.extractLocation(document);
+
+                                                    LocationFragment lf = new LocationFragment(location);
+
+                                                    getActivity()
+                                                            .getSupportFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, lf)
+                                                            .addToBackStack(LocationFragment.TAG)
+                                                            .commit();
+                                                }
+                                            }
+                                        }
+                                    });
+                        } else {
+                            Location location = new Location(
+                                            "Unknown", "Unknown", 0,
+                                            0, "Unknown", "Unknown",
+                                            0, 0, new TagMapper().getTagValuesMap(),
+                                            "", "");
+
+                            LocationFragment lf = new LocationFragment(location);
+                            getActivity()
+                                    .getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, lf)
+                                    .addToBackStack(LocationFragment.TAG)
+                                    .commit();
+                        }
                     }
                 }
         );

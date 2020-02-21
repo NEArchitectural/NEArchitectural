@@ -26,18 +26,17 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Handles the retrieval of information for and rendering of a custom information
- * window on the Map Activity when a marker is tapped
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Handles the retrieval of information for and rendering of a custom information
+ *          window on the Map Activity when a marker is tapped
  */
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final String TAG = "CustomInfoWindowAdapter"; // Tag used for logging status of application
 
     private final View mWindow; // The window view itself
-    private final Context mContext; // The context (activity) in which to display
     private FirebaseFirestore db; // Database reference for retrieving information/image to display
     private ImageView thumbnailImage; // View holding the thumbnail image
     private String thumbnailURL; // The URL hosting the thumbnail image
@@ -52,7 +51,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     // Constructor initialises necessary attributes
     public CustomInfoWindowAdapter(Context mContext) {
-        this.mContext = mContext;
         db = FirebaseFirestore.getInstance();
         mWindow = LayoutInflater.from(mContext).inflate(R.layout.custom_info_panel, null);
     }
@@ -107,7 +105,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
             setThumbnailURL(thumbnailURL);
 
-            GlideApp.with(context)
+            GlideApp.with(context.getApplicationContext())
                     .load(thumbnailURL)
                     .override(300, 300)
                     .error(R.drawable.ic_launcher_background)

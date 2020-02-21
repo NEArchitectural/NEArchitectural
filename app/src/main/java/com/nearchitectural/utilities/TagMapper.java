@@ -5,11 +5,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**author: Joel Bell-Wilding
- * since: 07/02/20
- * version: 1.0
- * purpose: Utility class which stores mapping of Tag IDs, their state (active/inactive)
- * and display names for use when searching/applying via settings
+/* Author:  Joel Bell-Wilding
+ * Since:   07/02/20
+ * Version: 1.0
+ * Purpose: Utility class which stores mapping of Tag IDs, their state (active/inactive)
+ *          and display names for use when searching/applying via settings
  */
 public class TagMapper {
 
@@ -54,12 +54,12 @@ public class TagMapper {
 
     // Getter for map of Tag IDs to their respective state
     public Map<TagID, Boolean> getTagValuesMap() {
-        return tagValuesMap;
+        return new LinkedHashMap<>(tagValuesMap);
     }
 
     // Getter for map of Tag display names to their respective Tag IDs
     public Map<String, TagID> getTagDisplayNameMap() {
-        return tagDisplayNameMap;
+        return new LinkedHashMap<>(tagDisplayNameMap);
     }
 
     // Removes a tag from both internal maps

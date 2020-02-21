@@ -16,11 +16,11 @@ import com.nearchitectural.utilities.TagMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**author: Kristiyan Doykov, Joel Bell-Wilding
- * since: TODO: Fill in date
- * version: 1.1
- * purpose: Handle the activation/deactivation of additional dialogue box tags to apply locations
- * when using the search function
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+ * Since:   TODO: Fill in date
+ * Version: 1.1
+ * Purpose: Handle the activation/deactivation of additional dialogue box
+ *          tags to apply locations when using the search function
  */
 public class OptionsDialogFragment extends DialogFragment {
 
@@ -95,9 +95,9 @@ public class OptionsDialogFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface OptionsDialogListener {
-        public void onDialogPositiveClick(Bundle bundle);
+        void onDialogPositiveClick(Bundle bundle);
 
-        public void onDialogNegativeClick(Bundle bundle);
+        void onDialogNegativeClick(Bundle bundle);
     }
 
     // Use this instance of the interface to deliver action events

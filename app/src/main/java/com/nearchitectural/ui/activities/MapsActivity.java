@@ -3,6 +3,7 @@ package com.nearchitectural.ui.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivityMapsBinding;
 import com.nearchitectural.ui.fragments.AboutFragment;
@@ -31,11 +33,12 @@ import com.nearchitectural.ui.fragments.MapFragment;
 import com.nearchitectural.ui.fragments.SettingsFragment;
 import com.nearchitectural.ui.fragments.TimelineFragment;
 import com.nearchitectural.utilities.Settings;
+import com.nearchitectural.utilities.models.Location;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Handle events and presentation of locations on Maps home screen
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Handle events and presentation of locations on Maps home screen
  */
 public class MapsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -102,13 +105,14 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         Bundle bundle = intent.getExtras();
 
         if (bundle != null) {
-            if (bundle.get("openPlacePage") != null) {
-                LocationFragment lf = new LocationFragment();
-                Bundle arguments = new Bundle();
-                String placeName = bundle.getString("openPlacePage");
-                arguments.putString("placeName", placeName);
-                lf.setArguments(arguments);
-                bundle.remove("openPlacePage");
+            if (bundle.get("openLocationPage") != null) {
+                Gson gson = new Gson();
+                Location location = gson.fromJson(bundle.getString("location"),Location.class);
+                //  Create the new LocationFragment and set the location for the LocationFragment
+                LocationFragment lf = new LocationFragment(location);
+//                Bundle arguments = new Bundle();
+//                lf.setArguments(arguments);
+                bundle.remove("openLocationPage");
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         lf).commit();
             }
@@ -157,6 +161,12 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // do nothing, just override
+    }
+
     // Getter for navigationView
     public NavigationView getNavigationView() {
         return this.navigationView;
@@ -176,7 +186,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                     COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionsGranted = true;
-                Settings.getInstance().setmLocationPermissionsGranted(true);
+                Settings.getInstance().setLocationPermissionsGranted(true);
             } else {
                 ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
             }
@@ -236,7 +246,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         }
         return true;
     }
-
 
     /* On press of the magnifying glass open the search view */
     public void openSearch(View view) {

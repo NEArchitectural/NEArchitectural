@@ -2,10 +2,10 @@ package com.nearchitectural.utilities;
 
 import java.io.Serializable;
 
-/**author: Kristiyan Doykov
- * since: TODO: Fill in date
- * version: 1.0
- * purpose: Settings singleton class which stores and allows manipulation of application-wide settings
+/* Author:  Kristiyan Doykov
+ * Since:   TODO: Fill in date
+ * Version: 1.0
+ * Purpose: Settings singleton class which stores and allows manipulation of application-wide settings
  */
 public class Settings implements Serializable {
 
@@ -14,7 +14,7 @@ public class Settings implements Serializable {
     private static TagMapper activeTags;
     private static int fontSize;
     private double maxDistance;
-    private boolean mLocationPermissionsGranted;
+    private boolean locationPermissionsGranted;
 
     //private constructor
     private Settings() {
@@ -68,11 +68,11 @@ public class Settings implements Serializable {
         this.maxDistance = maxDistance;
     }
 
-    public boolean ismLocationPermissionsGranted() {
-        return mLocationPermissionsGranted;
+    public boolean isLocationPermissionsGranted() {
+        return locationPermissionsGranted;
     }
 
-    public void setmLocationPermissionsGranted(boolean mLocationPermissionsGranted) {
-        this.mLocationPermissionsGranted = mLocationPermissionsGranted;
+    public void setLocationPermissionsGranted(boolean locationPermissionsGranted) {
+        this.locationPermissionsGranted = locationPermissionsGranted;
     }
 }
