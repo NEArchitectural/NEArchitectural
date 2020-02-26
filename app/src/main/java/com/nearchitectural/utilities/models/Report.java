@@ -34,13 +34,15 @@ public class Report {
     }
 
     /* Concatenates all paragraphs together to produce a single text string
-     *containing the full report */
+     * containing the full report */
     public String getFullReport() {
-        String fullReport = "\n";
+        StringBuilder stringBuilder = new StringBuilder();
         for (String paragraph : paragraphs) {
-            fullReport += paragraph + "\n";
+            stringBuilder.append(paragraph);
+            stringBuilder.append("\n\n");
         }
-        return fullReport;
+        // Returns an empty string if report is empty (i.e. db retrieval failed)
+        return stringBuilder.length() == 0 ? "" : stringBuilder.substring(0, stringBuilder.length()-2); // Removes last two empty lines
     }
 
 }

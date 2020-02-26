@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.nearchitectural.databinding.ListItemBinding;
-import com.nearchitectural.ui.models.ListItemModel;
+import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,11 +17,12 @@ import java.util.List;
 /* Author:  Kristiyan Doykov
  * Since:   TODO: Fill in date
  * Version: 1.0
- * Purpose: TODO: Fill in purpose
+ * Purpose: Handles operations for the search results (i.e. a list of locations) for the search
+ *          activity
  */
-public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
+public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSearchResultViewHolder> {
 
-    private final SortedList<ListItemModel> mSortedList = new SortedList<>(ListItemModel.class, new SortedList.Callback<ListItemModel>() {
+    private final SortedList<LocationModel> mSortedList = new SortedList<>(LocationModel.class, new SortedList.Callback<LocationModel>() {
 
         @Override
         public void onInserted(int position, int count) {
@@ -39,7 +40,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
         }
 
         @Override
-        public int compare(ListItemModel o1, ListItemModel o2) {
+        public int compare(LocationModel o1, LocationModel o2) {
             return mComparator.compare(o1, o2);
         }
 
@@ -49,48 +50,48 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
         }
 
         @Override
-        public boolean areContentsTheSame(ListItemModel oldItem, ListItemModel newItem) {
+        public boolean areContentsTheSame(LocationModel oldItem, LocationModel newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(ListItemModel item1, ListItemModel item2) {
+        public boolean areItemsTheSame(LocationModel item1, LocationModel item2) {
             return item1.getLocationInfo().getId().equals(item2.getLocationInfo().getId());
         }
     });
 
-    private LayoutInflater mInflater;
-    private Comparator<ListItemModel> mComparator;
+    private LayoutInflater mInflater; // Handles inflating the search results to the UI
+    private Comparator<LocationModel> mComparator; // Comparator used to sort the location models
 
-    public ListItemAdapter(Context context, Comparator<ListItemModel> comparator) {
-        mInflater = LayoutInflater.from(context);
-        mComparator = comparator;
+    public LocationSearchResultAdapter(Context context, Comparator<LocationModel> comparator) {
+        this.mInflater = LayoutInflater.from(context);
+        this.mComparator = comparator;
     }
 
-    public void add(ListItemModel model) {
+    public void add(LocationModel model) {
         mSortedList.add(model);
     }
 
-    public void remove(ListItemModel model) {
+    public void remove(LocationModel model) {
         mSortedList.remove(model);
     }
 
-    public void add(List<ListItemModel> models) {
+    public void add(List<LocationModel> models) {
         mSortedList.addAll(models);
     }
 
-    public void remove(List<ListItemModel> models) {
+    public void remove(List<LocationModel> models) {
         mSortedList.beginBatchedUpdates();
-        for (ListItemModel model : models) {
+        for (LocationModel model : models) {
             mSortedList.remove(model);
         }
         mSortedList.endBatchedUpdates();
     }
 
-    public void replaceAll(List<ListItemModel> models) {
+    public void replaceAll(List<LocationModel> models) {
         mSortedList.beginBatchedUpdates();
         for (int i = mSortedList.size() - 1; i >= 0; i--) {
-            final ListItemModel model = mSortedList.get(i);
+            final LocationModel model = mSortedList.get(i);
             if (!models.contains(model)) {
                 mSortedList.remove(model);
             }
@@ -101,14 +102,14 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 
     @NonNull
     @Override
-    public ListItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public LocationSearchResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final ListItemBinding binding = ListItemBinding.inflate(mInflater, parent, false);
-        return new ListItemViewHolder(binding);
+        return new LocationSearchResultViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(ListItemViewHolder holder, int position) {
-        final ListItemModel model = mSortedList.get(position);
+    public void onBindViewHolder(LocationSearchResultViewHolder holder, int position) {
+        final LocationModel model = mSortedList.get(position);
         holder.performBind(model);
     }
 

@@ -12,9 +12,10 @@ import com.nearchitectural.utilities.models.Location;
 /* Author:  Kristiyan Doykov
  * Since:   TODO: Fill in date
  * Version: 1.0
- * Purpose: Internally uses a Location object to model location information to be displayed visually
+ * Purpose: Internally uses a Location object to model location information to be adapted
+ *          for a given layout
  */
-public class ListItemModel implements SortedListAdapter.ViewModel {
+public class LocationModel implements SortedListAdapter.ViewModel {
 
     // Location object containing all info for a given location
     private final Location locationInfo;
@@ -22,7 +23,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
     private double mDistanceFromCurrentPosInMeters; // Distance from user's current location
     private String distanceStringForListItem; // String representation of distance from user
 
-    public ListItemModel(Location locationInfo, double mDistanceFromCurrentPosInMeters) {
+    public LocationModel(Location locationInfo, double mDistanceFromCurrentPosInMeters) {
 
         final int KILOMETER_CONVERSION = 1000;
         this.locationInfo = locationInfo;
@@ -62,10 +63,6 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         return mDistanceFromCurrentPosInMeters;
     }
 
-    public void setMDistanceFromCurrentPosInMeters(double distanceFromCurrentPosInMeters) {
-        this.mDistanceFromCurrentPosInMeters = distanceFromCurrentPosInMeters;
-    }
-
     public String getThumbnailURL() {
         return locationInfo.getThumbnailURL();
     }
@@ -83,7 +80,7 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ListItemModel model = (ListItemModel) o;
+        LocationModel model = (LocationModel) o;
 
         return locationInfo.equals(o) && distanceStringForListItem.equals(model.distanceStringForListItem);
     }
@@ -95,12 +92,13 @@ public class ListItemModel implements SortedListAdapter.ViewModel {
         return result;
     }
 
-    // Loads image associated with Location List Item Model
+    // Loads thumbnail image associated with Location
     @BindingAdapter({"thumbnail"})
     public static void loadImage(ImageView imageView, String imageURL) {
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
                 .override(500, 500)
+                .centerCrop()
                 .error(R.drawable.ic_launcher_background)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(imageView);

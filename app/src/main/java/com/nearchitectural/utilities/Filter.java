@@ -2,7 +2,7 @@ package com.nearchitectural.utilities;
 
 import android.util.Log;
 
-import com.nearchitectural.ui.models.ListItemModel;
+import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +19,15 @@ public class Filter {
     private final static int KILOMETER_CONVERSION = 1000;
 
     /* Filter the locations from the database according to user input (search text and distance/filters) */
-    public static List<ListItemModel> apply(List<ListItemModel> models, String query,
+    public static List<LocationModel> apply(List<LocationModel> models, String query,
                                             double distanceSelected, Map<TagID, Boolean> activeTags) {
 
         final String lowerCaseQuery = query.toLowerCase();
 
-        final List<ListItemModel> filteredModelList = new ArrayList<>();
+        final List<LocationModel> filteredModelList = new ArrayList<>();
 
         // Cycles through all locations and adds to list if within search criteria
-        for (ListItemModel model : models) {
+        for (LocationModel model : models) {
 
             final String titleText = model.getLocationInfo().getName().toLowerCase();
             final String placeTypeText = model.getLocationInfo().getType().toLowerCase();
@@ -53,10 +53,10 @@ public class Filter {
         }
         Log.d(TAG, "Filtering current distance: " + distanceSelected * KILOMETER_CONVERSION);
 
-        List<ListItemModel> nonMatchModels = new ArrayList<>();
+        List<LocationModel> nonMatchModels = new ArrayList<>();
 
         // Cycles through all locations and removes any without the applied tags
-        for (ListItemModel model: filteredModelList) {
+        for (LocationModel model: filteredModelList) {
 
             for (TagID tag: TagID.values()) {
 

@@ -48,6 +48,7 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/thumbnail"
                 android:layout_below="@+id/location_type" />
 
 
@@ -58,13 +59,14 @@
                 android:layout_below="@id/thumbnail"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/general_information"
                 android:textColor="@color/colorPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/reportText"
+                android:id="@+id/report_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/general_info_heading"
@@ -78,7 +80,7 @@
                 android:textSize="16sp" />
 
             <LinearLayout
-                android:id="@+id/filterBox"
+                android:id="@+id/filter_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/location_type"
@@ -94,43 +96,47 @@
                 android:orientation="vertical"
                 android:textAlignment="viewStart">
 
-
                 <TextView
-                    android:id="@+id/wheelChairTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-
-                <TextView
-                    android:id="@+id/childTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/cheapTag"
+                    android:id="@+id/tag_one"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
+                    android:layout_marginBottom="5dp"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/freeTag"
+                    android:id="@+id/tag_two"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="5dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tag_three"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/all_tags"
+                    android:layout_width="30dp"
+                    android:layout_height="36dp"
+                    android:paddingBottom="5dp"
+                    android:paddingRight="8dp"
+                    android:paddingLeft="0dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:contentDescription="@string/all_tags_button"
+                    android:src="@drawable/ic_arrow_down"
+                    android:tint="@color/black" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
                     android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal"
                     android:textAlignment="center">
 
@@ -159,14 +165,13 @@
 
                 </LinearLayout>
 
-
             </LinearLayout>
 
             <TextView
                 android:id="@+id/photos_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/reportText"
+                android:layout_below="@id/report_text"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
@@ -232,7 +237,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="References text placeholder"
+                android:text="@string/reference_placeholder"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 

@@ -31,14 +31,14 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
 import com.nearchitectural.ui.activities.MapsActivity;
-import com.nearchitectural.ui.adapters.CustomInfoWindowAdapter;
+import com.nearchitectural.ui.adapters.MapMarkerWindowAdapter;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.TagMapper;
 import com.nearchitectural.utilities.models.Location;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   TODO: Fill in date
  * Version: 1.0
  * Purpose: Handles events and presentation related to the Google Maps section of the home screen
@@ -56,7 +56,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LatLng currentLocation; // User's current location
     // The default location used in cases where user's actual location cannot be determined
     private static final LatLng DEFAULT_LOCATION = new LatLng(54.9695, -1.6074);
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,12 +114,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Set up map fragment using Map Activity information
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
         parentActivity.setActionBarTitle("Map");
-        // Instance of the db for requesting/updating data
-        db = FirebaseFirestore.getInstance();
-        // Check if the user has allowed us to use their location
+
+        db = FirebaseFirestore.getInstance(); // Instance of the db for requesting/updating data
+
+        // Check if the user has allowed us to use their location from settings
         mLocationPermissionsGranted = Settings.getInstance().isLocationPermissionsGranted();
 
         // Whenever the map gets created - update the current location
@@ -158,7 +160,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-
     /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -170,74 +171,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onMapReady(GoogleMap map) {
-        googleMap = map;
 
+        googleMap = map;
+        // Opens a location page when a location info-window is tapped
         googleMap.setOnInfoWindowClickListener(
                 new GoogleMap.OnInfoWindowClickListener() {
                     public void onInfoWindowClick(Marker marker) {
-
-                        if (marker.getTitle() != null && !marker.getTitle().equals("Unknown")) {
-                            db.collection("locations").whereEqualTo("name", marker.getTitle())
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                                    Location location = DatabaseExtractor.extractLocation(document);
-
-                                                    LocationFragment lf = new LocationFragment(location);
-                                                    getActivity()
-                                                            .getSupportFragmentManager()
-                                                            .beginTransaction()
-                                                            .replace(R.id.fragment_container, lf)
-                                                            .addToBackStack(LocationFragment.TAG)
-                                                            .commit();
-
-
-                                                }
-                                            }
-                                        }
-                                    });
-                        } else if (marker.getSnippet() != null && !marker.getSnippet().equals("Unknown")) {
-                            db.collection("locations").whereEqualTo("summary", marker.getSnippet())
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                                    Location location = DatabaseExtractor.extractLocation(document);
-
-                                                    LocationFragment lf = new LocationFragment(location);
-
-                                                    getActivity()
-                                                            .getSupportFragmentManager()
-                                                            .beginTransaction()
-                                                            .replace(R.id.fragment_container, lf)
-                                                            .addToBackStack(LocationFragment.TAG)
-                                                            .commit();
-                                                }
-                                            }
-                                        }
-                                    });
-                        } else {
-                            Location location = new Location(
-                                            "Unknown", "Unknown", 0,
-                                            0, "Unknown", "Unknown",
-                                            0, 0, new TagMapper().getTagValuesMap(),
-                                            "", "");
-
-                            LocationFragment lf = new LocationFragment(location);
-                            getActivity()
-                                    .getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.fragment_container, lf)
-                                    .addToBackStack(LocationFragment.TAG)
-                                    .commit();
-                        }
+                        openLocationFragment(marker);
                     }
                 }
         );
@@ -249,55 +189,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         googleMap.getUiSettings().setTiltGesturesEnabled(true);
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
 
-        // Get all places from db and set a marker foreach here
-         /* TODO: Get the settings currently applied from the Settings singleton and
-             only add the necessary locations to the map that answer the criteria
-              (e.g. maximum distance from current location, child friendly,
-               wheelchair accessible locations only and so on) by calling the calculateDistance()
-                method on each location before adding it to the map*/
-        db.collection("locations")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-
-//                                if (DistanceCalculator.calculateDistance(currentLocation.latitude,
-//                                        (double) document.getData().get("latitude"),
-//                                        currentLocation.longitude,
-//                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
-//                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
-//                                }
-
-                                // Gather only information needed for marker
-                                String name = document.getData().get("name") == null ?
-                                        "Unknown" : (String) document.getData().get("name");
-
-                                String summary = document.getData().get("summary") == null ?
-                                        "Unknown" : (String) document.getData().get("summary");
-
-                                double latitude = document.getData().get("latitude") == null ?
-                                        0 : (double) document.getData().get("latitude");
-
-                                double longitude = document.getData().get("longitude") == null ?
-                                        0 : (double) document.getData().get("longitude");
-
-                                // Only add a marker if name and coordinates are identified (since both are necessary)
-                                if (!(name.equals("Unknown") || (latitude == 0 && longitude == 0))) {
-                                    googleMap.addMarker(new MarkerOptions().flat(false)
-                                            .position(new LatLng(latitude, longitude))
-                                            .title(name)
-                                            .snippet(summary));
-                                }
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+        addAllMarkers(); // Adds a marker for every location in the database
 
         googleMap.setMyLocationEnabled(true);
 
@@ -319,12 +211,83 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.setMargins(0, 0, 0, 80);
 
         /* Set the map to use our custom info window */
-        googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
+        googleMap.setInfoWindowAdapter(new MapMarkerWindowAdapter(getActivity()));
 
         /* Get the device's location again to update the current coordinates */
         getDeviceLocation();
     }
 
+    private void addAllMarkers() {
+        // Get all locations from database and set a marker for each
+         /* TODO: Get the settings currently applied from the Settings singleton and
+             only add the necessary locations to the map that answer the criteria
+              (e.g. maximum distance from current location, child friendly,
+               wheelchair accessible locations only and so on) by calling the calculateDistance()
+                method on each location before adding it to the map*/
+        db.collection("locations")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            // Cycles through all location documents in database and adds a map marker
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+//                                if (DistanceCalculator.calculateDistance(currentLocation.latitude,
+//                                        (double) document.getData().get("latitude"),
+//                                        currentLocation.longitude,
+//                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
+//                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
+//                                }
+
+                                // Creates a marker using database extractor
+                                MarkerOptions marker = DatabaseExtractor.extractMapMarker(document);
+                                // If retrieval of info from database is successful, adds new marker to map
+                                if (marker != null)
+                                    googleMap.addMarker(marker);
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    // Opens a new location fragment for the location corresponding to the provided marker
+    private void openLocationFragment(Marker marker) {
+
+        // Attempts to retrieve location from database
+        db.collection("locations").whereEqualTo("name", marker.getTitle())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        // Instantiates selected location to a default location of empty/unknown fields
+                        Location selectedLocation = new Location(
+                                "Unknown", "Unknown", 0,
+                                0, "Unknown", "Unknown",
+                                0, 0, new TagMapper().getTagValuesMap(),
+                                "", "");
+
+                        // Retrieves location from database and sets it as location to pass to fragment
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                selectedLocation = DatabaseExtractor.extractLocation(document);
+                            }
+                        }
+
+                        // Creates a new location fragment and opens it
+                        LocationFragment lf = new LocationFragment(selectedLocation);
+                        getActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, lf)
+                                .addToBackStack(LocationFragment.TAG)
+                                .commit();
+                    }
+                });
+    }
 
     /* Message bubble */
     private void MessageBox(String message) {

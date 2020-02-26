@@ -16,14 +16,14 @@ import java.util.ArrayList;
 /* Author:  Kristiyan Doykov
  * Since:   TODO: Fill in date
  * Version: 1.0
- * Purpose: TODO: Fill in purpose
+ * Purpose: Handles the displaying of slideshow images on the Location page
  */
-public class ViewPagerAdapter extends PagerAdapter {
+public class LocationSlideshowAdapter extends PagerAdapter {
 
     private Context context;
-    private ArrayList<String> imageURLs;
+    private ArrayList<String> imageURLs; // The list of URLs for images to be displayed
 
-    public ViewPagerAdapter(Context context, ArrayList<String> imageURLs) {
+    public LocationSlideshowAdapter(Context context, ArrayList<String> imageURLs) {
         this.context = context;
         this.imageURLs = imageURLs;
     }
@@ -38,11 +38,13 @@ public class ViewPagerAdapter extends PagerAdapter {
         return view == object;
     }
 
+    // Creates the next image to be displayed and returns it
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageView imageView = new ImageView(context);
 
+        // Formats and places the current image being viewed into an image view
         GlideApp.with(context)
                 .load(imageURLs.get(position))
                 .override(400, 400)

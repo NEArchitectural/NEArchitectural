@@ -1,7 +1,8 @@
 package com.nearchitectural.utilities.models;
-
 import com.nearchitectural.utilities.TagID;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
@@ -11,8 +12,6 @@ import java.util.Map;
  */
 public class Location {
 
-    /* TODO: Update Location constructor to use all attributes (potentially make all
-        attributes but likes immutable) */
     private final String id; // Unique ID String for a given location
     private String name; // Location name
     private int yearOpened; // year location was opened initially
@@ -73,6 +72,17 @@ public class Location {
         return tags;
     }
 
+    // Returns only active tags from tags list
+    public List<TagID> getActiveTags() {
+        List<TagID> activeTags = new ArrayList<>();
+        for (TagID tag : tags.keySet()) {
+            if (tags.get(tag))
+                activeTags.add(tag);
+        }
+        return activeTags;
+    }
+
+    // Returns a boolean representing if a tag is active or not when provided with TagID
     public Boolean getTagValue(TagID tagID) {
         return tags.get(tagID);
     }

@@ -23,17 +23,18 @@ import java.util.List;
 /* Author:  Kristiyan Doykov
  * Since:   TODO: Fill in date
  * Version: 1.0
- * Purpose: TODO: Fill in purpose
+ * Purpose: Acts as a model which holds the list of search results (i.e. a list of locations models)
+ *          to be adapted and displayed on the UI
  */
-public class SearchableActivityViewModel extends ViewModel {
+public class SearchResultsModel extends ViewModel {
 
-    private FirebaseFirestore db;
     private static final String TAG = "SAViewModel";
-    private ArrayList<Location> locationsToShowList;
-    private ArrayList<ListItemModel> mModelsList;
-    private MutableLiveData<List<Location>> locations;
-    private MutableLiveData<List<ListItemModel>> models;
+    private ArrayList<Location> locationsToShow; // List of locations to be displayed in results
+    private ArrayList<LocationModel> locationModelsList; // List of models corresponding to location
+    private MutableLiveData<List<Location>> locations; // Observes the state of the locations list
+    private MutableLiveData<List<LocationModel>> locationModels; // Observes the state of the models list
 
+    // Returns the list of locations to show
     public LiveData<List<Location>> getLocationsToShow() {
         if (locations == null) {
             locations = new MutableLiveData<>();
@@ -42,20 +43,24 @@ public class SearchableActivityViewModel extends ViewModel {
         return locations;
     }
 
-    public LiveData<List<ListItemModel>> getmModels() {
-        if (models == null) {
-            models = new MutableLiveData<>();
+    // Returns the list of location models to be displayed
+    public LiveData<List<LocationModel>> getLocationModels() {
+        if (locationModels == null) {
+            locationModels = new MutableLiveData<>();
             loadLocationsAndCreateModels();
         }
-        return models;
+        return locationModels;
     }
 
+    // Retrieves locations from the database and creates the models as needed
     private void loadLocationsAndCreateModels() {
 
-        db = FirebaseFirestore.getInstance();
-        locationsToShowList = new ArrayList<>();
-        mModelsList = new ArrayList<>();
+        // Initialises database and lists to hold location and model data
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        locationsToShow = new ArrayList<>();
+        locationModelsList = new ArrayList<>();
 
+        // Creates location and models from database and posts each to their respective lists
         db.collection("locations")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -67,24 +72,25 @@ public class SearchableActivityViewModel extends ViewModel {
 
                                 // For each location create a new Location instance and add it to the list
                                 Location locationTemp = DatabaseExtractor.extractLocation(document);
+                                locationsToShow.add(locationTemp);
 
-                                locationsToShowList.add(locationTemp);
-
+                                // Find current distance between user and location
                                 double distanceToUser = DistanceCalculator.calculateDistance(
                                         CurrentCoordinates.getCoords().latitude, locationTemp.getLatitude(),
                                         CurrentCoordinates.getCoords().longitude, locationTemp.getLongitude());
 
-                                mModelsList.add(new ListItemModel(locationTemp, distanceToUser));
+                                // Create location model from location object and distance to user
+                                locationModelsList.add(new LocationModel(locationTemp, distanceToUser));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
-                            models.postValue(mModelsList);
-                            locations.postValue(locationsToShowList);
+                            locationModels.postValue(locationModelsList); // Post model to model list
+                            locations.postValue(locationsToShow); // Post location to location list
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
-                            locationsToShowList = new ArrayList<>();
-                            locations.postValue(locationsToShowList);
-                            mModelsList = new ArrayList<>();
-                            models.postValue(mModelsList);
+                            locationsToShow = new ArrayList<>();
+                            locations.postValue(locationsToShow);
+                            locationModelsList = new ArrayList<>();
+                            locationModels.postValue(locationModelsList);
                         }
                     }
                 });

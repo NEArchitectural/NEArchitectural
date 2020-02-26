@@ -32,29 +32,26 @@ import com.nearchitectural.R;
  * Purpose: Handles the retrieval of information for and rendering of a custom information
  *          window on the Map Activity when a marker is tapped
  */
-public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
-    private final String TAG = "CustomInfoWindowAdapter"; // Tag used for logging status of application
+    private final String TAG = "MapMarkerWindowAdapter"; // Tag used for logging status of application
 
-    private final View mWindow; // The window view itself
+    private final View window; // The window view itself
     private FirebaseFirestore db; // Database reference for retrieving information/image to display
     private ImageView thumbnailImage; // View holding the thumbnail image
     private String thumbnailURL; // The URL hosting the thumbnail image
-
-    public String getThumbnailURL() {
-        return thumbnailURL;
-    }
 
     private void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
     }
 
     // Constructor initialises necessary attributes
-    public CustomInfoWindowAdapter(Context mContext) {
+    public MapMarkerWindowAdapter(Context mContext) {
         db = FirebaseFirestore.getInstance();
-        mWindow = LayoutInflater.from(mContext).inflate(R.layout.custom_info_panel, null);
+        window = LayoutInflater.from(mContext).inflate(R.layout.custom_info_panel, null);
     }
 
+    // Renders a window containing the location title and summary for the selected marker
     private void renderWindowText(final Marker marker, final View view) {
 
         String title = marker.getTitle(); // Get marker title (location name)
@@ -97,16 +94,19 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         thumbnailImage.setContentDescription(title);
     }
 
+    // Handles the displaying of the thumbnail image associated with the location
     private void displayImage(@NonNull Task<QuerySnapshot> task, Context context, final Marker marker) {
 
         for (QueryDocumentSnapshot document : task.getResult()) {
 
+            // Get thumbnail URL from database
             thumbnailURL = (String) document.getData().get("thumbnail");
-
             setThumbnailURL(thumbnailURL);
 
+            // Display and render thumbnail as an image inside window using URL
             GlideApp.with(context.getApplicationContext())
                     .load(thumbnailURL)
+                    .centerCrop()
                     .override(300, 300)
                     .error(R.drawable.ic_launcher_background)
                     .signature(new ObjectKey(thumbnailURL.hashCode()))
@@ -131,13 +131,13 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     @Override
     public View getInfoWindow(Marker marker) {
-        renderWindowText(marker, mWindow);
-        return mWindow;
+        renderWindowText(marker, window);
+        return window;
     }
 
     @Override
     public View getInfoContents(Marker marker) {
-        renderWindowText(marker, mWindow);
-        return mWindow;
+        renderWindowText(marker, window);
+        return window;
     }
 }

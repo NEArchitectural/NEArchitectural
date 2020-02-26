@@ -6,7 +6,7 @@
 
         <variable
             name="model"
-            type="com.nearchitectural.ui.models.ListItemModel" />
+            type="com.nearchitectural.ui.models.LocationModel" />
 
     </data>
 

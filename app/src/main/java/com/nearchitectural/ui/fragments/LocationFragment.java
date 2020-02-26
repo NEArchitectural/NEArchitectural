@@ -1,7 +1,7 @@
 package com.nearchitectural.ui.fragments;
 
+import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,56 +29,51 @@ import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.FragmentLocationBinding;
 import com.nearchitectural.ui.activities.MapsActivity;
-import com.nearchitectural.ui.adapters.ViewPagerAdapter;
+import com.nearchitectural.ui.adapters.AllTagsAdapter;
+import com.nearchitectural.ui.adapters.LocationSlideshowAdapter;
 import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   TODO: Fill in date
- * Version: 1.0
+ * Version: 1.1
  * purpose: Presents information and images regarding a given location
  */
 public class LocationFragment extends Fragment {
     public static final String TAG = "LocationFragment";
 
-    private String name;
+    // Binding between location fragment and layout
     FragmentLocationBinding locationBinding;
 
+    // LAYOUT ELEMENTS
+    private List<TextView> tagsTextViews; // List of text views for important tags
     private ImageView thumbnail;
     private TextView title;
     private TextView locationType;
     private TextView summary;
+    private ImageView allTagsIcon;
     private TextView referencesHeading;
     private TextView referencesBody;
-    private TextView wheelChairTag;
-    private TextView childFriendlyTag;
-    private TextView cheapTag;
-    private TextView freeTag;
-    private TextView reportText;
-    private String reportTextString;
     private TextView likesCount;
-    private Drawable ic_accessible;
-    private Drawable ic_child;
-    private Drawable ic_cheap;
-    private Drawable ic_free;
-    private ViewPager slideshow;
+    private TextView reportText;
     private Button navigateButton;
     private Button showReferencesButton;
-    private ViewPagerAdapter viewPagerAdapter;
-    private com.like.LikeButton likeButton;
-    // Arguments that came in with the intent
-    private Bundle arguments;
-    // Database reference field
-    private FirebaseFirestore db;
+    private LikeButton likeButton;
+    private ViewPager slideshow;
 
-    // Location object to contain all the info
-    private Location location;
-    private Report locationReport;
+    private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
+    private Bundle arguments; // Arguments that came in with the intent
+    private FirebaseFirestore db;// Database reference field
+    private Location location;// Location object to contain all the info
+    private Report locationReport; // Report object to contain full location report and slideshow images
 
     public LocationFragment(Location location) {
         this.location = location;
@@ -86,45 +82,44 @@ public class LocationFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         // Initialize the arguments field with what came in from the previous activity
         arguments = getArguments();
 
+        // Data binding
         locationBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_location, container, false);
+        locationBinding.setModel(location); // Set selected location as data binding model
+
+        // Bind layout elements
+        thumbnail = locationBinding.thumbnail;
+        title = locationBinding.title;
+        locationType = locationBinding.locationType;
+        tagsTextViews = new ArrayList<>();
+        tagsTextViews.add(locationBinding.tagOne);
+        tagsTextViews.add(locationBinding.tagTwo);
+        tagsTextViews.add(locationBinding.tagThree);
+        allTagsIcon = locationBinding.allTags;
+        referencesHeading = locationBinding.referencesHeading;
+        showReferencesButton = locationBinding.showReferencesButton;
+        referencesBody = locationBinding.references;
+        likesCount = locationBinding.likesCount;
+        navigateButton = locationBinding.navigateButton;
+        slideshow = locationBinding.slideshow;
+        likeButton = locationBinding.likeButton;
 
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
 
-        // Get data for location here -> db call or passed in in the Bundle
+        /* Get an instance of the database in order to
+         retrieve/update the data for the specific location */
+        db = FirebaseFirestore.getInstance();
+        getLocationReport();
 
-        locationBinding.setModel(location);
-
-        thumbnail = locationBinding.thumbnail;
-
-        title = locationBinding.title;
-
-        locationType = locationBinding.locationType;
-
-        wheelChairTag = locationBinding.wheelChairTag;
-
-        childFriendlyTag = locationBinding.childTag;
-
-        cheapTag = locationBinding.cheapTag;
-
-        freeTag = locationBinding.freeTag;
-
-        reportText = locationBinding.reportText;
-
-        referencesHeading = locationBinding.referencesHeading;
-
-        referencesBody = locationBinding.references;
-
+        // Hides references by default
         referencesBody.setVisibility(View.GONE);
-
         referencesHeading.setVisibility(View.GONE);
-
-        showReferencesButton = locationBinding.showReferencesButton;
-
         showReferencesButton.setTransformationMethod(null);
 
+        // Listener for toggling between showing references and hiding them
         showReferencesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,20 +135,8 @@ public class LocationFragment extends Fragment {
             }
         });
 
-        ic_accessible = getResources().getDrawable(R.drawable.ic_accessible);
-
-        ic_child = getResources().getDrawable(R.drawable.ic_child_friendly);
-
-        ic_cheap = getResources().getDrawable(R.drawable.ic_cheap);
-
-        ic_free = getResources().getDrawable(R.drawable.ic_free);
-
-        likesCount = locationBinding.likesCount;
-
-        navigateButton = locationBinding.navigateButton;
-
         /* These lines are for navigating through Google maps forcefully
-         * will be used when someone presses "Take me here" button or whatever we call it */
+         * will be used when someone presses "Take me here" button */
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,108 +147,60 @@ public class LocationFragment extends Fragment {
                 startActivity(mapIntent);
             }
         });
-
         navigateButton.setTransformationMethod(null);
 
-        slideshow = locationBinding.slideshow;
-
-        /* Get an instance of the database in order to
-         retrieve/update the data for the specific location */
-        db = FirebaseFirestore.getInstance();
-
-        getLocationReport();
-
-        likeButton = locationBinding.likeButton;
-
+        // Listener for liking or unliking a location
         likeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-                final long[] likes = new long[1];
+                // Increments value of likes attribute for location document in database
                 db.collection("locations")
-                        .document(location.getId())
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    if (task.getResult() != null) {
-                                        likes[0] = (long) task.getResult().getData().get("likes");
-                                        db.collection("locations")
-                                                .document(location.getId())
-                                                .update("likes", likes[0] + 1)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        likesCount.setText(String.valueOf(likes[0] + 1));
-                                                    }
-                                                });
-                                    }
-                                }
-                            }
-                        });
-
-
+                    .document(location.getId())
+                    .update("likes", location.getLikes()+1)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            /* If database update is successful, add like to
+                            location object and update value on UI */
+                            location.addLike();
+                            likesCount.setText(String.valueOf(location.getLikes()));
+                        }
+                    });
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
-                final long[] likes = new long[1];
+                // Decrements value of likes attribute for location document in database
                 db.collection("locations")
                         .document(location.getId())
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        .update("likes", location.getLikes()-1)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    if (task.getResult() != null) {
-                                        likes[0] = (long) task.getResult().getData().get("likes");
-                                        db.collection("locations")
-                                                .document(location.getId())
-                                                .update("likes", likes[0] - 1)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        likesCount.setText(String.valueOf(likes[0] - 1));
-                                                    }
-                                                });
-                                    }
-                                }
+                            public void onComplete(@NonNull Task<Void> task) {
+                                /* If database update is successful, remove like from
+                                location object and update value on UI */
+                                location.removeLike();
+                                likesCount.setText(String.valueOf(location.getLikes()));
                             }
                         });
             }
         });
 
-        if (location.getTagValue(TagID.WHEELCHAIR_ACCESSIBLE)) {
-            wheelChairTag.setText(R.string.wheelChair_accessibility_text);
-            wheelChairTag.setCompoundDrawablesWithIntrinsicBounds(ic_accessible, null, null, null);
-        } else {
-            wheelChairTag.setVisibility(View.GONE);
-        }
+        displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
 
-        if (location.getTagValue(TagID.CHILD_FRIENDLY)) {
-            childFriendlyTag.setText(R.string.child_friendly_text);
-            childFriendlyTag.setCompoundDrawablesWithIntrinsicBounds(ic_child, null, null, null);
-        } else {
-            childFriendlyTag.setVisibility(View.GONE);
-        }
+        // Adds a listener for clicking the additional tags arrows
+        allTagsIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAllFilters();
+            }
+        });
 
-        if (location.getTagValue(TagID.CHEAP_ENTRY)) {
-            cheapTag.setText(R.string.cheap_entry_text);
-            cheapTag.setCompoundDrawablesWithIntrinsicBounds(ic_cheap, null, null, null);
-        } else {
-            cheapTag.setVisibility(View.GONE);
-        }
-
-        if (location.getTagValue(TagID.FREE_ENTRY)) {
-            freeTag.setText(R.string.free_entry_text);
-            freeTag.setCompoundDrawablesWithIntrinsicBounds(ic_free, null, null, null);
-        } else {
-            freeTag.setVisibility(View.GONE);
-        }
-
+        // Displays location thumbnail
         GlideApp.with(parentActivity)
                 .load(location.getThumbnailURL())
-                .override(600, 600)
+                .centerCrop()
+                .override(525, 525)
                 .error(R.drawable.ic_launcher_background)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(thumbnail);
@@ -279,9 +214,9 @@ public class LocationFragment extends Fragment {
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         // Set the title of the action bar
         parentActivity.setActionBarTitle("Details");
-
     }
 
+    // Getter and setter for location
     public Location getLocation() {
         return location;
     }
@@ -290,6 +225,31 @@ public class LocationFragment extends Fragment {
         this.location = location;
     }
 
+    // Displays up to three active high priority tags alongside thumbnail image
+    private void displayImportantTags(Map<TagID, Boolean> tagValues) {
+        // Cycle through each text view and set text to tag value and icon
+        for (TextView tagTextView : tagsTextViews) {
+            for (TagID tag : TagID.values())
+                if (tagValues.get(tag)) {
+                    tagTextView.setText(tag.displayName);
+                    // Get icon associated with tag
+                    int iconID = getResources().getIdentifier(tag.iconName , "drawable", getActivity().getPackageName());
+                    tagTextView.setCompoundDrawablesWithIntrinsicBounds(iconID, 0, 0, 0);
+                    tagValues.put(tag, false); // Flag that tag no longer needs to be displayed
+                    break;
+                }
+            // Hide text view if less than three tags are active
+            if (tagTextView.getText().equals("")) {
+                tagTextView.setVisibility(View.GONE);
+            }
+        }
+        // Hide "more tags" button if exactly three tags are active
+        if (!tagValues.values().contains(true)) {
+            allTagsIcon.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    // Retrieves location report from database and displays on UI
     private void getLocationReport() {
         db.collection("reports")
                 .document(location.getReportID())
@@ -298,30 +258,45 @@ public class LocationFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
+                            // Set up binding for location info once report is retrieved
                             locationReport = DatabaseExtractor.extractReport(task.getResult());
+                            locationBinding.setReport(locationReport);
+                            reportText = locationBinding.reportText;
 
-                            if (!locationReport.getParagraphs().isEmpty()) {
-
-                                StringBuilder sBuilder = new StringBuilder();
-                                sBuilder.append("\n");
-                                for (String paragraph : locationReport.getParagraphs()) {
-                                    sBuilder.append(paragraph + "\n\n");
-                                }
-
-                                reportTextString = sBuilder.toString();
-                                reportTextString = reportTextString.substring(0, reportTextString.length()-2);
-                                reportText.setText(reportTextString);
-
-                            } else {
+                            // Hides report text if database retrieval failed
+                            if (locationReport.getParagraphs().isEmpty()) {
                                 reportText.setVisibility(View.GONE);
                             }
 
-                            viewPagerAdapter = new ViewPagerAdapter(LocationFragment.this.getContext(), new ArrayList<>(locationReport.getSlideshowURLs()));
-                            slideshow.setAdapter(viewPagerAdapter);
+                            // Set up adapter for slideshow once slideshow URLs are retrieved
+                            locationSlideshowAdapter = new LocationSlideshowAdapter(LocationFragment.this.getContext(), new ArrayList<>(locationReport.getSlideshowURLs()));
+                            slideshow.setAdapter(locationSlideshowAdapter);
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
                         }
                     }
                 });
+    }
+
+    /* Handle the popup for showing all tags - taken and adapted
+    * from the following link: https://mkyong.com/android/android-custom-dialog-example/ */
+    private void showAllFilters() {
+        // Create a custom dialog
+        final Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.all_tags_dialog);
+
+        // Use custom adapter to display all active tags and icons
+        ListView listOfTags = dialog.findViewById(R.id.all_tags_list);
+        listOfTags.setAdapter(new AllTagsAdapter(getContext(), location.getActiveTags()));
+
+        Button dialogButton = dialog.findViewById(R.id.dialog_button_ok);
+        // If button is clicked, close the custom dialog
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 }

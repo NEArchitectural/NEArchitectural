@@ -19,9 +19,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.nearchitectural.R;
@@ -37,19 +37,19 @@ import com.nearchitectural.utilities.models.Location;
 
 /* Author:  Kristiyan Doykov
  * Since:   TODO: Fill in date
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Handle events and presentation of locations on Maps home screen
  */
 public class MapsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MapActivity"; // Tag used for logging status of application
 
-    private DrawerLayout drawer; // Layout showing the sidebar menu
+    // LAYOUT ELEMENTS
     private ActivityMapsBinding mapsBinding; // Binding between to the maps activity layout
+    private DrawerLayout drawer; // Layout showing the sidebar menu
     private NavigationView navigationView; // View containing the drawer menu
     private TextView actionBarTitle; // Title for activity
     private FragmentManager fragmentManager; // Utility for switching between fragments
-    private LatLng currentLocation; // User's current location
 
     // Boolean representing whether location permissions have been granted
     public Boolean mLocationPermissionsGranted;
@@ -69,9 +69,8 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Needed for switching back and forth between the different fragments
         fragmentManager = getSupportFragmentManager();
 
-        Toolbar toolbar = mapsBinding.toolbar;
-
         // Set the action bar (top bar)
+        Toolbar toolbar = mapsBinding.toolbar;
         setSupportActionBar(toolbar);
         toolbar.bringToFront();
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -104,61 +103,43 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
+        Fragment fragmentToOpen = new MapFragment(); // Fragment to be opened based on user's choice
+
         if (bundle != null) {
+            // Handles opening a location page
             if (bundle.get("openLocationPage") != null) {
                 Gson gson = new Gson();
-                Location location = gson.fromJson(bundle.getString("location"),Location.class);
-                //  Create the new LocationFragment and set the location for the LocationFragment
-                LocationFragment lf = new LocationFragment(location);
-//                Bundle arguments = new Bundle();
-//                lf.setArguments(arguments);
-                bundle.remove("openLocationPage");
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        lf).commit();
-            }
-            // Check if the user tried to open one of the fragments from the Searchable Activity
-            else if (bundle.getString("openFragment") != null) {
+                Location location = gson.fromJson(bundle.getString("location"), Location.class);
+                fragmentToOpen = new LocationFragment(location);
+            } else if (bundle.getString("openFragment") != null) {
+                // Check if the user tried to open one of the fragments from the Searchable Activity
                 String fragment = bundle.getString("openFragment");
+                bundle.remove("openFragment");
                 switch (fragment) {
                     case "Map":
-                        bundle.remove("openFragment");
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, new MapFragment())
-                                .commit();
+                        fragmentToOpen = new MapFragment();
                         break;
                     case "Settings":
-                        bundle.remove("openFragment");
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, new SettingsFragment())
-                                .commit();
+                        fragmentToOpen = new SettingsFragment();
                         break;
                     case "About":
-                        bundle.remove("openFragment");
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, new AboutFragment())
-                                .commit();
+                        fragmentToOpen = new AboutFragment();
                         break;
                     case "Help":
-                        bundle.remove("openFragment");
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, new HelpFragment())
-                                .commit();
+                        fragmentToOpen = new HelpFragment();
                         break;
                     case "Timeline":
-                        bundle.remove("openFragment");
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, new TimelineFragment())
-                                .commit();
+                        fragmentToOpen = new TimelineFragment();
                         break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + fragment);
                 }
-
-            } else {
-                /* If no place page or menu item needs to be opened, do the default
-                - launch the map fragment */
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new MapFragment()).commit();
             }
-        } else {
-            /* Same as before, but this is for when the bundle is null, a.k.a no arguments were
-             * provided when launching this activity */
-            fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                    new MapFragment()).commit();
         }
+
+        // Opens the appropriate fragment (Map by default)
+        fragmentManager.beginTransaction().replace(R.id.fragment_container,
+                fragmentToOpen).commit();
     }
 
     @Override
@@ -215,35 +196,33 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+
             case R.id.nav_timeline:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new TimelineFragment()).addToBackStack(TimelineFragment.TAG).commit();
-                drawer.closeDrawer(GravityCompat.START);
                 break;
+
             case R.id.nav_map:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new MapFragment()).addToBackStack(MapFragment.TAG).commit();
-                drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_settings:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new SettingsFragment()).addToBackStack(SettingsFragment.TAG).commit();
-                drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_info:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new AboutFragment()).addToBackStack(AboutFragment.TAG).commit();
-                drawer.closeDrawer(GravityCompat.START);
                 break;
 
             case R.id.nav_help:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
                         new HelpFragment()).addToBackStack(HelpFragment.TAG).commit();
-                drawer.closeDrawer(GravityCompat.START);
                 break;
         }
+        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -251,7 +230,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     public void openSearch(View view) {
         Intent myIntent = new Intent(MapsActivity.this, SearchableActivity.class);
         /* Optional key value pairs if you need to provide info to the Search view*/
-        myIntent.putExtra("key", "value");
+        //myIntent.putExtra("key", "value");
         MapsActivity.this.startActivity(myIntent);
     }
 }
