@@ -3,4 +3,24 @@
     <string name="title_activity_maps">NE Architectural</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="wheelChair_accessibility_text">Wheelchair accessible</string>
+    <string name="cheap_entry_text">Cheap entry</string>
+    <string name="free_entry_text">No entry fee</string>
+    <string name="child_friendly_text">Suitable for children</string>
+    <string name="general_information">General Information</string>
+    <string name="photos">Photos</string>
+    <string name="take_me_here">Take me here!</string>
+    <string name="like_button_text">I like this place</string>
+    <string name="show_references">Show references</string>
+    <string name="references">References</string>
+    <string name="hide_references">Hide references</string>
+    <string name="search">Search</string>
+    <string name="show_all_tags">Showing All Tags</string>
+    <string name="launcher_logo">Launcher Logo</string>
+    <string name="close">Close</string>
+    <string name="thumbnail">Location Thumbnail</string>
+    <string name="all_tags_button">Show All Tags Button</string>
+    <string name="reference_placeholder">No References To Display</string>
+    <string name="search_actionBar_title">Search</string>
+    <string name="slider_unset_text">Use slider to adjust maximum distance</string>
 </resources>

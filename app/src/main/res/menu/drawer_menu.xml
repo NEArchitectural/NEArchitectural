@@ -3,16 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
     <group android:checkableBehavior="single">
+
+        <item android:id="@+id/nav_map"
+            android:icon="@drawable/ic_map"
+            android:title="Map" />
         <item
             android:id="@+id/nav_timeline"
             android:icon="@drawable/ic_timeline"
-            android:onClick="openTimeline"
             android:title="Timeline" />
 
         <item android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings"
-            android:onClick="openSettings"
-            android:title="Settings"/>
+            android:title="Settings" />
 
+        <item android:id="@+id/nav_info"
+            android:icon="@drawable/ic_info"
+            android:title="About" />
+
+        <item android:id="@+id/nav_help"
+            android:icon="@drawable/ic_help"
+            android:title="Help" />
     </group>
 </menu>

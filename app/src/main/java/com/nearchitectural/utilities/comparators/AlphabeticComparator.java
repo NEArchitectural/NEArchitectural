@@ -1,0 +1,19 @@
+package com.nearchitectural.utilities.comparators;
+
+import com.nearchitectural.utilities.models.Location;
+
+import java.util.Comparator;
+
+/* Author:  Joel Bell-Wilding
+ * Version: 1.0
+ * Since:   11/02/20
+ * Purpose: Compare locations by alphabetical order of name
+ */
+public class AlphabeticComparator implements Comparator<Location> {
+
+    @Override
+    public int compare(Location firstLocation, Location secondLocation) {
+        return firstLocation.getName().compareToIgnoreCase(secondLocation.getName());
+    }
+
+}
