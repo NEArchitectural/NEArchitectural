@@ -30,14 +30,13 @@
                     android:background="@color/colorPrimary">
 
                     <TextView
+                        android:id="@+id/action_bar_title"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:id="@+id/action_bar_title"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textAlignment="center"
                         android:layout_marginTop="14dp"
-                        android:textColor="@color/white"/>
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
                     <ImageView
                         android:id="@+id/toolbar_search"
@@ -52,7 +51,7 @@
                         android:focusable="true"
                         android:onClick="openSearch"
                         android:src="@drawable/ic_search"
-                        android:title="Search" />
+                        android:title="@string/search" />
 
                 </RelativeLayout>
 

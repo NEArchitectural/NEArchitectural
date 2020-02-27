@@ -30,7 +30,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginTop="14dp"
-                    android:textAlignment="center"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -49,7 +48,6 @@
                     android:layout_marginTop="10dp"
                     android:background="@color/grey"
                     android:orientation="vertical">
-
 
                     <LinearLayout
                         android:id="@+id/filters"
@@ -108,7 +106,7 @@
                                     android:layout_marginTop="0dp"
                                     android:layout_marginEnd="5dp"
                                     android:layout_marginRight="5dp"
-                                    android:onClick="openOptions"
+                                    android:onClick="openMoreFilters"
                                     android:paddingTop="10dp"
                                     android:src="@drawable/ic_arrow_down"
                                     android:tint="@color/black" />
@@ -138,14 +136,27 @@
                                 android:id="@+id/seekbar_progress"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
                                 android:textAlignment="center"
-                                android:textSize="16sp"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
 
                         </LinearLayout>
 
 
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/results_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/places_list"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/places_list"

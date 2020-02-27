@@ -14,4 +14,13 @@
     <string name="show_references">Show references</string>
     <string name="references">References</string>
     <string name="hide_references">Hide references</string>
+    <string name="search">Search</string>
+    <string name="show_all_tags">Showing All Tags</string>
+    <string name="launcher_logo">Launcher Logo</string>
+    <string name="close">Close</string>
+    <string name="thumbnail">Location Thumbnail</string>
+    <string name="all_tags_button">Show All Tags Button</string>
+    <string name="reference_placeholder">No References To Display</string>
+    <string name="search_actionBar_title">Search</string>
+    <string name="slider_unset_text">Use slider to adjust maximum distance</string>
 </resources>

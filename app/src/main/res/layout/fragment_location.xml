@@ -6,7 +6,11 @@
 
         <variable
             name="model"
-            type="com.nearchitectural.models.Location" />
+            type="com.nearchitectural.utilities.models.Location" />
+
+        <variable
+            name="report"
+            type="com.nearchitectural.utilities.models.Report" />
 
     </data>
 
@@ -37,13 +41,14 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/title"
                 android:layout_marginBottom="10dp"
-                android:text="@{model.locationType}"
+                android:text="@{model.type}"
                 android:textSize="14sp" />
 
             <ImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/thumbnail"
                 android:layout_below="@+id/location_type" />
 
 
@@ -53,50 +58,29 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/thumbnail"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/general_information"
                 android:textColor="@color/colorPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/firstParagraph"
+                android:id="@+id/report_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/general_info_heading"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="10dp"
-                android:text="@{model.firstParagraph}"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/secondParagraph"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/firstParagraph"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="10dp"
-                android:text="@{model.secondParagraph}"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/thirdParagraph"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/secondParagraph"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="10dp"
-                android:text="@{model.thirdParagraph}"
-                android:textAlignment="center"
+                android:text="@{report.fullReport}"
+                android:textAlignment="textStart"
+                android:layout_gravity="start"
+                android:justificationMode="inter_word"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
             <LinearLayout
-                android:id="@+id/filterBox"
+                android:id="@+id/filter_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/location_type"
@@ -112,57 +96,51 @@
                 android:orientation="vertical"
                 android:textAlignment="viewStart">
 
-
                 <TextView
-                    android:id="@+id/wheelChairTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-
-                <TextView
-                    android:id="@+id/childTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/cheapTag"
+                    android:id="@+id/tag_one"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/freeTag"
+                    android:id="@+id/tag_two"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
                     android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tag_three"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/all_tags"
+                    android:layout_width="30dp"
+                    android:layout_height="36dp"
+                    android:paddingBottom="5dp"
+                    android:paddingRight="8dp"
+                    android:paddingLeft="0dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:contentDescription="@string/all_tags_button"
+                    android:src="@drawable/ic_arrow_down"
+                    android:tint="@color/black" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:gravity="center_horizontal"
+                    android:gravity="start"
                     android:orientation="horizontal"
-                    android:textAlignment="center">
+                    android:textAlignment="viewStart">
 
-                    <TextView
-                        android:id="@+id/likes_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="3dp"
-                        android:text="@{String.valueOf(model.likes)}"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+
 
                     <com.like.LikeButton
                         android:id="@+id/like_button"
@@ -175,8 +153,19 @@
                         app:like_drawable="@drawable/ic_liked"
                         app:unlike_drawable="@drawable/ic_unliked" />
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/likes_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="3dp"
+                        android:text="@{String.valueOf(model.likes)}"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -184,7 +173,7 @@
                 android:id="@+id/photos_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/thirdParagraph"
+                android:layout_below="@id/report_text"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
@@ -250,7 +239,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="References text placeholder"
+                android:text="@string/reference_placeholder"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
