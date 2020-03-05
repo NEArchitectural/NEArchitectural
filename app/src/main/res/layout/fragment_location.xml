@@ -48,8 +48,8 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/thumbnail"
-                android:layout_below="@+id/location_type" />
+                android:layout_below="@+id/location_type"
+                android:contentDescription="@string/thumbnail" />
 
 
             <TextView
@@ -71,11 +71,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/general_info_heading"
                 android:layout_centerHorizontal="true"
+                android:layout_gravity="start"
                 android:layout_marginBottom="10dp"
+                android:justificationMode="inter_word"
                 android:text="@{report.fullReport}"
                 android:textAlignment="textStart"
-                android:layout_gravity="start"
-                android:justificationMode="inter_word"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
@@ -100,16 +100,16 @@
                     android:id="@+id/tag_one"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
                     android:layout_marginBottom="10dp"
+                    android:textColor="@color/black"
                     android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/tag_two"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
                     android:layout_marginBottom="10dp"
+                    android:textColor="@color/black"
                     android:textSize="16sp" />
 
                 <TextView
@@ -124,12 +124,12 @@
                     android:id="@+id/all_tags"
                     android:layout_width="30dp"
                     android:layout_height="36dp"
-                    android:paddingBottom="5dp"
-                    android:paddingRight="8dp"
+                    android:contentDescription="@string/all_tags_button"
+                    android:paddingStart="0dp"
                     android:paddingLeft="0dp"
                     android:paddingEnd="8dp"
-                    android:paddingStart="0dp"
-                    android:contentDescription="@string/all_tags_button"
+                    android:paddingRight="8dp"
+                    android:paddingBottom="5dp"
                     android:src="@drawable/ic_arrow_down"
                     android:tint="@color/black" />
 
@@ -139,7 +139,6 @@
                     android:gravity="start"
                     android:orientation="horizontal"
                     android:textAlignment="viewStart">
-
 
 
                     <com.like.LikeButton
@@ -239,7 +238,10 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="@string/reference_placeholder"
+                android:justificationMode="inter_word"
+                android:textIsSelectable="true"
+                android:autoLink="web"
+                android:text="@{report.fullReferences}"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
