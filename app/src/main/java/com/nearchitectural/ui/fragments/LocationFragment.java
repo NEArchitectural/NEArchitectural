@@ -233,7 +233,8 @@ public class LocationFragment extends Fragment {
                 if (tagValues.get(tag)) {
                     tagTextView.setText(tag.displayName);
                     // Get icon associated with tag
-                    int iconID = getResources().getIdentifier(tag.iconName, "drawable", getActivity().getPackageName());
+                    int iconID = getResources()
+                            .getIdentifier(tag.iconName, "drawable", getActivity().getPackageName());
                     tagTextView.setCompoundDrawablesWithIntrinsicBounds(iconID, 0, 0, 0);
                     tagValues.put(tag, false); // Flag that tag no longer needs to be displayed
                     break;
@@ -263,14 +264,14 @@ public class LocationFragment extends Fragment {
                             locationBinding.setReport(locationReport);
                             reportText = locationBinding.reportText;
 
-                            // Hides report text if database retrieval failed
-                            if (locationReport.getParagraphs().isEmpty()) {
-                                reportText.setVisibility(View.GONE);
-                            }
-
                             // Set up adapter for slideshow once slideshow URLs are retrieved
-                            locationSlideshowAdapter = new LocationSlideshowAdapter(LocationFragment.this.getContext(), new ArrayList<>(locationReport.getSlideshowURLs()));
+                            locationSlideshowAdapter =
+                                    new LocationSlideshowAdapter(
+                                            LocationFragment.this.getContext(),
+                                            new ArrayList<>(locationReport.getSlideshowURLs())
+                                    );
                             slideshow.setAdapter(locationSlideshowAdapter);
+
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
                         }
