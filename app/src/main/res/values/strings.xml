@@ -23,4 +23,6 @@
     <string name="reference_placeholder">No References To Display</string>
     <string name="search_actionBar_title">Search</string>
     <string name="slider_unset_text">Use slider to adjust maximum distance</string>
+    <string name="cardbackground">CardBackground</string>
+    <string name="castletest">castleTest</string>
 </resources>

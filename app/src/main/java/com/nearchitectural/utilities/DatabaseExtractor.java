@@ -27,16 +27,18 @@ public class DatabaseExtractor {
         String id = document.getId();
         ArrayList<String> paragraphs = new ArrayList<>();
         ArrayList<String> slideshowURLs = new ArrayList<>();
+        ArrayList<String> references = new ArrayList<>();
 
         if (document.getData() != null) {
             paragraphs = (ArrayList<String>) document.getData().get("paragraphs");
             slideshowURLs = (ArrayList<String>) document.getData().get("slideshowURLs");
+            references = (ArrayList<String>) document.getData().get(("references"));
         }
 
         Log.d(TAG, document.getId() + " => " + document.getData());
 
         // All the information about the current location
-        return new Report(id, paragraphs, slideshowURLs);
+        return new Report(id, paragraphs, slideshowURLs, references);
     }
 
     // Takes necessary fields from the database location document and converts them to a Map Marker
