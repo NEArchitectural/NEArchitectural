@@ -30,4 +30,28 @@
         android:cropToPadding="false"
         android:scaleType="centerInside"
         app:srcCompat="@drawable/newcastlecastle" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/cardBackground"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginRight="9dp"
+        android:background="#FFFFFF"
+        app:srcCompat="@drawable/rightarrow" />
+
+    <ImageButton
+        android:id="@+id/imageButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/cardBackground"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="-26dp"
+        android:background="@color/white"
+        app:srcCompat="@drawable/leftarrow" />
 </RelativeLayout>

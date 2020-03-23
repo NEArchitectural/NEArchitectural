@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.like.LikeButton;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
+import com.nearchitectural.databinding.FragmentLocationBinding;
 import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.LocationSlideshowAdapter;
 import com.nearchitectural.utilities.models.Location;
@@ -33,18 +34,11 @@ import java.util.List;
  */
 public class TimelineFragment extends Fragment {
 
+    public static final String TAG = "TimelineFragment";
 
     private ImageView thumbnail;
-
-    private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
-    private Bundle arguments; // Arguments that came in with the intent
-    private FirebaseFirestore db;// Database reference field
-    private Location location;// Location object to contain all the info
-    private Report locationReport; // Report object to contain full location report and slideshow images
-
-
-
-    public static final String TAG = "TimelineFragment";
+    private TextView title;
+    private FirebaseFirestore db; // Represents the database storing location information
 
     @Nullable
     @Override
