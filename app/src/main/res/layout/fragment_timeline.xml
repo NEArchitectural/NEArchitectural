@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/cardBackground"
-        android:layout_width="336dp"
-        android:layout_height="574dp"
+        android:layout_width="311dp"
+        android:layout_height="561dp"
         android:layout_alignWithParentIfMissing="false"
         android:layout_alignParentStart="false"
         android:layout_alignParentLeft="false"
@@ -23,8 +23,9 @@
 
     <ImageView
         android:id="@+id/castleTest"
-        android:layout_width="271dp"
-        android:layout_height="478dp"
+        android:layout_width="260dp"
+        android:layout_height="391dp"
+        android:layout_above="@id/divider"
         android:layout_centerInParent="true"
         android:contentDescription="@string/castletest"
         android:cropToPadding="false"
@@ -32,7 +33,7 @@
         app:srcCompat="@drawable/newcastlecastle" />
 
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/rightarrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@id/cardBackground"
@@ -42,16 +43,56 @@
         android:layout_centerInParent="true"
         android:layout_marginRight="9dp"
         android:background="#FFFFFF"
-        app:srcCompat="@drawable/rightarrow" />
+        android:contentDescription="@string/arrow_to_go_right"
+        app:srcCompat="@drawable/rightarrow"
+        android:layout_alignEnd="@id/cardBackground"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="9dp" />
 
     <ImageButton
-        android:id="@+id/imageButton2"
+        android:id="@+id/leftarrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@id/cardBackground"
         android:layout_centerInParent="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginLeft="-26dp"
         android:background="@color/white"
-        app:srcCompat="@drawable/leftarrow" />
+        android:contentDescription="@string/arrow_to_go_left"
+        app:srcCompat="@drawable/leftarrow"
+        android:layout_alignStart="@id/cardBackground"
+        android:layout_marginStart="-26dp" />
+
+    <TextView
+        android:id="@+id/timelineTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/castleTest"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"
+        android:text="@string/textview" />
+
+    <TextView
+        android:id="@+id/timelineSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/castleTest"
+        android:layout_centerInParent="true"
+        android:text="@string/textview" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignBottom="@id/cardBackground"
+        android:layout_marginBottom="121dp"
+        android:background="?android:attr/listDivider" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/castleTest"
+        android:layout_marginBottom="-497dp"
+        android:background="?android:attr/listDivider" />
 </RelativeLayout>

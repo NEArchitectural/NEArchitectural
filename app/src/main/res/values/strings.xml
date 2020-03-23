@@ -25,4 +25,8 @@
     <string name="slider_unset_text">Use slider to adjust maximum distance</string>
     <string name="cardbackground">CardBackground</string>
     <string name="castletest">castleTest</string>
+    <string name="arrow_to_go_right">Arrow to go right</string>
+    <string name="arrow_to_go_left">Arrow to go left</string>
+    <string name="textview">TextView</string>
+    <string name="textview">TextView</string>
 </resources>
