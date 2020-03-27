@@ -1,4 +1,5 @@
 package com.nearchitectural.utilities.models;
+
 /* Author:  James Allwood-Panter
  * Since:   24/03/20
  * Version: 1.0
@@ -41,4 +42,5 @@ public class TimeLine  {
 
     public String getSummaryTimeLine() {
         return summaryTimeLine; }
+
 }
