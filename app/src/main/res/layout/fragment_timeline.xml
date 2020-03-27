@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white" >
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+
+        <variable
+            name="model"
+            type="com.nearchitectural.utilities.models.TimeLine" />
+
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+         >
+
+
+
 
     <ImageView
         android:id="@+id/cardBackground"
@@ -54,14 +68,15 @@
         android:id="@+id/leftarrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignStart="@id/cardBackground"
         android:layout_alignLeft="@id/cardBackground"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="-26dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="-36dp"
+        android:layout_marginLeft="-36dp"
         android:background="@color/white"
         android:contentDescription="@string/arrow_to_go_left"
-        app:srcCompat="@drawable/leftarrow"
-        android:layout_alignStart="@id/cardBackground"
-        android:layout_marginStart="-26dp" />
+        app:srcCompat="@drawable/leftarrow" />
 
     <TextView
         android:id="@+id/timelineTitle"
@@ -70,7 +85,7 @@
         android:layout_above="@id/castleTest"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="0dp"
-        android:text="@string/textview" />
+        android:text="@{model.name}" />
 
     <TextView
         android:id="@+id/timelineSummary"
@@ -78,7 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/castleTest"
         android:layout_centerInParent="true"
-        android:text="@string/textview" />
+        android:text="@{model.summaryTimeLine}"/>
 
     <View
         android:id="@+id/divider"
@@ -95,4 +110,24 @@
         android:layout_above="@id/castleTest"
         android:layout_marginBottom="-497dp"
         android:background="?android:attr/listDivider" />
-</RelativeLayout>
+
+        <TextView
+            android:id="@+id/yearOpened"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/divider3"
+            android:layout_centerHorizontal="true"
+            android:text="@{model.yearOpenedString}" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="?android:attr/listDivider" />
+    </RelativeLayout>
+
+
+
+</layout>
+
