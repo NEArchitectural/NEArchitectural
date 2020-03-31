@@ -48,11 +48,10 @@ public class LocationSlideshowAdapter extends PagerAdapter {
         GlideApp.with(context)
                 .load(imageURLs.get(position))
                 .override(400, 400)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.mipmap.ic_launcher_round)
                 .into(imageView);
 
         container.addView(imageView);
-
         return imageView;
     }
 

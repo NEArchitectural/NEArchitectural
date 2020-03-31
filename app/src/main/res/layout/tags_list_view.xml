@@ -10,6 +10,6 @@
         android:layout_centerHorizontal="true"
         android:singleLine="true"
         android:padding="5dp"
-        android:textSize="18sp" />
+        android:textSize="?attr/font_medium" />
 
 </RelativeLayout>

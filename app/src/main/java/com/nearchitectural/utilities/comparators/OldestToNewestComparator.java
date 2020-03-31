@@ -1,6 +1,6 @@
 package com.nearchitectural.utilities.comparators;
 
-import com.nearchitectural.utilities.models.Location;
+import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.Comparator;
 
@@ -9,10 +9,10 @@ import java.util.Comparator;
  * Since:   11/02/20
  * Purpose: Compare locations by oldest to newest (opening date)
  */
-public class OldestToNewestComparator implements Comparator<Location> {
+public class OldestToNewestComparator implements Comparator<LocationModel> {
 
     @Override
-    public int compare(Location firstLocation, Location secondLocation) {
-        return secondLocation.getYearOpened() - firstLocation.getYearOpened();
+    public int compare(LocationModel firstLocation, LocationModel secondLocation) {
+        return secondLocation.getLocationInfo().getYearOpened() - firstLocation.getLocationInfo().getYearOpened();
     }
 }

@@ -22,5 +22,42 @@
     <string name="all_tags_button">Show All Tags Button</string>
     <string name="reference_placeholder">No References To Display</string>
     <string name="search_actionBar_title">Search</string>
+    <string name="slider_max_distance">Showing locations over 10 %1$s</string>
+    <string name="slider_distance">Showing locations within %1$d %2$s</string>
     <string name="slider_unset_text">Use slider to adjust maximum distance</string>
+    <plurals name="search_results_count">
+        <item quantity="one">1 Result</item>
+        <item quantity="other">%d Results</item>
+    </plurals>
+    <string name="font_size_string">Font Size</string>
+    <string name="slider_disabled">Please enable location for distance filtering</string>
+    <string name="slider_enabled">Showing all Locations</string>
+    <string name="gps_network_not_enabled_title">Location Services Not Enabled</string>
+    <string name="gps_network_not_enabled">Location services are not enabled. Please enable your location services to use location features.</string>
+    <string name="open_location_settings">Open Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="search_icon">Magnifying glass/Search Icon</string>
+    <string name="liked_locations_icon">Liked Locations Icon</string>
+    <string name="wheelchair_accessible_icon">Wheelchair Accessible Icon</string>
+    <string name="more_tags_icon">More Tags Icon</string>
+    <string name="location_thumbnail">Location Thumbnail</string>
+    <string name="font_size_small">Small</string>
+    <string name="font_size_medium">Medium</string>
+    <string name="font_size_large">Large</string>
+    <string name="location_enabled">Location Enabled</string>
+    <string name="app_wide_filters">Application-wide Location Filters</string>
+    <string name="select_tags">Select Tags</string>
+    <string name="distance_unit">Distance Unit</string>
+    <string name="kilometers">Kilometers</string>
+    <string name="miles">Miles</string>
+
+    <!--Settings keys-->
+    <string name="settings_file_key">com.nearchitectural.SETTINGS_FILE_KEY</string>
+    <string name="settings_file_exists">com.nearchitectural.SETTINGS_EXISTS</string>
+    <string name="settings_font_size">com.nearchitectural.SETTINGS_FONT_SIZE</string>
+    <string name="settings_distance_unit">com.nearchitectural.SETTINGS_DISTANCE_UNIT</string>
+    <string name="settings_active_tags">com.nearchitectural.SETTINGS_ACTIVE_TAGS</string>
+    <string name="settings_liked_locations">com.nearchitectural.SETTINGS_LIKED_LOCATIONS</string>
+    <string name="settings_location_permissions_granted">com.nearchitectural.SETTINGS_LOCATION_PERMISSIONS</string>
+    <string name="settings_max_distance">com.nearchitectural.SETTINGS_MAX_DISTANCE</string>
 </resources>

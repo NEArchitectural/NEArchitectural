@@ -1,13 +1,11 @@
 package com.nearchitectural.utilities;
 
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /* Author:  Joel Bell-Wilding
  * Since:   07/02/20
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Utility class which stores mapping of Tag IDs, their state (active/inactive)
  *          and display names for use when searching/applying via settings
  */
@@ -17,12 +15,6 @@ public class TagMapper {
     private Map<TagID, Boolean> tagValuesMap;
     // Map of Tag Display Names (presented on UI) to Tag IDs
     private Map<String, TagID> tagDisplayNameMap;
-
-    // Constructor for creating a duplicate tag mapper
-    public TagMapper(TagMapper tagMapper) {
-        this.tagValuesMap = new LinkedHashMap<>(tagMapper.getTagValuesMap());
-        this.tagDisplayNameMap = new LinkedHashMap<>(tagMapper.getTagDisplayNameMap());
-    }
 
     // Constructor for tag mapper with default false values (i.e. no tags set)
     public TagMapper() {
@@ -38,7 +30,7 @@ public class TagMapper {
     }
 
     // Constructor for tag mapper with values read in from database (i.e. location specific set tags)
-    public TagMapper(QueryDocumentSnapshot document) {
+    public TagMapper(String locationID, Map<String, Object> document) {
 
         tagValuesMap = new LinkedHashMap<>();
         tagDisplayNameMap = new LinkedHashMap<>();
@@ -46,10 +38,13 @@ public class TagMapper {
         // Reads values from database for a given location and sets tags to appropriate boolean value
         for (TagID tag : TagID.values()) {
             tagValuesMap.put(tag,
-                    document.getData().get(tag.databaseReference) != null
-                            && (boolean) document.getData().get(tag.databaseReference));
+                    document.get(tag.databaseReference) != null
+                            && (boolean) document.get(tag.databaseReference));
             tagDisplayNameMap.put(tag.displayName, tag);
         }
+
+        // If location is liked, set tag in the tag mapper
+        tagValuesMap.put(TagID.LIKED_BY_YOU, Settings.getInstance().locationIsLiked(locationID));
     }
 
     // Getter for map of Tag IDs to their respective state
@@ -73,5 +68,4 @@ public class TagMapper {
         tagValuesMap.put(tag, isActive);
         tagDisplayNameMap.put(tag.displayName, tag);
     }
-
 }

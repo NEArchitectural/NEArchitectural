@@ -1,6 +1,6 @@
 package com.nearchitectural.utilities.comparators;
 
-import com.nearchitectural.utilities.models.Location;
+import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.Comparator;
 
@@ -9,11 +9,10 @@ import java.util.Comparator;
  * Since:   11/02/20
  * Purpose: Compare locations by alphabetical order of name
  */
-public class AlphabeticComparator implements Comparator<Location> {
+public class AlphabeticComparator implements Comparator<LocationModel> {
 
     @Override
-    public int compare(Location firstLocation, Location secondLocation) {
-        return firstLocation.getName().compareToIgnoreCase(secondLocation.getName());
+    public int compare(LocationModel firstLocation, LocationModel secondLocation) {
+        return firstLocation.getTitle().compareToIgnoreCase(secondLocation.getTitle());
     }
-
 }

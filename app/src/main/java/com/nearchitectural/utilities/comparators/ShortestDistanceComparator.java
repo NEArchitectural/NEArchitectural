@@ -13,8 +13,8 @@ public class ShortestDistanceComparator implements Comparator<LocationModel> {
 
     @Override
     public int compare(LocationModel firstModel, LocationModel secondModel) {
-        if (firstModel.getMDistanceFromCurrentPosInMeters() == secondModel.getMDistanceFromCurrentPosInMeters())
+        if (firstModel.getMDistanceFromCurrentPos() == secondModel.getMDistanceFromCurrentPos())
             return 0;
-        return firstModel.getMDistanceFromCurrentPosInMeters() > secondModel.getMDistanceFromCurrentPosInMeters() ? 1 : -1;
+        return firstModel.getMDistanceFromCurrentPos() > secondModel.getMDistanceFromCurrentPos() ? 1 : -1;
     }
 }

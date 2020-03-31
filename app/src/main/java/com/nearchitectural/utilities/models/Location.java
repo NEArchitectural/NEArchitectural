@@ -1,4 +1,5 @@
 package com.nearchitectural.utilities.models;
+
 import com.nearchitectural.utilities.TagID;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class Location {
         this.name = name;
         this.yearOpened = yearOpened;
         // Setting yearOpened String to BC or AC depending on if year opened is negative
-        this.yearOpenedString = yearOpened < 0 ? yearOpened + "BC" : yearOpened + "AC";
+        this.yearOpenedString = yearOpened < 0 ? yearOpened + " BC" : yearOpened < 1000 ? yearOpened + " AD" : String.valueOf(yearOpened);
         this.likes = likes;
         this.type = type;
         this.summary = summary;

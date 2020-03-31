@@ -2,6 +2,7 @@ package com.nearchitectural.ui.activities;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -21,83 +22,86 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.Slider;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivitySearchBinding;
 import com.nearchitectural.databinding.ActivitySearchLandscapeBinding;
 import com.nearchitectural.ui.adapters.LocationSearchResultAdapter;
-import com.nearchitectural.ui.fragments.OptionsDialogFragment;
+import com.nearchitectural.ui.fragments.TagSelectorFragment;
 import com.nearchitectural.ui.models.LocationModel;
 import com.nearchitectural.ui.models.SearchResultsModel;
-import com.nearchitectural.utilities.DatabaseExtractor;
+import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Filter;
+import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.comparators.AlphabeticComparator;
 import com.nearchitectural.utilities.comparators.ShortestDistanceComparator;
 import com.nearchitectural.utilities.models.Location;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /* Author:  Kristyan Doykov, Joel Bell-Wilding
  * Since:   12/12/19
- * Version: 1.1
+ * Version: 1.2
  * Purpose: Activity which handles searching through list of locations through numerous approaches
  *          i.e. text search, tag filtration, distance to user
  */
-public class SearchableActivity extends AppCompatActivity implements OptionsDialogFragment.OptionsDialogListener, NavigationView.OnNavigationItemSelectedListener {
+public class SearchableActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = "SearchableActivity"; // Tag used for logging status of application
 
-    // BINDING AND ORIENTATION VARIABLES
-    private ActivitySearchBinding searchBinding; // Binds all views in this activity (portrait orientation)
-    private ActivitySearchLandscapeBinding searchLandscapeBinding; // Binds all views in this activity (landscape orientation)
-    private SearchResultsModel mViewModel; // UI model for searchable activity
-    private int columns; // Number of columns needed for location cards
-
     // LAYOUT ELEMENTS
-    private RecyclerView places;
-    private TextView seekbarProg;
+    private RecyclerView searchResultsRecyclerView;
+    private TextView sliderText;
     private Slider slider;
     private AppCompatCheckBox wheelChairCheckBox;
-    private AppCompatCheckBox childFriendlyCheckBox;
+    private AppCompatCheckBox likedLocationsCheckBox;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private TextView actionBarTitle;
     private TextView resultsCount;
+    private Toolbar searchViewToolbar;
+    private SearchResultsModel searchResults; // UI model for list of location search results
+    private LocationSearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
 
     private List<LocationModel> mModels; // Location cards
-    private LocationSearchResultAdapter mAdapter; // Adapter for filtering location cards
-    private FirebaseFirestore db; // Represents the database storing location information
     private double distanceSelected; // The user-selected distance outside of which locations will not be displayed
     private String currentQuery; // The string value stored in the text search bar
     private List<Location> locationsToShow; // List of all locations to show
     private TagMapper searchTagMapper; // Utility object used to aid in handling search by tag
+
+    /* Variables used to determine if search results must be updated (i.e. if a
+    * current value is different from its 'last' value, search results need updating */
+    private HashSet<String> lastLikedLocationIDs;
+    private double lastLatitude;
+    private double lastLongitude;
 
     // Handles initialisation of activity upon opening
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Toolbar searchViewToolbar;
+        // Apply user's chosen font size across activity
+        getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
+
+        // BINDING AND ORIENTATION VARIABLES
+        ActivitySearchBinding searchBinding; // Binds all views in this activity (portrait orientation)
+        ActivitySearchLandscapeBinding searchLandscapeBinding; // Binds all views in this activity (landscape orientation)
+        int columns; // Number of columns needed for location cards (search results)
 
         // Use data binding to bind all UI elements in this activity for both orientations
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 
-            columns = 1;
+            columns = 1; // One column of search results
             searchBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
             // Binding all UI elements for portrait orientation (default)
@@ -105,16 +109,16 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             actionBarTitle = searchBinding.actionBarTitle;
             drawer = searchBinding.drawerLayout;
             navigationView = searchBinding.navView;
-            places = searchBinding.placesList;
-            seekbarProg = searchBinding.seekbarProgress;
+            searchResultsRecyclerView = searchBinding.placesList;
+            sliderText = searchBinding.sliderSearchText;
             slider = searchBinding.slider;
             wheelChairCheckBox = searchBinding.accessibleCb;
-            childFriendlyCheckBox = searchBinding.childFriendlyCb;
+            likedLocationsCheckBox = searchBinding.likedLocationsCb;
             resultsCount = searchBinding.resultsCount;
 
         } else {
 
-            columns = 2;
+            columns = 2; // Two columns of search results
             searchLandscapeBinding = DataBindingUtil.setContentView(this, R.layout.activity_search_landscape);
 
             // Binding all UI elements for landscape orientation
@@ -122,23 +126,32 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             actionBarTitle = searchLandscapeBinding.actionBarTitle;
             drawer = searchLandscapeBinding.drawerLayout;
             navigationView = searchLandscapeBinding.navView;
-            places = searchLandscapeBinding.placesList;
-            seekbarProg = searchLandscapeBinding.seekbarProgress;
+            searchResultsRecyclerView = searchLandscapeBinding.placesList;
+            sliderText = searchLandscapeBinding.sliderSearchText;
             slider = searchLandscapeBinding.slider;
             wheelChairCheckBox = searchLandscapeBinding.accessibleCb;
-            childFriendlyCheckBox = searchLandscapeBinding.childFriendlyCb;
+            likedLocationsCheckBox = searchLandscapeBinding.likedLocationsCb;
             resultsCount = searchLandscapeBinding.resultsCount;
         }
 
-        mViewModel = ViewModelProviders.of(this).get(SearchResultsModel.class);
+        // Set the view model for displaying search results
+        searchResults = ViewModelProviders.of(this).get(SearchResultsModel.class);
 
+        // Set the action bar (top bar)
         setSupportActionBar(searchViewToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
+        }
         actionBarTitle.setText(R.string.search_actionBar_title);
 
-        seekbarProg.setText(R.string.slider_unset_text);
+        // Enable/disable the distance slider based on whether location is enabled
+        if (!Settings.getInstance().locationPermissionsAreGranted()) {
+            sliderText.setText(R.string.slider_disabled);
+        } else {
+            sliderText.setText(R.string.slider_unset_text);
+        }
+        slider.setEnabled(Settings.getInstance().locationPermissionsAreGranted());
 
         // Set the menu to use the listener provided in this class
         navigationView.setNavigationItemSelectedListener(this);
@@ -147,18 +160,20 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, searchViewToolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-
-        // This is to make sure the button closes/opens the menu accordingly
+        // Ensure the hamburger button closes/opens the menu accordingly
         toggle.syncState();
 
         // Determines how many columns the results list uses (depending on orientation)
-        places.setLayoutManager(new GridLayoutManager(this, columns));
+        searchResultsRecyclerView.setLayoutManager(new GridLayoutManager(this, columns));
 
-        /* Set listeners to be able to apply when the user checks/unchecks a CheckBox */
-        childFriendlyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        // Sets all active search tags to false (i.e. not activated by the user)
+        searchTagMapper = new TagMapper();
+
+        /* Set listeners to be able to apply tags when the user checks/unchecks a checkbox */
+        likedLocationsCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setTag(TagID.CHILD_FRIENDLY, isChecked);
+                setTag(TagID.LIKED_BY_YOU, isChecked);
                 filterAndRearrange();
             }
         });
@@ -171,80 +186,88 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
             }
         });
 
-        // Sets all active search tags to false (i.e. not activated by the user)
-        this.searchTagMapper = new TagMapper();
+        // If locations are granted order by results by distance to user, else order alphabetically by name
+        if (Settings.getInstance().locationPermissionsAreGranted()) {
+            searchResultsAdapter = new LocationSearchResultAdapter(this, new ShortestDistanceComparator());
+        } else {
+            searchResultsAdapter = new LocationSearchResultAdapter(this, new AlphabeticComparator());
+        }
 
-        // Currently the cards with locations are being sorted by distance from the user
-        mAdapter = new LocationSearchResultAdapter(this, new ShortestDistanceComparator());
-
-        // Initialize database reference
-        db = FirebaseFirestore.getInstance();
         // Query string is empty in the beginning
         currentQuery = "";
-        // Adapter to apply the data
-        places.setAdapter(mAdapter);
+        // Set adapter for recycler view
+        searchResultsRecyclerView.setAdapter(searchResultsAdapter);
 
+        // Retrieve locations from database using live data (i.e. results will appear when retrieved from database)
         locationsToShow = new ArrayList<>();
-
-        mViewModel.getLocationsToShow().observe(this, new Observer<List<Location>>() {
+        searchResults.getLocationsToShow().observe(this, new Observer<List<Location>>() {
             @Override
             public void onChanged(List<Location> locations) {
-                locationsToShow.addAll(locations);
+                locationsToShow = locations;
             }
         });
 
+        // Create locations models from database using live data (i.e. results will appear when retrieved from database)
         mModels = new ArrayList<>();
-
-        mViewModel.getLocationModels().observe(this, new Observer<List<LocationModel>>() {
+        searchResults.getLocationModels().observe(this, new Observer<List<LocationModel>>() {
             @Override
             public void onChanged(List<LocationModel> locationModels) {
-                mModels.addAll(locationModels);
+                mModels = locationModels;
                 filterAndRearrange();
             }
         });
 
-        mAdapter.add(mModels);
+        // Add all models to the search results adapter
+        searchResultsAdapter.add(mModels);
 
         /* When the user uses the slider to choose max distance, update the list of locations shown */
         slider.addOnChangeListener(new Slider.OnChangeListener() {
             @Override
             public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
 
-                distanceSelected = Double.MAX_VALUE;
+                distanceSelected = Double.MAX_VALUE; // Initially set distance to max possible value
 
                 if (slider.getValue() == 10) {
-                    seekbarProg.setText("Distance: over 10km");
+                    // Show all locations (as distance is > 10 distance units)
+                    sliderText.setText(String.format(getString(R.string.slider_max_distance),
+                            Settings.getInstance().getDistanceUnit().getDisplayName()));
+
                 } else if (slider.getValue() != 0) {
+                    // Show locations within the selected distance
                     distanceSelected = slider.getValue();
-                    seekbarProg.setText("Distance: " + (int) distanceSelected + "km");
+                    sliderText.setText(String.format(getString(R.string.slider_distance),
+                            (int) distanceSelected,
+                            Settings.getInstance().getDistanceUnit().getDisplayName()));
+
                 } else {
-                    seekbarProg.setText(R.string.slider_unset_text);
+                    // Slider not moved - show all locations
+                    sliderText.setText(R.string.slider_unset_text);
                 }
                 filterAndRearrange();
             }
         });
 
-        Intent intent = getIntent();
-        /* If when starting this activity you passed in a key-value pair
-         This is how you retrieve it */
-        // String value = intent.getStringExtra("key"); //if it's a string you stored.
+        // When activity is created, assign the current values for each variable
+        lastLikedLocationIDs = Settings.getInstance().getLikedLocations();
+        lastLatitude = CurrentCoordinates.getCoords().latitude;
+        lastLongitude = CurrentCoordinates.getCoords().longitude;
+
     }
 
-    // Handles creating the magnifying glass expanding search field
+    // Handles creating the expanding search field on press of the magnifying glass icon
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.search_menu, menu);
 
         // Associate searchable configuration with the SearchView
         MenuItem searchItem = menu.findItem(R.id.search_item);
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) searchItem.getActionView();
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
         // Make sure search field takes up whole action bar even in landscape
         searchView.setMaxWidth(Integer.MAX_VALUE);
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        assert searchManager != null;
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         // When the query text changes - update the locations shown accordingly
         SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
@@ -254,10 +277,8 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
                 return true;
             }
 
-            /* We never submit the query as the users
-             don't have an enter button, but this is a necessary method */
+            /* No submission is made by the user so simply return false */
             public boolean onQueryTextSubmit(String query) {
-                // **Here you can get the value "query" which is entered in the search box.**
                 return false;
             }
         };
@@ -269,84 +290,100 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
         return true;
     }
 
-    /* Handle a place card being pressed and take the user to the according Location page */
+    @Override
+    protected void onPause() {
+
+        // When activity is paused, record the last known values of each variable
+        lastLikedLocationIDs = Settings.getInstance().getLikedLocations();
+        lastLatitude = CurrentCoordinates.getCoords().latitude;
+        lastLongitude = CurrentCoordinates.getCoords().longitude;
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+
+        // Update current coordinates
+        CurrentCoordinates.getInstance().getDeviceLocation(this);
+
+        // Check if a location has been liked/unliked
+        if (lastLikedLocationIDs.size() != Settings.getInstance().getLikedLocations().size()
+                && searchResults != null) {
+
+            // Select all locations which have been liked/unliked and update them
+            List<Location> locationsToUpdate = new ArrayList<>();
+            for (Location location : locationsToShow) {
+                if (lastLikedLocationIDs.contains(location.getId()) || Settings.getInstance().getLikedLocations().contains(location.getId())) {
+                    locationsToUpdate.add(location);
+                }
+            }
+            searchResults.refineSearchResults(locationsToUpdate);
+
+        // Check if user's location has changed
+        } else if ((lastLatitude != CurrentCoordinates.getCoords().latitude
+                || lastLongitude != CurrentCoordinates.getCoords().longitude)
+                && searchResults != null) {
+            // Update all locations with new distances
+            searchResults.refineSearchResults(locationsToShow);
+        }
+        super.onResume();
+    }
+
+    /* Handle a location card being pressed and take the user to the according Location page */
     public void openLocationPage(View view) {
-        TextView textView = view.findViewById(R.id.list_item_title);
-
-        // Get Location from database
-        db.collection("locations").whereEqualTo("name", textView.getText())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                // Parse info into location object
-                                Location location = DatabaseExtractor.extractLocation(document);
-
-                                // Open new location fragment and pass chosen location into this fragment
-                                Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-                                myIntent.putExtra("openLocationPage", location.getName());
-                                Gson gson = new Gson();
-                                String locationJSON = gson.toJson(location);
-                                myIntent.putExtra("location", locationJSON);
-                                SearchableActivity.this.startActivity(myIntent);
-                                Log.d(TAG, "goToLocation");
-                            }
-                        } else {
-                            /* If this block executes, either no document was found
-                             * matching the search name or some other error occurred*/
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        // Open a location page for the location with the provided ID
+        Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
+        myIntent.putExtra("openLocationPage", view.getTag().toString());
+        SearchableActivity.this.startActivity(myIntent);
+        Log.d(TAG, "goToLocation");
     }
 
     // Opens the appropriate fragment corresponding to the provided fragment name
     public void openFragment(String fragmentName) {
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         myIntent.putExtra("openFragment", fragmentName); // Optional parameters
-        SearchableActivity.this.startActivity(myIntent);
+        this.startActivity(myIntent);
     }
 
-    /* Handle the popup for more filters */
-    public void openMoreFilters(View view) {
-        // Create an instance of the dialogFragment fragment and show it
-        /* Get the values for each apply and send them to the popup as an argument (order matters) */
-        DialogFragment dialogFragment = new OptionsDialogFragment(searchTagMapper);
-        dialogFragment.show(getSupportFragmentManager(), "OptionsDialogFragment");
-    }
+    /* Handle the popup for more tags*/
+    public void openTagSelector(View view) {
+        // Remove tags that are handled through separate UI elements
+        final boolean likedByYou = searchTagMapper.getTagValuesMap().get(TagID.LIKED_BY_YOU);
+        final boolean wheelchairAccessible = searchTagMapper.getTagValuesMap().get(TagID.WHEELCHAIR_ACCESSIBLE);
+        searchTagMapper.removeTagFromMapper(TagID.LIKED_BY_YOU);
+        searchTagMapper.removeTagFromMapper(TagID.WHEELCHAIR_ACCESSIBLE);
 
-    /* Handlers for the closing of the pop-up for more filters */
-    @Override
-    public void onDialogPositiveClick(Bundle bundle) {
-        filterAndRearrange();
-    }
-
-    @Override
-    public void onDialogNegativeClick(Bundle bundle) {
-        filterAndRearrange();
+        // Create an instance of the tag selector fragment and show it
+        TagSelectorFragment tagSelector = new TagSelectorFragment(searchTagMapper);
+        tagSelector.setDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                // Re-add tags that are handled separately and filter results
+                searchTagMapper.addTagToMapper(TagID.LIKED_BY_YOU, likedByYou);
+                searchTagMapper.addTagToMapper(TagID.WHEELCHAIR_ACCESSIBLE, wheelchairAccessible);
+                filterAndRearrange();
+            }
+        });
+        tagSelector.show(getSupportFragmentManager(), "TagSelectorFragment");
     }
 
     // Sets a tag to active or inactive
     public void setTag(TagID tag, boolean isActive) {
-        this.searchTagMapper.addTagToMapper(tag, isActive);
+        searchTagMapper.addTagToMapper(tag, isActive);
     }
 
-    /* Apply apply method and replace the current list with the list of matches and rearrange */
+    /* Use Filter with current search criteria and update search results */
     public void filterAndRearrange() {
         List<LocationModel> filteredModelList =
                 Filter.apply(mModels, currentQuery, distanceSelected,
                         searchTagMapper.getTagValuesMap());
-        mAdapter.replaceAll(filteredModelList);
-        places.scrollToPosition(0);
+        searchResultsAdapter.replaceAll(filteredModelList);
+        searchResultsRecyclerView.scrollToPosition(0);
 
         // Edit the number of matches upon filtering
-        if (mAdapter.getItemCount() == 1) {
-            resultsCount.setText(String.format("%d Result", mAdapter.getItemCount()));
-        } else {
-            resultsCount.setText(String.format("%d Results", mAdapter.getItemCount()));
-        }
+        String resultsText = getResources().getQuantityString(R.plurals.search_results_count,
+                searchResultsAdapter.getItemCount(), searchResultsAdapter.getItemCount());
+        resultsCount.setText(resultsText);
     }
 
     /* If the back button is pressed */
@@ -362,6 +399,7 @@ public class SearchableActivity extends AppCompatActivity implements OptionsDial
     /* Manages the drawer menu click events */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Switch statement to handle which fragment should be opened
         switch (item.getItemId()) {
             case R.id.nav_timeline:
                 openFragment("Timeline");
