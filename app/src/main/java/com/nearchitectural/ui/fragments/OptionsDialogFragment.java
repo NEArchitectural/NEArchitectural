@@ -30,7 +30,7 @@ public class OptionsDialogFragment extends DialogFragment {
     public OptionsDialogFragment(TagMapper tagMapper) {
 
         // Creates a copy of original TagMapper to be modified
-        this.tagMapper = new TagMapper(tagMapper);
+        this.tagMapper = new TagMapper();
 
         // Removing the two tags that are handled separately
         this.tagMapper.removeTagFromMapper(TagID.WHEELCHAIR_ACCESSIBLE);

@@ -66,6 +66,7 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
     public LocationSearchResultAdapter(Context context, Comparator<LocationModel> comparator) {
         this.mInflater = LayoutInflater.from(context);
         this.mComparator = comparator;
+        setHasStableIds(true);
     }
 
     public void add(LocationModel model) {
@@ -118,4 +119,13 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
         return mSortedList.size();
     }
 
+    @Override
+    public void onViewAttachedToWindow(@NonNull LocationSearchResultViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mSortedList.get(position).hashCode();
+    }
 }

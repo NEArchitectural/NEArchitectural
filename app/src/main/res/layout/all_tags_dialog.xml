@@ -11,10 +11,9 @@
         android:text="@string/show_all_tags"
         android:background="@color/colorPrimary"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="?attr/font_medium"
         android:textStyle="bold"
-        android:padding="10dp"
-        />
+        android:padding="10dp"/>
 
     <ListView
         android:id="@+id/all_tags_list"
@@ -27,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/close"
+        android:textSize="?attr/font_medium"
         android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
         android:layout_marginLeft="5dp"/>

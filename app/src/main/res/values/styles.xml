@@ -1,11 +1,54 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
     </style>
 
+    <!-- Font sizes for Settings menu
+         Idea taken and adapted from the following link:
+         https://stackoverflow.com/questions/4877153/android-application-wide-font-size-preference/12591991 -->
+    <style name="FontStyle">
+    </style>
+
+    <style name="FontStyle.Small">
+        <item name="font_small">14sp</item>
+        <item name="font_medium">16sp</item>
+        <item name="font_large">18sp</item>
+        <item name="font_margin">16dp</item>
+    </style>
+
+    <style name="FontStyle.Medium">
+        <item name="font_small">16sp</item>
+        <item name="font_medium">18sp</item>
+        <item name="font_large">20sp</item>
+        <item name="font_margin">12dp</item>
+    </style>
+
+    <style name="FontStyle.Large">
+        <item name="font_small">20sp</item>
+        <item name="font_medium">22sp</item>
+        <item name="font_large">24sp</item>
+        <item name="font_margin">10dp</item>
+    </style>
+
+    <style name="NavigationViewStyle">
+        <item name="android:textSize">?attr/font_small</item>
+    </style>
+
+    <style name="DialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="android:textSize">?attr/font_medium</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowTitleStyle">@style/DialogTheme.DialogTitle</item>
+    </style>
+
+    <style name="DialogTheme.DialogTitle">
+        <item name="android:textSize">?attr/font_large</item>
+    </style>
 </resources>

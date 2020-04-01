@@ -5,7 +5,7 @@
     <data>
 
         <variable
-            name="model"
+            name="location"
             type="com.nearchitectural.utilities.models.Location" />
 
         <variable
@@ -30,9 +30,9 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{model.name}"
+                android:text="@{location.name}"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
+                android:textSize="?attr/font_medium"
                 android:textStyle="bold" />
 
             <TextView
@@ -41,8 +41,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/title"
                 android:layout_marginBottom="10dp"
-                android:text="@{model.type}"
-                android:textSize="14sp" />
+                android:text="@{location.type}"
+                android:textSize="?attr/font_small" />
 
             <ImageView
                 android:id="@+id/thumbnail"
@@ -50,7 +50,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/location_type"
                 android:contentDescription="@string/thumbnail" />
-
 
             <TextView
                 android:id="@+id/general_info_heading"
@@ -62,7 +61,7 @@
                 android:layout_marginBottom="10dp"
                 android:text="@string/general_information"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
+                android:textSize="?attr/font_medium"
                 android:textStyle="bold" />
 
             <TextView
@@ -77,7 +76,7 @@
                 android:text="@{report.fullReport}"
                 android:textAlignment="textStart"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="?attr/font_small" />
 
             <LinearLayout
                 android:id="@+id/filter_box"
@@ -101,24 +100,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
                     android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:textSize="?attr/font_small" />
 
                 <TextView
                     android:id="@+id/tag_two"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
                     android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:textSize="?attr/font_small" />
 
                 <TextView
                     android:id="@+id/tag_three"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
                     android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:textSize="?attr/font_small" />
 
                 <ImageView
                     android:id="@+id/all_tags"
@@ -128,8 +133,10 @@
                     android:paddingStart="0dp"
                     android:paddingLeft="0dp"
                     android:paddingEnd="8dp"
-                    android:paddingRight="8dp"
+                    android:paddingRight="6dp"
                     android:paddingBottom="5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
                     android:src="@drawable/ic_arrow_down"
                     android:tint="@color/black" />
 
@@ -147,7 +154,7 @@
                         android:layout_height="30dp"
                         android:layout_marginBottom="10dp"
                         app:anim_scale_factor="5"
-                        app:icon_size="20dp"
+                        app:icon_size="?attr/font_large"
                         app:icon_type="heart"
                         app:like_drawable="@drawable/ic_liked"
                         app:unlike_drawable="@drawable/ic_unliked" />
@@ -159,9 +166,9 @@
                         android:layout_marginStart="5dp"
                         android:layout_marginLeft="5dp"
                         android:layout_marginTop="3dp"
-                        android:text="@{String.valueOf(model.likes)}"
+                        android:text="@{String.valueOf(location.likes)}"
                         android:textColor="@color/black"
-                        android:textSize="18sp"
+                        android:textSize="?attr/font_medium"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -178,7 +185,7 @@
                 android:layout_marginBottom="10dp"
                 android:text="@string/photos"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
+                android:textSize="?attr/font_medium"
                 android:textStyle="bold" />
 
             <androidx.viewpager.widget.ViewPager
@@ -199,20 +206,28 @@
                 android:padding="10dp"
                 android:text="@string/take_me_here"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="?attr/font_small" />
+
+            <View
+                android:id="@+id/dividerOne"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#c0c0c0"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/navigate_button"/>
 
             <Button
                 android:id="@+id/show_references_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/navigate_button"
+                android:layout_below="@id/dividerOne"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="10dp"
                 android:background="@color/colorAccent"
                 android:padding="10dp"
                 android:text="@string/show_references"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="?attr/font_small"
                 app:backgroundTint="@color/colorAccent" />
 
             <TextView
@@ -221,11 +236,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/show_references_button"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:text="@string/references"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
+                android:textSize="?attr/font_medium"
                 android:textStyle="bold" />
 
             <TextView
@@ -238,15 +253,14 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:autoLink="web"
                 android:justificationMode="inter_word"
+                android:textIsSelectable="true"
+                android:autoLink="web"
                 android:text="@{report.fullReferences}"
                 android:textColor="@color/black"
-                android:textIsSelectable="true"
-                android:textSize="16sp" />
+                android:textSize="?attr/font_small" />
 
         </RelativeLayout>
 
     </ScrollView>
 </layout>
-

@@ -1,9 +1,8 @@
 package com.nearchitectural.utilities.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/* Author:  Joel Bell-Wilding, Kristiyan Doykov
+/* Author:  Joel Bell-Wilding
  * Since:   18/02/20
  * Version: 1.0
  * Purpose: A record-like class holding report-based information (text and images) for a
@@ -32,35 +31,30 @@ public class Report {
         return paragraphs;
     }
 
+    public List<String> getReferences() {
+        return references;
+    }
+
     public List<String> getSlideshowURLs() {
-        if (this.slideshowURLs != null) {
-            return slideshowURLs;
-        }
-        return new ArrayList<>();
+        return slideshowURLs;
     }
 
     /* Concatenates all paragraphs together to produce a single text string
      * containing the full report */
     public String getFullReport() {
         StringBuilder stringBuilder = new StringBuilder();
-        if (paragraphs != null) {
-            for (String paragraph : paragraphs) {
-                stringBuilder.append(paragraph).append("\n\n");
-            }
-            // Returns an empty string if report is empty (i.e. db retrieval failed)
-            return stringBuilder.length() == 0 ? "" : stringBuilder.substring(0, stringBuilder.length() - 2); // Removes last two empty lines
+        for (String paragraph : paragraphs) {
+            stringBuilder.append(paragraph);
+            stringBuilder.append("\n\n");
         }
-        // In case no paragraphs have been registered in the database, display an appropriate message
-        return "No Information to display";
+        // Returns an empty string if report is empty (i.e. database retrieval failed)
+        return stringBuilder.length() == 0 ? "" : stringBuilder.substring(0, stringBuilder.length()-2); // Removes last two empty lines
     }
 
-    public List<String> getReferences() {
-        return references;
-    }
-
+    // Concatenates all report references to produce a single text string
     public String getFullReferences() {
         StringBuilder stringBuilder = new StringBuilder();
-        if (references != null) {
+        if(references != null) {
             for (String reference :
                     references) {
                 stringBuilder.append(reference).append("\n\n");
@@ -70,4 +64,5 @@ public class Report {
         // In case no references have been registered in the database display an appropriate message
         return "No references to display";
     }
+
 }

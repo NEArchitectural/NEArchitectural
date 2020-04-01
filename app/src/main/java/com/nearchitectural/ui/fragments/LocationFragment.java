@@ -32,6 +32,8 @@ import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.AllTagsAdapter;
 import com.nearchitectural.ui.adapters.LocationSlideshowAdapter;
 import com.nearchitectural.utilities.DatabaseExtractor;
+import com.nearchitectural.utilities.Settings;
+import com.nearchitectural.utilities.SettingsManager;
 import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
@@ -44,7 +46,7 @@ import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   20/01/20
- * Version: 1.1
+ * Version: 1.2
  * purpose: Presents information and images regarding a given location
  */
 public class LocationFragment extends Fragment {
@@ -69,26 +71,23 @@ public class LocationFragment extends Fragment {
     private LikeButton likeButton;
     private ViewPager slideshow;
 
+    private String locationID; // ID of the location to be displayed
     private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
-    private Bundle arguments; // Arguments that came in with the intent
-    private FirebaseFirestore db;// Database reference field
-    private Location location;// Location object to contain all the info
+    private FirebaseFirestore db; // Database reference field
+    private Location location; // Location object to contain all the info
     private Report locationReport; // Report object to contain full location report and slideshow images
 
-    public LocationFragment(Location location) {
-        this.location = location;
+    // Assign locationID when fragment is instantiated
+    public LocationFragment(String locationID) {
+        this.locationID = locationID;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        // Initialize the arguments field with what came in from the previous activity
-        arguments = getArguments();
-
         // Data binding
         locationBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_location, container, false);
-        locationBinding.setModel(location); // Set selected location as data binding model
 
         // Bind layout elements
         thumbnail = locationBinding.thumbnail;
@@ -107,12 +106,10 @@ public class LocationFragment extends Fragment {
         slideshow = locationBinding.slideshow;
         likeButton = locationBinding.likeButton;
 
-        MapsActivity parentActivity = (MapsActivity) this.getActivity();
-
         /* Get an instance of the database in order to
          retrieve/update the data for the specific location */
         db = FirebaseFirestore.getInstance();
-        getLocationReport();
+        retrieveLocation();
 
         // Hides references by default
         referencesBody.setVisibility(View.GONE);
@@ -135,8 +132,8 @@ public class LocationFragment extends Fragment {
             }
         });
 
-        /* These lines are for navigating through Google maps forcefully
-         * will be used when someone presses "Take me here" button */
+        /* Navigate to Google maps via the "Take Me Here" button,
+        *  displaying a route to the current location */
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,6 +150,7 @@ public class LocationFragment extends Fragment {
         likeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
+
                 // Increments value of likes attribute for location document in database
                 db.collection("locations")
                         .document(location.getId())
@@ -164,6 +162,10 @@ public class LocationFragment extends Fragment {
                             location object and update value on UI */
                                 location.addLike();
                                 likesCount.setText(String.valueOf(location.getLikes()));
+                                // Update settings with new liked location
+                                Settings.getInstance().addLikedLocation(location.getId());
+                                new SettingsManager(getContext()).saveSettings();
+                                location.getAllTags().put(TagID.LIKED_BY_YOU, true);
                             }
                         });
             }
@@ -181,12 +183,14 @@ public class LocationFragment extends Fragment {
                                 location object and update value on UI */
                                 location.removeLike();
                                 likesCount.setText(String.valueOf(location.getLikes()));
+                                // Update settings by removing location from liked locations
+                                Settings.getInstance().removeLikedLocation(location.getId());
+                                new SettingsManager(getContext()).saveSettings();
+                                location.getAllTags().put(TagID.LIKED_BY_YOU, false);
                             }
                         });
             }
         });
-
-        displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
 
         // Adds a listener for clicking the additional tags arrows
         allTagsIcon.setOnClickListener(new View.OnClickListener() {
@@ -195,15 +199,6 @@ public class LocationFragment extends Fragment {
                 showAllFilters();
             }
         });
-
-        // Displays location thumbnail
-        GlideApp.with(parentActivity)
-                .load(location.getThumbnailURL())
-                .centerCrop()
-                .override(525, 525)
-                .error(R.drawable.ic_launcher_background)
-                .placeholder(R.drawable.ic_launcher_background)
-                .into(thumbnail);
 
         return locationBinding.getRoot();
     }
@@ -216,11 +211,12 @@ public class LocationFragment extends Fragment {
         parentActivity.setActionBarTitle("Details");
     }
 
-    // Getter and setter for location
+    // Getter for location
     public Location getLocation() {
         return location;
     }
 
+    // Setter for location
     public void setLocation(Location location) {
         this.location = location;
     }
@@ -233,8 +229,8 @@ public class LocationFragment extends Fragment {
                 if (tagValues.get(tag)) {
                     tagTextView.setText(tag.displayName);
                     // Get icon associated with tag
-                    int iconID = getResources()
-                            .getIdentifier(tag.iconName, "drawable", getActivity().getPackageName());
+                    int iconID = getResources().getIdentifier(tag.iconName,
+                            "drawable", getActivity().getPackageName());
                     tagTextView.setCompoundDrawablesWithIntrinsicBounds(iconID, 0, 0, 0);
                     tagValues.put(tag, false); // Flag that tag no longer needs to be displayed
                     break;
@@ -250,8 +246,33 @@ public class LocationFragment extends Fragment {
         }
     }
 
-    // Retrieves location report from database and displays on UI
-    private void getLocationReport() {
+    // Retrieves location from database using location ID and handles appropriate UI bindings
+    private void retrieveLocation() {
+        db.collection("locations")
+                .document(locationID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            // Set up binding for location info once report is retrieved
+                            location = DatabaseExtractor.extractLocation(task.getResult().getId(), task.getResult().getData());
+                            locationBinding.setLocation(location); // Set selected location as data binding model
+                            // Handle displaying UI elements which use location values
+                            likeButton.setLiked(Settings.getInstance().locationIsLiked(location.getId()));
+                            displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
+                            // Display location thumbnail and retrieve location report
+                            displayThumbnail();
+                            retrieveReport();
+                        } else {
+                            Log.w(TAG, "Error getting report.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    // Retrieves report corresponding to location from database and handles appropriate UI bindings
+    private void retrieveReport() {
         db.collection("reports")
                 .document(location.getReportID())
                 .get()
@@ -265,18 +286,27 @@ public class LocationFragment extends Fragment {
                             reportText = locationBinding.reportText;
 
                             // Set up adapter for slideshow once slideshow URLs are retrieved
-                            locationSlideshowAdapter =
-                                    new LocationSlideshowAdapter(
-                                            LocationFragment.this.getContext(),
-                                            new ArrayList<>(locationReport.getSlideshowURLs())
-                                    );
-                            slideshow.setAdapter(locationSlideshowAdapter);
+                            locationSlideshowAdapter = new LocationSlideshowAdapter(
+                                    LocationFragment.this.getContext(),
+                                    new ArrayList<>(locationReport.getSlideshowURLs()));
 
+                            slideshow.setAdapter(locationSlideshowAdapter);
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
                         }
                     }
                 });
+    }
+
+    // Displays location thumbnail
+    private void displayThumbnail() {
+        GlideApp.with(getActivity())
+                .load(location.getThumbnailURL())
+                .centerCrop()
+                .override(525, 525)
+                .error(R.drawable.ic_launcher_background)
+                .placeholder(R.mipmap.ic_launcher_round)
+                .into(thumbnail);
     }
 
     /* Handle the popup for showing all tags - taken and adapted

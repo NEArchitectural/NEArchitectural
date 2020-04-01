@@ -32,10 +32,11 @@
                     <TextView
                         android:id="@+id/action_bar_title"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="14dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="?attr/font_margin"
+                        android:layout_gravity="center_vertical"
                         android:textColor="@color/white"
-                        android:textSize="20sp"
+                        android:textSize="?attr/font_large"
                         android:textStyle="bold" />
 
                     <ImageView
@@ -47,7 +48,7 @@
                         android:layout_marginEnd="10dp"
                         android:layout_marginRight="10dp"
                         android:clickable="true"
-                        android:contentDescription="Magnifying glass/Search Icon"
+                        android:contentDescription="@string/search_icon"
                         android:focusable="true"
                         android:onClick="openSearch"
                         android:src="@drawable/ic_search"
@@ -71,6 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            app:itemTextAppearance="@style/NavigationViewStyle"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_menu">
 

@@ -1,31 +1,36 @@
 package com.nearchitectural.ui.fragments;
 
-import android.content.pm.PackageManager;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -34,13 +39,17 @@ import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.MapMarkerWindowAdapter;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.DatabaseExtractor;
+import com.nearchitectural.utilities.DistanceCalculator;
 import com.nearchitectural.utilities.Settings;
+import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
-import com.nearchitectural.utilities.models.Location;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/12/19
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Handles events and presentation related to the Google Maps section of the home screen
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
@@ -51,11 +60,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap googleMap; // Object representing the map itself
     private FirebaseFirestore db; // The Firebase database containing location information
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
-    private FusedLocationProviderClient mFusedLocationProviderClient; // Used to get user's current location
-    private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
-    private LatLng currentLocation; // User's current location
-    // The default location used in cases where user's actual location cannot be determined
-    private static final LatLng DEFAULT_LOCATION = new LatLng(54.9695, -1.6074);
+    private boolean introDialogNeeded; // Flag boolean to signal if the intro dialog should show
+    private CameraUpdate defaultCameraPosition; // The default position the map camera will hover over
+    private Map<Marker, String> markerIDMap; // Map of markers to corresponding location IDs
+
+    public MapFragment(boolean introDialogNeeded) {
+        this.introDialogNeeded = introDialogNeeded;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,53 +74,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
-    // Attempts to get device's location if permissions are granted, otherwise returns a default location
-    private void getDeviceLocation() {
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-        // Sets current location to default position in case actual location cannot be determined
-        if (currentLocation != null) {
-            CurrentCoordinates.setCoords(DEFAULT_LOCATION);
-        } else {
-            currentLocation = DEFAULT_LOCATION;
-            CurrentCoordinates.setCoords(currentLocation);
-        }
-
-        // Attempts to get device's location initially
-        try {
-            if (mLocationPermissionsGranted) {
-                // This warning cannot be evaded as we're using the Task api
-                Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: found location! ");
-                            android.location.Location currentLocationFound = (android.location.Location) task.getResult();
-                            if (currentLocationFound != null) {
-                                currentLocation = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
-                                CurrentCoordinates.setCoords(new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude()));
-                            } else {
-                                // TODO: Remove log tags and else statements at end of development
-                                Log.d(TAG, "onComplete: current location is null. Fallback to default location");
-                            }
-                        } else {
-                            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
-                            Toast.makeText(getActivity(), "Unable to get current location", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException se) {
-            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
-            Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage());
-        }
-
-        // Moves camera to user's location
-        if (googleMap != null) {
-            moveCamera(CurrentCoordinates.getCoords());
-        }
-    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -117,16 +81,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         // Set up map fragment using Map Activity information
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
         parentActivity.setActionBarTitle("Map");
 
         db = FirebaseFirestore.getInstance(); // Instance of the db for requesting/updating data
 
-        // Check if the user has allowed us to use their location from settings
-        mLocationPermissionsGranted = Settings.getInstance().isLocationPermissionsGranted();
-
-        // Whenever the map gets created - update the current location
-        getDeviceLocation();
+        parentActivity.requestLocationPermissions(); // Request location permissions if needed
+        mLocationPermissionsGranted = Settings.getInstance().locationPermissionsAreGranted();
 
         // Set up the map
         mapView = view.findViewById(R.id.mapView);
@@ -137,33 +99,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
     }
 
-    // Move camera overlooking map to be positioned over provided location
-    private void moveCamera(LatLng latLng) {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, (float) 15.0));
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mLocationPermissionsGranted = false;
-
-        if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length > 0) {
-                for (int i : grantResults) {
-                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                        // If the result is not PERMISSION_GRANTED do nothing
-                        return;
-                    }
-                }
-                // Else set it to true
-                mLocationPermissionsGranted = true;
-            }
-        }
-    }
-
     /*
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera.
+     * Manipulates the map once available. This callback is triggered when the map is ready to be used.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -172,7 +109,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap map) {
 
+        // Array holding the marker who's info window is currently visible
+        final Marker[] visibleMarker = new Marker[1];
+        // Default camera position overlooking Newcastle and Northumberland before all map markers are created
+        defaultCameraPosition = CameraUpdateFactory.newLatLngZoom(new LatLng(55.25, -1.9979), 9f);
+
+        // Initialise map and move to default camera position
         googleMap = map;
+        googleMap.moveCamera(defaultCameraPosition);
+
+        addAllMarkers(); // Adds a marker for every location in the database
+
         // Opens a location page when a location info-window is tapped
         googleMap.setOnInfoWindowClickListener(
                 new GoogleMap.OnInfoWindowClickListener() {
@@ -188,10 +135,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
         googleMap.getUiSettings().setTiltGesturesEnabled(true);
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
+        googleMap.setMyLocationEnabled(mLocationPermissionsGranted);
 
-        addAllMarkers(); // Adds a marker for every location in the database
-
-        googleMap.setMyLocationEnabled(true);
+        // Adjusts the padding of the map to account for the activity action bar (i.e. the top bar)
+        int actionBarPadding  = ((MapsActivity) getActivity()).getSupportActionBar().getHeight()
+                + (int) (40 * Resources.getSystem().getDisplayMetrics().density);
+        googleMap.setPadding(0, actionBarPadding , 0, 0);
 
         /* Move the "Center on my location" button to the bottom left */
         View locationButton =
@@ -210,20 +159,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
 
-        /* Set the map to use our custom info window */
+        /* Set the map to use the application custom info window */
         googleMap.setInfoWindowAdapter(new MapMarkerWindowAdapter(getActivity()));
 
-        /* Get the device's location again to update the current coordinates */
-        getDeviceLocation();
+        /* Navigation feature - when the user holds finger on the screen, hide the
+         * current info window and return to the default position */
+        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                googleMap.animateCamera(defaultCameraPosition);
+                if (visibleMarker[0] != null)
+                    visibleMarker[0].hideInfoWindow();
+            }
+        });
+
+        /* Navigation feature - when the user taps a marker, display info window and
+         * zoom into the marker's location */
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14.5f));
+                marker.showInfoWindow();
+                visibleMarker[0] = marker;
+                return true;
+            }
+        });
+
+        // If application is in start up, display intro dialog
+        if (introDialogNeeded) {
+            displayIntroDialog();
+        }
     }
 
+    // Adds all location markers to Google Map (if settings criteria is met)
     private void addAllMarkers() {
-        // Get all locations from database and set a marker for each
-         /* TODO: Get the settings currently applied from the Settings singleton and
-             only add the necessary locations to the map that answer the criteria
-              (e.g. maximum distance from current location, child friendly,
-               wheelchair accessible locations only and so on) by calling the calculateDistance()
-                method on each location before adding it to the map*/
+
+        // Allows the camera boundary for all map markers to be built
+        final LatLngBounds.Builder cameraBoundBuilder = new LatLngBounds.Builder();
+        // Map of markers to location IDs for opening a location page
+        markerIDMap = new HashMap<>();
+
+        // Cycle through all locations in database and set a marker if appropriate
         db.collection("locations")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -232,20 +208,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         if (task.isSuccessful()) {
                             // Cycles through all location documents in database and adds a map marker
                             for (QueryDocumentSnapshot document : task.getResult()) {
-
-//                                if (DistanceCalculator.calculateDistance(currentLocation.latitude,
-//                                        (double) document.getData().get("latitude"),
-//                                        currentLocation.longitude,
-//                                        (double) document.getData().get("longitude")) > Settings.getInstance().getMaxDistance()) {
-//                                    // TODO: Move the googleMap.addMarker call here after the Settings Fragment has been finished
-//                                }
-
-                                // Creates a marker using database extractor
-                                MarkerOptions marker = DatabaseExtractor.extractMapMarker(document);
-                                // If retrieval of info from database is successful, adds new marker to map
-                                if (marker != null)
-                                    googleMap.addMarker(marker);
+                                if (locationMeetsSettingsCriteria(document)) {
+                                    // Creates a marker using database extractor
+                                    MarkerOptions marker = DatabaseExtractor.extractMapMarker(document);
+                                    // If retrieval of info from database is successful, adds new marker to map
+                                    if (marker != null) {
+                                        markerIDMap.put(googleMap.addMarker(marker), document.getId());
+                                        // Add marker position to camera bounds
+                                        cameraBoundBuilder.include(marker.getPosition());
+                                    }
+                                }
                             }
+                            // Once all markers are added to map, create bound and move camera with bound
+                            createDefaultCameraPosition(cameraBoundBuilder);
+                            googleMap.moveCamera(defaultCameraPosition);
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -253,44 +229,99 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 });
     }
 
+    /* Uses the positions of map markers to create a bound for the map camera such
+     * that all markers will fit within the camera bounds. Taken and adapted from:
+     * https://stackoverflow.com/questions/14828217/android-map-v2-zoom-to-show-all-the-markers */
+    private void createDefaultCameraPosition(LatLngBounds.Builder boundBuilder) {
+        try {
+            LatLngBounds cameraBounds = boundBuilder.build();
+            int padding = (int) (30 * Resources.getSystem().getDisplayMetrics().density);
+            defaultCameraPosition = CameraUpdateFactory.newLatLngBounds(cameraBounds, padding);
+        } catch (IllegalStateException ignored) {
+            /* Exception ignored since a default position has already been defined
+             * in cases where there are not enough markers to create a bound*/
+        }
+    }
+
     // Opens a new location fragment for the location corresponding to the provided marker
     private void openLocationFragment(Marker marker) {
 
-        // Attempts to retrieve location from database
-        db.collection("locations").whereEqualTo("name", marker.getTitle())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                        // Instantiates selected location to a default location of empty/unknown fields
-                        Location selectedLocation = new Location(
-                                "Unknown", "Unknown", 0,
-                                0, "Unknown", "Unknown",
-                                0, 0, new TagMapper().getTagValuesMap(),
-                                "", "");
-
-                        // Retrieves location from database and sets it as location to pass to fragment
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                selectedLocation = DatabaseExtractor.extractLocation(document);
-                            }
-                        }
-
-                        // Creates a new location fragment and opens it
-                        LocationFragment lf = new LocationFragment(selectedLocation);
-                        getActivity()
-                                .getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container, lf)
-                                .addToBackStack(LocationFragment.TAG)
-                                .commit();
-                    }
-                });
+        // Creates a new location fragment and opens it using the location ID
+        LocationFragment lf = new LocationFragment(markerIDMap.get(marker));
+        getActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, lf)
+                .addToBackStack(LocationFragment.TAG)
+                .commit();
     }
 
-    /* Message bubble */
-    private void MessageBox(String message) {
-        Toast.makeText(this.getContext(), message, Toast.LENGTH_SHORT).show();
+    // Method used to determine if location used for map marker meets the criteria of the user settings
+    private boolean locationMeetsSettingsCriteria(QueryDocumentSnapshot document) {
+
+        Settings userSettings = Settings.getInstance();
+
+        // Create TagMapper for checking tags of the given location
+        TagMapper locationTagMapper = new TagMapper(document.getId(), document.getData());
+
+        // Ensures location matches all set tags
+        for (TagID tag: TagID.values()) {
+            if (userSettings.getTagValue(tag) && !locationTagMapper.getTagValuesMap().get(tag)) {
+                return false;
+            }
+        }
+
+        // Ensures location is within the user specified max distance
+        return (DistanceCalculator.calculateDistance(CurrentCoordinates.getCoords().latitude,
+                (double) document.getData().get("latitude"),
+                CurrentCoordinates.getCoords().longitude,
+                (double) document.getData().get("longitude")) <= userSettings.getMaxDistance());
+    }
+
+    /* Displays the introductory dialog on the first use of the map fragment during each
+     * instance of the application */
+    private void displayIntroDialog() {
+
+        // Once dialog has been displayed, set false to indicate it will not be displayed again
+        introDialogNeeded = false;
+
+        // Initially hide the Google Map UI elements
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+        // Display the dialog
+        Dialog introDialog = new MaterialAlertDialogBuilder(getActivity(), R.style.ThemeOverlay_MaterialComponents)
+                .setIcon(R.mipmap.ic_launcher_round)
+                .setTitle("Welcome to NE Architectural")
+                .setMessage("Tap on a Map Marker to see an information popup about the chosen location. " +
+                        "Hold your finger on the map to zoom back out and see all Locations. " +
+                        "Enjoy!")
+                .setPositiveButton("Ok", null)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        // Once the dialog is dismissed, show the Google Map UI elements
+                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    }
+                })
+                .setBackgroundInsetBottom((int) (40 * Resources.getSystem().getDisplayMetrics().density))
+                .show();
+
+        /* Ensure that window is displayed at the bottom of the screen and map is not dimmed
+         * Code taken and adapted from:
+         * https://stackoverflow.com/questions/9467026/changing-position-of-the-dialog-on-screen-android
+         */
+        Window window = introDialog.getWindow();
+        WindowManager.LayoutParams windowLayoutParams = window.getAttributes();
+        windowLayoutParams.gravity = Gravity.BOTTOM;
+        windowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        window.setAttributes(windowLayoutParams);
+    }
+
+    // Method to handle the result of a location permissions request
+    public void locationPermissionsResult(boolean permissionsGranted) {
+        mLocationPermissionsGranted = permissionsGranted;
+        googleMap.setMyLocationEnabled(mLocationPermissionsGranted);
     }
 }

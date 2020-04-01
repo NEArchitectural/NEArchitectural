@@ -1,7 +1,5 @@
 package com.nearchitectural.utilities;
 
-import android.util.Log;
-
 import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.ArrayList;
@@ -16,23 +14,22 @@ import java.util.Map;
 public class Filter {
 
     private static final String TAG = "Filter Class";
-    private final static int KILOMETER_CONVERSION = 1000;
 
-    /* Filter the locations from the database according to user input (search text and distance/filters) */
+    /* Filter the locations according to search criteria (search text and distance/filters) */
     public static List<LocationModel> apply(List<LocationModel> models, String query,
                                             double distanceSelected, Map<TagID, Boolean> activeTags) {
 
-        final String lowerCaseQuery = query.toLowerCase();
-
-        final List<LocationModel> filteredModelList = new ArrayList<>();
+        final List<LocationModel> filteredModelList = new ArrayList<>(); // List of models to filter
+        final String lowerCaseQuery = query.toLowerCase(); // Search string
+        // Distance unit conversion rate
+        final int conversionRate = Settings.getInstance().getDistanceUnit().getConversionRate();
 
         // Cycles through all locations and adds to list if within search criteria
         for (LocationModel model : models) {
 
             final String titleText = model.getLocationInfo().getName().toLowerCase();
             final String placeTypeText = model.getLocationInfo().getType().toLowerCase();
-            final double distance = model.getMDistanceFromCurrentPosInMeters();
-            Log.w(TAG, String.valueOf(distance));
+            final double distance = model.getMDistanceFromCurrentPos();
 
             // Checks if either title or place type strings match search string
             boolean textMatchFound = titleText.contains(lowerCaseQuery)
@@ -46,20 +43,17 @@ public class Filter {
             } else {
                 if (textMatchFound
                         && (distanceSelected > 0
-                        && distanceSelected * KILOMETER_CONVERSION >= distance)) {
+                        && distanceSelected * conversionRate >= distance)) {
                     filteredModelList.add(model);
                 }
             }
         }
-        Log.d(TAG, "Filtering current distance: " + distanceSelected * KILOMETER_CONVERSION);
 
+        // A list of models which do not match the active search tags
         List<LocationModel> nonMatchModels = new ArrayList<>();
-
         // Cycles through all locations and removes any without the applied tags
         for (LocationModel model: filteredModelList) {
-
             for (TagID tag: TagID.values()) {
-
                 if (activeTags.get(tag) && !model.getLocationInfo().getTagValue(tag)) {
                     nonMatchModels.add(model);
                 }

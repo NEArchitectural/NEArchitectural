@@ -1,15 +1,226 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/holo_blue_light">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="settings"
+            type="com.nearchitectural.utilities.Settings" />
+    </data>
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:fillViewport="true">
 
-</RelativeLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/grey"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:id="@+id/fontSizeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/fontSizeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/font_size_string"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="?attr/font_large"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/fontSizeChoices"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <RadioButton
+                        android:id="@+id/smallButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/font_size_small"
+                        android:textSize="16sp" />
+
+                    <RadioButton
+                        android:id="@+id/mediumButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/font_size_medium"
+                        android:textSize="18sp" />
+
+                    <RadioButton
+                        android:id="@+id/largeButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/font_size_large"
+                        android:textSize="24sp" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/dividerOne"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#c0c0c0"
+                app:layout_constraintTop_toBottomOf="@+id/fontSizeLayout" />
+
+            <LinearLayout
+                android:id="@+id/locationEnabledLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/dividerOne">
+
+                <TextView
+                    android:id="@+id/locationEnabledText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/location_enabled"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="?attr/font_large"
+                    android:textStyle="bold" />
+
+                <Switch
+                    android:id="@+id/locationEnabledSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="@{settings.locationPermissionsAreGranted}" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/dividerTwo"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#c0c0c0"
+                app:layout_constraintTop_toBottomOf="@+id/locationEnabledLayout" />
+
+            <LinearLayout
+                android:id="@+id/showLocationsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dividerTwo">
+
+                <TextView
+                    android:id="@+id/showLocationsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_wide_filters"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="?attr/font_large"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/distanceSliderText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:text="@{settings.locationPermissionsAreGranted ? @string/slider_enabled : @string/slider_disabled}"
+                    android:textSize="?attr/font_small" />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/maxDistanceSlider"
+                    android:layout_width="260dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="28dp"
+                    android:stepSize="1"
+                    android:theme="@style/AppTheme"
+                    android:value="@{settings.maxDistanceSliderVal}"
+                    android:valueFrom="0"
+                    android:valueTo="10" />
+
+                <Button
+                    android:id="@+id/selectTagsButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/select_tags"
+                    android:textSize="?attr/font_medium" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/dividerThree"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#c0c0c0"
+                app:layout_constraintTop_toBottomOf="@+id/showLocationsLayout" />
+
+            <LinearLayout
+                android:id="@+id/distanceUnitLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dividerThree">
+
+                <TextView
+                    android:id="@+id/distanceUnitText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/distance_unit"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="?attr/font_large"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/distanceUnitChoice"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp">
+
+                    <RadioButton
+                        android:id="@+id/kilometersButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="@{settings.distanceUnit.displayName.equals(settings.kilometerString)}"
+                        android:text="@string/kilometers"
+                        android:textSize="?attr/font_medium" />
+
+                    <RadioButton
+                        android:id="@+id/milesButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="@{settings.distanceUnit.displayName.equals(settings.milesString)}"
+                        android:text="@string/miles"
+                        android:textSize="?attr/font_medium" />
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</layout>

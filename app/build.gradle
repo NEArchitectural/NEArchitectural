@@ -31,8 +31,8 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:2.2.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.firebase:firebase-database:19.2.1'
-    implementation 'com.google.firebase:firebase-analytics:17.2.3'
-    implementation 'com.google.firebase:firebase-firestore:21.4.1'
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.google.firebase:firebase-firestore:21.4.2'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -55,6 +55,9 @@ dependencies {
     annotationProcessor 'com.android.support:support-annotations:28.0.0'
     // Heart button
     implementation 'com.github.jd-alexander:LikeButton:0.2.3'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    // Google Services Location requests
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

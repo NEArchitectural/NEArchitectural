@@ -25,6 +25,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
+import com.nearchitectural.utilities.Settings;
 
 /* Author:  Kristiyan Doykov
  * Since:   13/12/19
@@ -52,7 +53,7 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
     // Renders a window containing the location title and summary for the selected marker
-    private void renderWindowText(final Marker marker, final View view) {
+    private void renderWindowText(final Marker marker, View view) {
 
         String title = marker.getTitle(); // Get marker title (location name)
         final Context context = view.getContext(); // Initialise view
@@ -69,9 +70,10 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (final QueryDocumentSnapshot document : task.getResult()) {
+                                // Get thumbnail URL from database
                                 thumbnailURL = (String) document.getData().get("thumbnail");
                                 setThumbnailURL(thumbnailURL);
-                                displayImage(task, context, marker);
+                                displayImage(context, marker);
                             }
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
@@ -91,41 +93,40 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
             textViewSnippet.setText("");
         }
 
+        if (Settings.getInstance().getFontSize() == R.style.FontStyle_Large) {
+            textViewSnippet.setMaxLines(4 - textViewTitle.getLineCount());
+        } else {
+            textViewSnippet.setMaxLines(6 - textViewTitle.getLineCount());
+        }
+
         thumbnailImage.setContentDescription(title);
     }
 
     // Handles the displaying of the thumbnail image associated with the location
-    private void displayImage(@NonNull Task<QuerySnapshot> task, Context context, final Marker marker) {
+    private void displayImage(Context context, final Marker marker) {
 
-        for (QueryDocumentSnapshot document : task.getResult()) {
+        // Display and render thumbnail as an image inside window using URL
+        GlideApp.with(context.getApplicationContext())
+                .load(thumbnailURL)
+                .centerCrop()
+                .override(520, 520)
+                .error(R.mipmap.ic_launcher_round)
+                .signature(new ObjectKey(thumbnailURL.hashCode()))
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        return false;
+                    }
 
-            // Get thumbnail URL from database
-            thumbnailURL = (String) document.getData().get("thumbnail");
-            setThumbnailURL(thumbnailURL);
-
-            // Display and render thumbnail as an image inside window using URL
-            GlideApp.with(context.getApplicationContext())
-                    .load(thumbnailURL)
-                    .centerCrop()
-                    .override(400, 400)
-                    .error(R.drawable.ic_launcher_background)
-                    .signature(new ObjectKey(thumbnailURL.hashCode()))
-                    .listener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            return false;
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        if (marker.isInfoWindowShown()) {
+                            marker.showInfoWindow();
                         }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            if (marker.isInfoWindowShown()) {
-                                marker.showInfoWindow();
-                            }
-                            return false;
-                        }
-                    })
-                    .into(thumbnailImage);
-        }
+                        return false;
+                    }
+                })
+                .into(thumbnailImage);
 
     }
 

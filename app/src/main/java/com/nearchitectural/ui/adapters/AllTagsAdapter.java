@@ -20,8 +20,8 @@ import java.util.List;
  */
 public class AllTagsAdapter extends BaseAdapter {
 
-    List<TagID> activeTags; // List of active tags
-    Context mContext; // Context from which adapter is to be used
+    private List<TagID> activeTags; // List of active tags
+    private Context mContext; // Context from which adapter is to be used
 
     public AllTagsAdapter(Context context, List<TagID> activeTags) {
         this.mContext = context;

@@ -1,21 +1,23 @@
 package com.nearchitectural.ui.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -23,7 +25,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.gson.Gson;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivityMapsBinding;
 import com.nearchitectural.ui.fragments.AboutFragment;
@@ -32,56 +33,65 @@ import com.nearchitectural.ui.fragments.LocationFragment;
 import com.nearchitectural.ui.fragments.MapFragment;
 import com.nearchitectural.ui.fragments.SettingsFragment;
 import com.nearchitectural.ui.fragments.TimelineFragment;
+import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Settings;
-import com.nearchitectural.utilities.models.Location;
+import com.nearchitectural.utilities.SettingsManager;
 
-/* Author:  Kristiyan Doykov
+
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/12/19
- * Version: 1.1
- * Purpose: Handle events and presentation of locations on Maps home screen
+ * Version: 1.2
+ * Purpose: Handle initialisation of application, and events and presentation of locations on Maps home screen
  */
 public class MapsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MapActivity"; // Tag used for logging status of application
 
     // LAYOUT ELEMENTS
-    private ActivityMapsBinding mapsBinding; // Binding between to the maps activity layout
     private DrawerLayout drawer; // Layout showing the sidebar menu
     private NavigationView navigationView; // View containing the drawer menu
     private TextView actionBarTitle; // Title for activity
+    private Toolbar toolbar; // Action (top) bar
+
+    boolean canRequestLocation; // Boolean to flag whether the application can request the user's location
     private FragmentManager fragmentManager; // Utility for switching between fragments
 
-    // Boolean representing whether location permissions have been granted
-    public Boolean mLocationPermissionsGranted;
-    // Location permission constant representing GPS access has been granted
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    // Location permission constant representing Network access has been granted
-    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 1234;
-
-    /* Upon creation of the activity, bind all the view components */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mapsBinding = DataBindingUtil.setContentView(this, R.layout.activity_maps);
+        // Boolean which is true only when the application is first loaded
+        boolean applicationStartup = !Settings.getInstance().isSettingsLoaded();
+
+        // Instantiate settings singleton with user's saved settings for use across child fragments
+        final SettingsManager settingsManager = new SettingsManager(getApplicationContext());
+        settingsManager.retrieveSettings();
+
+        // Apply user's chosen font size across activity and child fragments
+        getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
+        // Get user coordinates initially
+        CurrentCoordinates.getInstance().getDeviceLocation(this);
+
+        // Binding between to the maps activity layout
+        ActivityMapsBinding mapsBinding = DataBindingUtil.setContentView(this, R.layout.activity_maps);
 
         // Needed for switching back and forth between the different fragments
         fragmentManager = getSupportFragmentManager();
 
+        // Binding layout elements
+        toolbar = mapsBinding.toolbar;
+        actionBarTitle = mapsBinding.actionBarTitle;
+        drawer = mapsBinding.drawerLayout;
+        navigationView = mapsBinding.navView;
+
         // Set the action bar (top bar)
-        Toolbar toolbar = mapsBinding.toolbar;
         setSupportActionBar(toolbar);
         toolbar.bringToFront();
-        getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
+        }
 
-        actionBarTitle = mapsBinding.actionBarTitle;
-
-        // Map the drawer pop up
-        drawer = mapsBinding.drawerLayout;
-        // Map the drawer menu
-        navigationView = mapsBinding.navView;
         // Set the menu to use the listener provided in this class
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -89,35 +99,33 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-
-        // This is to make sure the button closes/opens the menu accordingly
+        // Ensure the hamburger button closes/opens the menu accordingly
         toggle.syncState();
 
-        // Acquire permissions to use users location
-        getLocationPermission();
+        // Flag initially set to true allowing the application to make a request
+        canRequestLocation = true;
 
-        /* Check the extras provided with launching this activity, e.g any strings like a place page
-         * to be opened, as the Location Fragment is making use of the fragment container in this
-         * layout, so when a user presses a certain card on the search view page, this layout will
-         * know exactly for which location to open a LocationFragment */
+        /* Bundle to hold information needed when handling if a fragment/location
+         * page needs to be opened */
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        Fragment fragmentToOpen = new MapFragment(); // Fragment to be opened based on user's choice
+        // Fragment to be opened based on user's choice (Map by default)
+        Fragment fragmentToOpen = new MapFragment(applicationStartup);
 
         if (bundle != null) {
             // Handles opening a location page
             if (bundle.get("openLocationPage") != null) {
-                Gson gson = new Gson();
-                Location location = gson.fromJson(bundle.getString("location"), Location.class);
-                fragmentToOpen = new LocationFragment(location);
+                fragmentToOpen = new LocationFragment((String) bundle.get("openLocationPage"));
             } else if (bundle.getString("openFragment") != null) {
                 // Check if the user tried to open one of the fragments from the Searchable Activity
                 String fragment = bundle.getString("openFragment");
                 bundle.remove("openFragment");
+                assert fragment != null;
+                // Switch statement to handle which fragment should be opened
                 switch (fragment) {
                     case "Map":
-                        fragmentToOpen = new MapFragment();
+                        fragmentToOpen = new MapFragment(applicationStartup);
                         break;
                     case "Settings":
                         fragmentToOpen = new SettingsFragment();
@@ -143,12 +151,134 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // do nothing, just override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        // Handles the user enabling/disabling location from outside the application
+        if (hasFocus && locationServicesEnabled() && canRequestLocation) {
+            requestLocationPermissions();
+        } else if (hasFocus && canRequestLocation) {
+            requestLocationPermissions();
+        }
+
+        handleFragmentPermissions(locationServicesEnabled() && locationPermissionsGranted());
     }
 
-    // Getter for navigationView
+    // Requests user both to enabled device location and grant location permissions for application
+    public void requestLocationPermissions() {
+
+        // Prompt user to enable device location if not enabled
+        if(!locationServicesEnabled()) {
+            Settings.getInstance().setLocationPermissionsGranted(false);
+            promptUserToEnableLocation();
+        }
+
+        // Prompt user to enable location permissions if not granted
+        if (!locationPermissionsGranted() && locationServicesEnabled()) {
+            Settings.getInstance().setLocationPermissionsGranted(false);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        }
+        // Save changes to settings if any made
+        new SettingsManager(this).saveSettings();
+    }
+
+    /* Method which determines if user has enabled location services (different from granting
+     * location permissions)
+     * Code taken and adapted from the following link:
+     * https://stackoverflow.com/questions/10311834/how-to-check-if-location-services-are-enabled
+     */
+    public boolean locationServicesEnabled() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        assert lm != null;
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ignored) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ignored) {}
+
+        return gps_enabled || network_enabled;
+    }
+
+    // Method which determines if user has granted location permissions for the application
+    private boolean locationPermissionsGranted() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /* Creates an alert dialog prompting the user to enable location services on their device
+     * Code taken and adapted from the following link (see locationServicesEnabled comments above):
+     * https://stackoverflow.com/questions/10311834/how-to-check-if-location-services-are-enabled
+     */
+    private void promptUserToEnableLocation() {
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.gps_network_not_enabled_title)
+                .setMessage(R.string.gps_network_not_enabled)
+                .setCancelable(false)
+                .setPositiveButton(R.string.open_location_settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        // If positive button clicked, open Android settings for enabling location
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 1);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // If negative button clicked, location permissions cannot be granted
+                        Settings.getInstance().setLocationPermissionsGranted(false);
+                        // Unset flag to prevent infinite loop of dialogs from popping up
+                        canRequestLocation = false;
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        boolean permissionsGranted = locationServicesEnabled() && locationPermissionsGranted();
+        handleFragmentPermissions(permissionsGranted);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, int[] grantResults) {
+
+        // Unset flag to prevent infinite loop of dialogs from popping up
+        canRequestLocation = false;
+
+        // Boolean determining if application has been granted location permissions
+        boolean permissionsGranted = grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED && locationServicesEnabled();
+
+        // Update Settings and coordinates to handle the result of permissions request
+        Settings.getInstance().setLocationPermissionsGranted(permissionsGranted);
+        new SettingsManager(this).saveSettings();
+        CurrentCoordinates.getInstance().getDeviceLocation(this);
+
+        handleFragmentPermissions(permissionsGranted);
+    }
+
+    // Invokes the location permission handling methods of child fragments which use location
+    private void handleFragmentPermissions(boolean permissionsGranted) {
+        Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (activeFragment instanceof SettingsFragment) {
+            // If Settings page is open, handle location permissions result within fragment
+            ((SettingsFragment) activeFragment).locationPermissionsResult(permissionsGranted);
+        } else if (activeFragment instanceof MapFragment) {
+            // If Maps page is open, handle location permissions result within fragment
+            ((MapFragment) activeFragment).locationPermissionsResult(permissionsGranted);
+        }
+    }
+
+    // Getter for navigationView (navigation side bar)
     public NavigationView getNavigationView() {
         return this.navigationView;
     }
@@ -158,25 +288,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         actionBarTitle.setText(title);
     }
 
-    /* Requesting a users permission to use location services */
-    private void getLocationPermission() {
-        String[] permissions = {FINE_LOCATION, COARSE_LOCATION};
-
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                    COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mLocationPermissionsGranted = true;
-                Settings.getInstance().setLocationPermissionsGranted(true);
-            } else {
-                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
-            }
-        } else {
-            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
-        }
-    }
-
-    /* If the back button is pressed */
+    // Handles the event of the user pressing the back button
     @Override
     public void onBackPressed() {
         // Close the nav drawer if open
@@ -186,15 +298,11 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         super.onBackPressed();
     }
 
-
-    /* Message bubble if you want to display something to the user */
-    public void MessageBox(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
     /* Listener for click events on the nav drawer menu items */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        /* Switch statement to handle the opening of the appropriate fragment for
+           each navigation item */
         switch (item.getItemId()) {
 
             case R.id.nav_timeline:
@@ -204,7 +312,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_map:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new MapFragment()).addToBackStack(MapFragment.TAG).commit();
+                        new MapFragment(false)).addToBackStack(MapFragment.TAG).commit();
                 break;
 
             case R.id.nav_settings:
@@ -226,11 +334,18 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    /* On press of the magnifying glass open the search view */
+    /* Starts search activity when the magnifying glass icon in the action bar is tapped  */
     public void openSearch(View view) {
         Intent myIntent = new Intent(MapsActivity.this, SearchableActivity.class);
         /* Optional key value pairs if you need to provide info to the Search view*/
-        //myIntent.putExtra("key", "value");
+        // myIntent.putExtra("key", "value");
         MapsActivity.this.startActivity(myIntent);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Update coordinates with last known position when activity is paused
+        CurrentCoordinates.getInstance().getDeviceLocation(this);
     }
 }
