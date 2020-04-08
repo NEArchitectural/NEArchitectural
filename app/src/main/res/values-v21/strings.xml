@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cardbackground">CardBackground</string>
+    <string name="castletest">castleTest</string>
+    <string name="arrow_to_go_left">Arrow to go left</string>
+    <string name="Title">TextView</string>
+    <string name="timelineSummary">TextView</string>
+    <string name="yearOpened">TextView</string>
+    <string name="newcastle_uni_logo">Newcastle uni logo</string>
+    <string name="newcastle_council">Newcastle council</string>
+    <string name="about_the_project_and_team_6">About the Project and Team 6</string>
+</resources>

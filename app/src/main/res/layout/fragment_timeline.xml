@@ -4,12 +4,147 @@
     android:layout_height="match_parent"
     android:background="@android:color/holo_red_light">
 
+<<<<<<< Updated upstream
+=======
+        <variable
+            name="model"
+            type="com.nearchitectural.utilities.models.TimeLine" />
+
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:onClick="timelineTitle"
+         >
+
+
+        <ImageView
+            android:id="@+id/cardBackground"
+            android:layout_width="323dp"
+            android:layout_height="615dp"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentBottom="false"
+            android:layout_centerInParent="true"
+            android:contentDescription="@string/cardbackground"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/carddesign" />
+
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="260dp"
+        android:layout_height="391dp"
+        android:layout_above="@id/divider"
+        android:layout_centerInParent="true"
+        android:contentDescription="@string/thumbnail"
+        android:cropToPadding="false"
+        android:scaleType="centerInside"
+        />
+
+    <ImageButton
+        android:id="@+id/rightarrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/cardBackground"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginRight="9dp"
+        android:background="#FFFFFF"
+        android:contentDescription="@string/arrow_to_go_right"
+        app:srcCompat="@drawable/rightarrow"
+        android:layout_alignEnd="@id/cardBackground"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="9dp" />
+
+    <ImageButton
+        android:id="@+id/leftarrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/cardBackground"
+        android:layout_alignLeft="@id/cardBackground"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="-36dp"
+        android:layout_marginLeft="-36dp"
+        android:background="@color/white"
+        android:contentDescription="@string/arrow_to_go_left"
+        app:srcCompat="@drawable/leftarrow" />
+>>>>>>> Stashed changes
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+<<<<<<< Updated upstream
         android:text="Timeline Fragment"
         android:textSize="?attr/font_large"
         android:layout_centerInParent="true"/>
+=======
+        android:layout_above="@id/thumbnail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"
+        android:text="@{model.name}" />
+
+    <TextView
+        android:id="@+id/timelineSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/thumbnail"
+        android:layout_centerInParent="true"
+        android:text="@{model.summaryTimeLine}"/>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignBottom="@id/cardBackground"
+            android:layout_marginBottom="121dp"
+            android:background="?android:attr/listDivider"
+            android:visibility="invisible"
+            tools:visibility="invisible" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_above="@id/thumbnail"
+            android:layout_marginBottom="-497dp"
+            android:background="?android:attr/listDivider"
+            android:visibility="invisible"
+            tools:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/yearOpened"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/divider3"
+            android:layout_centerHorizontal="true"
+            android:text="@{model.yearOpenedString}" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="16dp"
+            android:visibility="visible"
+            tools:visibility="invisible" />
+
+
+    </RelativeLayout>
+
+
+
+</layout>
+>>>>>>> Stashed changes
 
 </RelativeLayout>
