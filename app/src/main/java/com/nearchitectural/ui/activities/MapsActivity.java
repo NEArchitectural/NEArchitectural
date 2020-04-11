@@ -176,7 +176,8 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Prompt user to enable location permissions if not granted
         if (!locationPermissionsGranted() && locationServicesEnabled()) {
             Settings.getInstance().setLocationPermissionsGranted(false);
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         }
         // Save changes to settings if any made
         new SettingsManager(this).saveSettings();

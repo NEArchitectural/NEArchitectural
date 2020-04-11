@@ -54,6 +54,7 @@
     <!--Settings keys-->
     <string name="settings_file_key">com.nearchitectural.SETTINGS_FILE_KEY</string>
     <string name="settings_file_exists">com.nearchitectural.SETTINGS_EXISTS</string>
+    <string name="settings_initial_opening">com.nearchitectural.SETTINGS_INITIAL_OPENING</string>
     <string name="settings_font_size">com.nearchitectural.SETTINGS_FONT_SIZE</string>
     <string name="settings_distance_unit">com.nearchitectural.SETTINGS_DISTANCE_UNIT</string>
     <string name="settings_active_tags">com.nearchitectural.SETTINGS_ACTIVE_TAGS</string>

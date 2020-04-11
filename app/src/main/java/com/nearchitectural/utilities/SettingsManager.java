@@ -42,6 +42,7 @@ public class SettingsManager {
             editor.putStringSet(context.getString(R.string.settings_active_tags), new HashSet<String>());
             editor.putStringSet(context.getString(R.string.settings_liked_locations), new HashSet<String>());
             editor.putBoolean(context.getString(R.string.settings_file_exists), true);
+            editor.putBoolean(context.getString(R.string.settings_initial_opening),true);
             editor.commit();
         }
 
@@ -53,6 +54,7 @@ public class SettingsManager {
         userSettings.setLocationPermissionsGranted(settingsFile.getBoolean(context.getString(R.string.settings_location_permissions_granted), false));
         userSettings.setMaxDistance(settingsFile.getFloat(context.getString(R.string.settings_max_distance), (float) Double.MAX_VALUE));
         userSettings.setLikedLocations(new HashSet<>(settingsFile.getStringSet(context.getString(R.string.settings_liked_locations), new HashSet<String>())));
+        userSettings.setInitialOpening(settingsFile.getBoolean(context.getString(R.string.settings_initial_opening),true));
 
         // Set the active tags for the Settings TagMapper
         Set<String> activeTags = settingsFile.getStringSet(context.getString(R.string.settings_active_tags), new HashSet<String>());
@@ -76,6 +78,7 @@ public class SettingsManager {
         editor.putInt(context.getString(R.string.settings_font_size), userSettings.getFontSize());
         editor.putString(context.getString(R.string.settings_distance_unit), userSettings.getDistanceUnit().name());
         editor.putBoolean(context.getString(R.string.settings_location_permissions_granted), userSettings.locationPermissionsAreGranted());
+        editor.putBoolean(context.getString(R.string.settings_initial_opening), userSettings.isInitialOpening());
         editor.putFloat(context.getString(R.string.settings_max_distance), (float) userSettings.getMaxDistance());
         editor.putStringSet(context.getString(R.string.settings_liked_locations), userSettings.getLikedLocations());
 

@@ -185,8 +185,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        // If application is in start up, display intro dialog
-        if (introDialogNeeded) {
+        // If application is in start up for the first time, display intro dialog
+        if (Settings.getInstance().isInitialOpening()) {
             displayIntroDialog();
         }
     }
@@ -283,7 +283,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void displayIntroDialog() {
 
         // Once dialog has been displayed, set false to indicate it will not be displayed again
-        introDialogNeeded = false;
+        Settings.getInstance().setInitialOpening(false);
 
         // Initially hide the Google Map UI elements
         googleMap.getUiSettings().setZoomControlsEnabled(false);
