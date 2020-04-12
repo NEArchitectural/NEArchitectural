@@ -52,7 +52,7 @@ public class TagSelectorFragment extends DialogFragment {
         }
 
         // Set the dialogue title
-        builder.setTitle("Select Tags")
+        builder.setTitle(R.string.tag_selector_title)
                 /* Set the items to each of the tag display names and the current state of items
                  * to their corresponding values in the tag mapper */
                 .setMultiChoiceItems(items, currentStateOfItems,
@@ -72,7 +72,7 @@ public class TagSelectorFragment extends DialogFragment {
                             }
                         })
                 // Set the action buttons
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         // User clicked OK

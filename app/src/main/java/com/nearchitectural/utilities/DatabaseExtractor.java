@@ -4,10 +4,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
 
@@ -24,64 +21,82 @@ public class DatabaseExtractor {
 
     private static final String TAG = "DBExtractor";
 
-    // Takes all fields from the database report document and converts them into a report object
-    public static Report extractReport(DocumentSnapshot document) {
+    // Placeholder string for failed database retrieval
+    private static final String UNKNOWN = "Unknown";
 
-        String id = document.getId();
+    // Database field strings for Location collection
+    private static final String NAME = "name";
+    private static final String PLACE_TYPE = "placeType";
+    private static final String YEAR_OPENED = "yearOpened";
+    private static final String SUMMARY = "summary";
+    private static final String LONGITUDE = "longitude";
+    private static final String LATITUDE = "latitude";
+    private static final String THUMBNAIL = "thumbnail";
+    private static final String REPORT_ID = "reportID";
+    private static final String LIKES = "likes";
+
+    // Database field strings for Report collection
+    private static final String PARAGRAPHS = "paragraphs";
+    private static final String SLIDESHOW_URLS = "slideshowURLs";
+    private static final String REFERENCES = "references";
+
+
+    // Takes all fields from the database report document and converts them into a report object
+    public static Report extractReport(String reportID, Map<String, Object> reportData) {
+
         ArrayList<String> paragraphs = new ArrayList<>();
         ArrayList<String> slideshowURLs = new ArrayList<>();
         ArrayList<String> references = new ArrayList<>();
 
-        if (document.getData() != null) {
+        if (reportData != null) {
             try {
-                paragraphs = (ArrayList<String>) document.getData().get("paragraphs");
-                slideshowURLs = (ArrayList<String>) document.getData().get("slideshowURLs");
-                references = (ArrayList<String>) document.getData().get(("references"));
+                paragraphs = (ArrayList<String>) reportData.get(PARAGRAPHS);
+                slideshowURLs = (ArrayList<String>) reportData.get(SLIDESHOW_URLS);
+                references = (ArrayList<String>) reportData.get((REFERENCES));
             } catch (ClassCastException ignored) {
                 // Ignored since report data has already been instantiated as empty lists
             }
         }
 
-        Log.d(TAG, document.getId() + " => " + document.getData());
+        Log.d(TAG, reportID + " => " + reportData);
 
         // All the information about the current location
-        return new Report(id, paragraphs, slideshowURLs, references);
+        return new Report(reportID, paragraphs, slideshowURLs, references);
     }
 
     // Takes necessary fields from the database location document and converts them to a Map Marker
-    public static MarkerOptions extractMapMarker(QueryDocumentSnapshot document) {
+    public static MarkerOptions extractMapMarker(String locationID, Map<String, Object> locationData) {
 
         // Gather only information needed for marker
-        String name = document.getData().get("name") == null ?
-                "Unknown" : (String) document.getData().get("name");
+        String name = locationData.get(NAME) == null ?
+                UNKNOWN : (String) locationData.get(NAME);
 
-        String summary = document.getData().get("summary") == null ?
-                "Unknown" : (String) document.getData().get("summary");
+        String summary = locationData.get(SUMMARY) == null ?
+                UNKNOWN : (String) locationData.get(SUMMARY);
 
         // Evade accidental use of Strings in number fields in the database
         double latitude = 0;
-        if (document.getData().get("latitude") != null) {
+        if (locationData.get(LATITUDE) != null) {
             try {
-                latitude = (double) document.getData().get("latitude");
+                latitude = (double) locationData.get(LATITUDE);
             } catch (Exception ignored) {
                 latitude = 0;
             }
         }
         double longitude = 0;
-        if (document.getData().get("longitude") != null) {
+        if (locationData.get(LONGITUDE) != null) {
             try {
-                longitude = (double) document.getData().get("longitude");
+                longitude = (double) locationData.get(LONGITUDE);
             } catch (Exception ignored) {
                 longitude = 0;
             }
         }
 
-        Log.d(TAG, document.getId() + " => " + document.getData());
+        Log.d(TAG, locationID + " => " + locationData);
 
         // Only add a marker if name and coordinates are identified (since both are necessary)
-        Marker newMarker;
         assert name != null;
-        if (!(name.equals("Unknown") || (latitude == 0 && longitude == 0))) {
+        if (!(name.equals(UNKNOWN) || (latitude == 0 && longitude == 0))) {
             return new MarkerOptions().flat(false)
                     .position(new LatLng(latitude, longitude))
                     .title(name)
@@ -92,57 +107,57 @@ public class DatabaseExtractor {
     }
 
     // Takes all fields from the database location document and converts them to a Location object
-    public static Location extractLocation(String documentID, Map<String, Object> document) {
+    public static Location extractLocation(String documentID, Map<String, Object> locationData) {
 
         // For each location in database create a new Location instance and add it to the list
-        String name = document.get("name") == null ?
-                "Unknown" : (String) document.get("name");
+        String name = locationData.get(NAME) == null ?
+                UNKNOWN : (String) locationData.get(NAME);
 
-        String placeType = document.get("placeType") == null ?
-                "Unknown" : (String) document.get("placeType");
+        String placeType = locationData.get(PLACE_TYPE) == null ?
+                UNKNOWN : (String) locationData.get(PLACE_TYPE);
 
         long yearOpened = 0;
-        if (document.get("yearOpened") != null) {
+        if (locationData.get(YEAR_OPENED) != null) {
             try {
-                yearOpened = (long) document.get("yearOpened");
+                yearOpened = (long) locationData.get(YEAR_OPENED);
             } catch (Exception ignored) {
             }
         }
 
-        String summary = document.get("summary") == null ?
-                "Unknown" : (String) document.get("summary");
+        String summary = locationData.get(SUMMARY) == null ?
+                UNKNOWN : (String) locationData.get(SUMMARY);
 
         // Evade accidental use of Strings in number fields in the database
         double latitude = 0;
-        if (document.get("latitude") != null) {
+        if (locationData.get(LATITUDE) != null) {
             try {
-                latitude = (double) document.get("latitude");
+                latitude = (double) locationData.get(LATITUDE);
             } catch (Exception ignored) {
                 latitude = 0;
             }
         }
         double longitude = 0;
-        if (document.get("longitude") != null) {
+        if (locationData.get(LONGITUDE) != null) {
             try {
-                longitude = (double) document.get("longitude");
+                longitude = (double) locationData.get(LONGITUDE);
             } catch (Exception ignored) {
                 longitude = 0;
             }
         }
 
         // Stores information about which tags are active for this location
-        TagMapper locationTagMapper = new TagMapper(documentID, document);
+        TagMapper locationTagMapper = new TagMapper(documentID, locationData);
 
-        String thumbnailAddress = document.get("thumbnail") == null ?
-                "" : (String) document.get("thumbnail");
+        String thumbnailAddress = locationData.get(THUMBNAIL) == null ?
+                "" : (String) locationData.get(THUMBNAIL);
 
-        String reportID = document.get("reportID") == null ?
-                "Unknown" : (String) document.get("reportID");
+        String reportID = locationData.get(REPORT_ID) == null ?
+                UNKNOWN : (String) locationData.get(REPORT_ID);
 
         long likes = 0;
-        if (document.get("likes") != null) {
+        if (locationData.get(LIKES) != null) {
             try {
-                likes = (long) document.get("likes");
+                likes = (long) locationData.get(LIKES);
             } catch (Exception ignored) {
             }
         }

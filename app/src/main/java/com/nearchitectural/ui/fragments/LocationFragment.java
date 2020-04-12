@@ -19,6 +19,11 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -49,7 +54,8 @@ import java.util.Map;
  * Version: 1.2
  * purpose: Presents information and images regarding a given location
  */
-public class LocationFragment extends Fragment {
+public class LocationFragment extends Fragment implements OnMapReadyCallback {
+
     public static final String TAG = "LocationFragment";
 
     // Binding between location fragment and layout
@@ -70,16 +76,21 @@ public class LocationFragment extends Fragment {
     private Button showReferencesButton;
     private LikeButton likeButton;
     private ViewPager slideshow;
+    private TextView slideshowNumber;
 
-    private String locationID; // ID of the location to be displayed
     private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
     private FirebaseFirestore db; // Database reference field
     private Location location; // Location object to contain all the info
     private Report locationReport; // Report object to contain full location report and slideshow images
+    private MarkerOptions marker; // Information representing the location marker to be placed on the google map
 
     // Assign locationID when fragment is instantiated
-    public LocationFragment(String locationID) {
-        this.locationID = locationID;
+    public static LocationFragment newInstance(String locationID) {
+        Bundle locationIDBundle = new Bundle();
+        locationIDBundle.putString("locationID", locationID);
+        LocationFragment locationFragment = new LocationFragment();
+        locationFragment.setArguments(locationIDBundle);
+        return locationFragment;
     }
 
     @Nullable
@@ -104,6 +115,7 @@ public class LocationFragment extends Fragment {
         likesCount = locationBinding.likesCount;
         navigateButton = locationBinding.navigateButton;
         slideshow = locationBinding.slideshow;
+        slideshowNumber = locationBinding.slideshowNumber;
         likeButton = locationBinding.likeButton;
 
         /* Get an instance of the database in order to
@@ -150,7 +162,6 @@ public class LocationFragment extends Fragment {
         likeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-
                 // Increments value of likes attribute for location document in database
                 db.collection("locations")
                         .document(location.getId())
@@ -208,7 +219,13 @@ public class LocationFragment extends Fragment {
         // Get a reference to the parent activity
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         // Set the title of the action bar
-        parentActivity.setActionBarTitle("Details");
+        assert parentActivity != null;
+        parentActivity.setActionBarTitle(getString(R.string.navigation_location_details));
+        // Unset the selection from the navigation menu
+        int size = parentActivity.getNavigationView().getMenu().size();
+        for (int i = 0; i < size; i++) {
+            parentActivity.getNavigationView().getMenu().getItem(i).setChecked(false);
+        }
     }
 
     // Getter for location
@@ -248,6 +265,11 @@ public class LocationFragment extends Fragment {
 
     // Retrieves location from database using location ID and handles appropriate UI bindings
     private void retrieveLocation() {
+
+        assert getArguments() != null;
+        // ID of the location to be displayed
+        String locationID = getArguments().getString("locationID");
+
         db.collection("locations")
                 .document(locationID)
                 .get()
@@ -257,12 +279,15 @@ public class LocationFragment extends Fragment {
                         if (task.isSuccessful()) {
                             // Set up binding for location info once report is retrieved
                             location = DatabaseExtractor.extractLocation(task.getResult().getId(), task.getResult().getData());
+                            marker = DatabaseExtractor.extractMapMarker(task.getResult().getId(), task.getResult().getData());
                             locationBinding.setLocation(location); // Set selected location as data binding model
+
                             // Handle displaying UI elements which use location values
                             likeButton.setLiked(Settings.getInstance().locationIsLiked(location.getId()));
                             displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
-                            // Display location thumbnail and retrieve location report
-                            displayThumbnail();
+                            // Initialise UI elements requiring the location model
+                            initialiseMap();
+                            displayThumbnail(location.getThumbnailURL());
                             retrieveReport();
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
@@ -281,16 +306,10 @@ public class LocationFragment extends Fragment {
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
                             // Set up binding for location info once report is retrieved
-                            locationReport = DatabaseExtractor.extractReport(task.getResult());
+                            locationReport = DatabaseExtractor.extractReport(task.getResult().getId(), task.getResult().getData());
                             locationBinding.setReport(locationReport);
                             reportText = locationBinding.reportText;
-
-                            // Set up adapter for slideshow once slideshow URLs are retrieved
-                            locationSlideshowAdapter = new LocationSlideshowAdapter(
-                                    LocationFragment.this.getContext(),
-                                    new ArrayList<>(locationReport.getSlideshowURLs()));
-
-                            slideshow.setAdapter(locationSlideshowAdapter);
+                            createSlideshow();
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
                         }
@@ -298,14 +317,41 @@ public class LocationFragment extends Fragment {
                 });
     }
 
+    // Sets up the slideshow ViewPager and accompanying slideshow number text
+    private void createSlideshow() {
+        // Set up adapter for slideshow once slideshow URLs are retrieved
+        locationSlideshowAdapter = new LocationSlideshowAdapter(
+                LocationFragment.this.getContext(),
+                new ArrayList<>(locationReport.getSlideshowURLs()));
+        slideshow.setAdapter(locationSlideshowAdapter);
+
+        // Changes the current image index value on the slideshow TextView
+        slideshowNumber.setText(String.format(getString(R.string.slideshow_text), 1, locationSlideshowAdapter.getCount()));
+        slideshow.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                // Set index value for image (i.e. 1/3 or 2/4)
+                slideshowNumber.setText(String.format(getString(R.string.slideshow_text), slideshow.getCurrentItem()+1, locationSlideshowAdapter.getCount()));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+    }
+
     // Displays location thumbnail
-    private void displayThumbnail() {
+    private void displayThumbnail(String thumbnailURL) {
         GlideApp.with(getActivity())
-                .load(location.getThumbnailURL())
+                .load(thumbnailURL)
                 .centerCrop()
                 .override(525, 525)
-                .error(R.drawable.ic_launcher_background)
-                .placeholder(R.mipmap.ic_launcher_round)
+                .error(R.drawable.ic_error_message)
+                .placeholder(R.drawable.ic_loading_message)
                 .into(thumbnail);
     }
 
@@ -329,5 +375,17 @@ public class LocationFragment extends Fragment {
             }
         });
         dialog.show();
+    }
+
+    private void initialiseMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        assert mapFragment != null;
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        googleMap.addMarker(marker);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 12.5f));
     }
 }

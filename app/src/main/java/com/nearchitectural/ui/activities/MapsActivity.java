@@ -1,7 +1,6 @@
 package com.nearchitectural.ui.activities;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivityMapsBinding;
@@ -41,7 +41,8 @@ import com.nearchitectural.utilities.SettingsManager;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/12/19
  * Version: 1.2
- * Purpose: Handle initialisation of application, and events and presentation of locations on Maps home screen
+ * Purpose: Handle initialisation of application and provide utilities for child fragments
+ *          (i.e. location services and permissions handling and state restoration)
  */
 public class MapsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -53,19 +54,21 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     private TextView actionBarTitle; // Title for activity
     private Toolbar toolbar; // Action (top) bar
 
-    boolean canRequestLocation; // Boolean to flag whether the application can request the user's location
+    private boolean canRequestLocation; // Boolean to flag whether the application can request the user's location
     private FragmentManager fragmentManager; // Utility for switching between fragments
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Boolean which is true only when the application is first loaded
-        boolean applicationStartup = !Settings.getInstance().isSettingsLoaded();
 
         // Instantiate settings singleton with user's saved settings for use across child fragments
-        final SettingsManager settingsManager = new SettingsManager(getApplicationContext());
+        final SettingsManager settingsManager = new SettingsManager(this);
         settingsManager.retrieveSettings();
+
+        // Boolean which is true only when the application is first loaded
+        boolean firstTimeLaunch = !Settings.getInstance().settingsFileExist();
+        settingsManager.saveSettings(); // Save settings to set settingsFileExists to true
+
+        super.onCreate(savedInstanceState);
 
         // Apply user's chosen font size across activity and child fragments
         getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
@@ -84,12 +87,13 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         drawer = mapsBinding.drawerLayout;
         navigationView = mapsBinding.navView;
 
-        // Set the action bar (top bar)
+        // Initialise the action bar (top bar)
         setSupportActionBar(toolbar);
         toolbar.bringToFront();
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(false);
+            getSupportActionBar().setElevation(10);
         }
 
         // Set the menu to use the listener provided in this class
@@ -107,47 +111,53 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
         /* Bundle to hold information needed when handling if a fragment/location
          * page needs to be opened */
-        Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
+        Bundle bundle = getIntent().getExtras();
 
-        // Fragment to be opened based on user's choice (Map by default)
-        Fragment fragmentToOpen = new MapFragment(applicationStartup);
+        // If application does not need to restore state, launch as normal
+        if (savedInstanceState == null) {
+            // Fragment to be opened based on user's choice (Map by default)
+            Fragment fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
 
-        if (bundle != null) {
-            // Handles opening a location page
-            if (bundle.get("openLocationPage") != null) {
-                fragmentToOpen = new LocationFragment((String) bundle.get("openLocationPage"));
-            } else if (bundle.getString("openFragment") != null) {
-                // Check if the user tried to open one of the fragments from the Searchable Activity
-                String fragment = bundle.getString("openFragment");
-                bundle.remove("openFragment");
-                assert fragment != null;
-                // Switch statement to handle which fragment should be opened
-                switch (fragment) {
-                    case "Map":
-                        fragmentToOpen = new MapFragment(applicationStartup);
-                        break;
-                    case "Settings":
-                        fragmentToOpen = new SettingsFragment();
-                        break;
-                    case "About":
-                        fragmentToOpen = new AboutFragment();
-                        break;
-                    case "Help":
-                        fragmentToOpen = new HelpFragment();
-                        break;
-                    case "Timeline":
-                        fragmentToOpen = new TimelineFragment();
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + fragment);
+            String openLocationPage = getString(R.string.navigation_location_page);
+            String openFragment = getString(R.string.navigation_open_fragment);
+
+            if (bundle != null) {
+                // Handles opening a location page
+                if (bundle.get(openLocationPage) != null) {
+                    fragmentToOpen = LocationFragment.newInstance((String) bundle.get(openLocationPage));
+                } else if (bundle.getInt(openFragment) != 0) {
+                    // Check if the user tried to open one of the fragments from the Searchable Activity
+                    int fragmentID = bundle.getInt(openFragment);
+                    bundle.remove(openFragment);
+                    // Switch statement to handle which fragment should be opened
+                    switch (fragmentID) {
+                        case R.string.navigation_map:
+                            fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
+                            break;
+                        case R.string.navigation_settings:
+                            fragmentToOpen = new SettingsFragment();
+                            // Prevents popup from being shown upon every opening of settings fragment
+                            canRequestLocation = false;
+                            break;
+                        case R.string.navigation_about:
+                            fragmentToOpen = new AboutFragment();
+                            break;
+                        case R.string.navigation_help:
+                            fragmentToOpen = new HelpFragment();
+                            break;
+                        case R.string.navigation_timeline:
+                            fragmentToOpen = new TimelineFragment();
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + getString(fragmentID));
+                    }
                 }
             }
-        }
 
-        // Opens the appropriate fragment (Map by default)
-        fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                fragmentToOpen).commit();
+            // Opens the appropriate fragment (Map by default)
+            fragmentManager.beginTransaction().replace(R.id.fragment_container,
+                    fragmentToOpen).commit();
+        }
     }
 
     @Override
@@ -160,8 +170,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         } else if (hasFocus && canRequestLocation) {
             requestLocationPermissions();
         }
-
-        handleFragmentPermissions(locationServicesEnabled() && locationPermissionsGranted());
     }
 
     // Requests user both to enabled device location and grant location permissions for application
@@ -171,13 +179,14 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         if(!locationServicesEnabled()) {
             Settings.getInstance().setLocationPermissionsGranted(false);
             promptUserToEnableLocation();
+            handleFragmentPermissions(false);
         }
 
         // Prompt user to enable location permissions if not granted
         if (!locationPermissionsGranted() && locationServicesEnabled()) {
             Settings.getInstance().setLocationPermissionsGranted(false);
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            handleFragmentPermissions(false);
         }
         // Save changes to settings if any made
         new SettingsManager(this).saveSettings();
@@ -217,7 +226,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
      */
     private void promptUserToEnableLocation() {
 
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents)
                 .setTitle(R.string.gps_network_not_enabled_title)
                 .setMessage(R.string.gps_network_not_enabled)
                 .setCancelable(false)
@@ -244,7 +253,10 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // Update permissions across activity, settings and open fragments
         boolean permissionsGranted = locationServicesEnabled() && locationPermissionsGranted();
+        Settings.getInstance().setLocationPermissionsGranted(permissionsGranted);
+        new SettingsManager(this).saveSettings();
         handleFragmentPermissions(permissionsGranted);
     }
 
@@ -313,7 +325,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_map:
                 fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new MapFragment(false)).addToBackStack(MapFragment.TAG).commit();
+                        MapFragment.newInstance(false)).addToBackStack(MapFragment.TAG).commit();
                 break;
 
             case R.id.nav_settings:
@@ -331,6 +343,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                         new HelpFragment()).addToBackStack(HelpFragment.TAG).commit();
                 break;
         }
+        canRequestLocation = true;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -338,8 +351,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     /* Starts search activity when the magnifying glass icon in the action bar is tapped  */
     public void openSearch(View view) {
         Intent myIntent = new Intent(MapsActivity.this, SearchableActivity.class);
-        /* Optional key value pairs if you need to provide info to the Search view*/
-        // myIntent.putExtra("key", "value");
         MapsActivity.this.startActivity(myIntent);
     }
 

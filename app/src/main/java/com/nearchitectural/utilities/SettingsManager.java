@@ -10,7 +10,7 @@ import java.util.Set;
 
 /* Author:  Joel Bell-Wilding
  * Since:   19/03/20
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Handle the retrieval and storage of user settings on the Android device
  */
 public class SettingsManager {
@@ -39,10 +39,10 @@ public class SettingsManager {
             editor.putString(context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETER.name());
             editor.putBoolean(context.getString(R.string.settings_location_permissions_granted), false);
             editor.putFloat(context.getString(R.string.settings_max_distance), (float) Double.MAX_VALUE);
+            editor.putInt(context.getString(R.string.settings_max_distance_slider), 0);
             editor.putStringSet(context.getString(R.string.settings_active_tags), new HashSet<String>());
             editor.putStringSet(context.getString(R.string.settings_liked_locations), new HashSet<String>());
-            editor.putBoolean(context.getString(R.string.settings_file_exists), true);
-            editor.putBoolean(context.getString(R.string.settings_initial_opening),true);
+            editor.putBoolean(context.getString(R.string.settings_file_exists), false); // False upon first startup
             editor.commit();
         }
 
@@ -53,16 +53,15 @@ public class SettingsManager {
                 context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETER.name())));
         userSettings.setLocationPermissionsGranted(settingsFile.getBoolean(context.getString(R.string.settings_location_permissions_granted), false));
         userSettings.setMaxDistance(settingsFile.getFloat(context.getString(R.string.settings_max_distance), (float) Double.MAX_VALUE));
+        userSettings.setMaxDistanceSliderVal(settingsFile.getInt(context.getString(R.string.settings_max_distance_slider), 0));
         userSettings.setLikedLocations(new HashSet<>(settingsFile.getStringSet(context.getString(R.string.settings_liked_locations), new HashSet<String>())));
-        userSettings.setInitialOpening(settingsFile.getBoolean(context.getString(R.string.settings_initial_opening),true));
+        userSettings.setSettingsFileExists(settingsFile.getBoolean(context.getString(R.string.settings_file_exists), false));
 
         // Set the active tags for the Settings TagMapper
         Set<String> activeTags = settingsFile.getStringSet(context.getString(R.string.settings_active_tags), new HashSet<String>());
         for (TagID tag : TagID.values()) {
             userSettings.setTagValue(tag, activeTags.contains(tag.toString()));
         }
-        // Flag that settings have been loaded and application has initialised
-        userSettings.setSettingsLoaded();
     }
 
     // Saves the current state of all settings in the Settings singleton to the Android device
@@ -78,9 +77,11 @@ public class SettingsManager {
         editor.putInt(context.getString(R.string.settings_font_size), userSettings.getFontSize());
         editor.putString(context.getString(R.string.settings_distance_unit), userSettings.getDistanceUnit().name());
         editor.putBoolean(context.getString(R.string.settings_location_permissions_granted), userSettings.locationPermissionsAreGranted());
-        editor.putBoolean(context.getString(R.string.settings_initial_opening), userSettings.isInitialOpening());
         editor.putFloat(context.getString(R.string.settings_max_distance), (float) userSettings.getMaxDistance());
+        editor.putInt(context.getString(R.string.settings_max_distance_slider), userSettings.getMaxDistanceSliderVal());
         editor.putStringSet(context.getString(R.string.settings_liked_locations), userSettings.getLikedLocations());
+        //  Always set to true after first startup
+        editor.putBoolean(context.getString(R.string.settings_file_exists), true);
 
         // Retrieve the active tags from the Settings TagMapper and save them to device
         HashSet<String> activeTags = new HashSet<>();

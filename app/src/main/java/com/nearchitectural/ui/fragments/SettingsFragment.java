@@ -43,6 +43,7 @@ public class SettingsFragment extends Fragment {
     private Slider maxDistanceSlider;
     private Button tagSelectButton;
     private TextView distanceSliderText;
+    private Settings userSettings;
 
     public static final String TAG = "SettingsFragment";
 
@@ -52,12 +53,13 @@ public class SettingsFragment extends Fragment {
 
         // Settings Manager class to handle retrieval or saving of settings when altered
         final SettingsManager settingsManager = new SettingsManager(getContext());
+        settingsManager.retrieveSettings();
         // An instance of the Settings singleton through which settings can be read and modified
-        final Settings userSettings = Settings.getInstance();
+        userSettings = Settings.getInstance();
 
         // Data binding
         settingsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_settings, container, false);
-        settingsBinding.setSettings(Settings.getInstance()); // Set settings as data binding model
+        settingsBinding.setSettings(userSettings); // Set settings as data binding model
 
         // Bind all layout elements
         fontSizeSelection = settingsBinding.fontSizeChoices;
@@ -93,19 +95,7 @@ public class SettingsFragment extends Fragment {
                     userSettings.setFontSize(R.style.FontStyle_Medium);
                 }
                 settingsManager.saveSettings();
-
-                // Refreshes the MapActivity UI to update the font-size once changed
-                MapsActivity parentActivity = (MapsActivity) getActivity();
-                assert parentActivity != null;
-                parentActivity.getTheme().applyStyle(userSettings.getFontSize(), true);
-                // Reopens the Settings page after the refresh
-                Intent openSettingsIntent = new Intent(getContext(), MapsActivity.class);
-                openSettingsIntent.putExtra("openFragment", "Settings");
-                parentActivity.finish();
-                // Removes animation from transition to appear smoother when changing font
-                parentActivity.overridePendingTransition(0, 0);
-                parentActivity.startActivity(openSettingsIntent);
-                parentActivity.overridePendingTransition(0, 0);
+                refreshUI();
             }
         });
 
@@ -163,6 +153,7 @@ public class SettingsFragment extends Fragment {
                 } else if (checkedId == settingsBinding.milesButton.getId()) {
                     userSettings.setDistanceUnit(Settings.DistanceUnit.MILE);
                 }
+                handleSliderValue(userSettings.getMaxDistanceSliderVal());
                 settingsManager.saveSettings();
             }
         });
@@ -176,16 +167,18 @@ public class SettingsFragment extends Fragment {
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_settings).setChecked(true);
-        parentActivity.setActionBarTitle("Settings");
+        parentActivity.setActionBarTitle(getString(R.string.navigation_settings));
 
-        // Enabled/distable the distance slider based on whether location permissions are granted
-        maxDistanceSlider.setEnabled(Settings.getInstance().locationPermissionsAreGranted());
+        // Enabled/disable the distance slider based on whether location permissions are granted
+        handleSliderValue(userSettings.getMaxDistanceSliderVal());
+        maxDistanceSlider.setEnabled(userSettings.locationPermissionsAreGranted());
     }
 
     /* Handle the popup for tag selection */
     private void openTagSelector(final SettingsManager settingsManager) {
         // Create an instance of the tag selector fragment and show it
-        TagSelectorFragment dialogFragment = new TagSelectorFragment(Settings.getInstance().getTagMapper());
+        TagSelectorFragment dialogFragment = new TagSelectorFragment(userSettings.getTagMapper());
+        // Once dialog dismissed, save the updated state of tags in the settings
         dialogFragment.setDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -200,25 +193,42 @@ public class SettingsFragment extends Fragment {
     private void handleSliderValue(int distanceSelected) {
 
         // Sets the appropriate message for the associated text view
-        if (distanceSelected == 0 || distanceSelected == 10) {
+        if (distanceSelected <= 0 || distanceSelected >= 10) {
             distanceSliderText.setText(R.string.slider_enabled);
         } else {
             distanceSliderText.setText(String.format(getString(R.string.slider_distance),
                     distanceSelected,
-                    Settings.getInstance().getDistanceUnit().getDisplayName()));
+                    userSettings.getDistanceUnit().getDisplayName()));
         }
 
-        // If slider value is 0 (i.e not set) or location permissions not granted show all locations
-        if (distanceSelected == 0 || !Settings.getInstance().locationPermissionsAreGranted()) {
-            Settings.getInstance().setMaxDistance(Double.MAX_VALUE);
+        // Sets the slider value in the settings singleton
+        userSettings.setMaxDistanceSliderVal(distanceSelected);
+
+        if (distanceSelected <= 0 || distanceSelected >= 10 || !userSettings.locationPermissionsAreGranted()) {
+            userSettings.setMaxDistance(Double.MAX_VALUE);
         } else {
-            // else show locations within selected distance
-            Settings.getInstance().setMaxDistance(distanceSelected * Settings.getInstance().getDistanceUnit().getConversionRate());
+            userSettings.setMaxDistance(distanceSelected * userSettings.getDistanceUnit().getConversionRate());
         }
     }
 
     // Method to handle the result of a location permissions request
     public void locationPermissionsResult(boolean result) {
         locationEnabledSwitch.setChecked(result);
+    }
+
+    // Refreshes the Maps Activity UI to reflect the user's choice of font size
+    private void refreshUI() {
+        // Refreshes the MapActivity UI to update the font-size once changed
+        MapsActivity parentActivity = (MapsActivity) getActivity();
+        assert parentActivity != null;
+        parentActivity.getTheme().applyStyle(userSettings.getFontSize(), true);
+        // Reopens the Settings page after the refresh
+        Intent openSettingsIntent = new Intent(getContext(), MapsActivity.class);
+        openSettingsIntent.putExtra(getString(R.string.navigation_open_fragment), R.string.navigation_settings);
+        // Removes animation from transition to appear smoother when changing font
+        parentActivity.overridePendingTransition(0, 0);
+        parentActivity.startActivity(openSettingsIntent);
+        parentActivity.overridePendingTransition(0, 0);
+        parentActivity.finish();
     }
 }

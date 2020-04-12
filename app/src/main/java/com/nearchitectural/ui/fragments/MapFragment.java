@@ -60,17 +60,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap googleMap; // Object representing the map itself
     private FirebaseFirestore db; // The Firebase database containing location information
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
-    private boolean introDialogNeeded; // Flag boolean to signal if the intro dialog should show
+    private boolean introDialogNeeded; // Flag boolean to signal if the introductory dialog should show
     private CameraUpdate defaultCameraPosition; // The default position the map camera will hover over
     private Map<Marker, String> markerIDMap; // Map of markers to corresponding location IDs
+    // Bundle key for storing/retrieving the initial startup dialog boolean
+    private static final String introDialogKey = "INTRO_DIALOG_KEY";
 
-    public MapFragment(boolean introDialogNeeded) {
-        this.introDialogNeeded = introDialogNeeded;
+    // Stores a boolean indicating if the introductory dialog must be shown every new instance
+    public static MapFragment newInstance(boolean introDialogNeeded) {
+        Bundle introDialogBundle = new Bundle();
+        introDialogBundle.putBoolean(introDialogKey, introDialogNeeded);
+        MapFragment mapFragment = new MapFragment();
+        mapFragment.setArguments(introDialogBundle);
+        return mapFragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Gets the boolean for the introductory dialog from the bundle
+        assert getArguments() != null;
+        introDialogNeeded = getArguments().getBoolean(introDialogKey);
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
@@ -83,7 +93,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
-        parentActivity.setActionBarTitle("Map");
+        parentActivity.setActionBarTitle(getString(R.string.navigation_map));
 
         db = FirebaseFirestore.getInstance(); // Instance of the db for requesting/updating data
 
@@ -210,7 +220,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 if (locationMeetsSettingsCriteria(document)) {
                                     // Creates a marker using database extractor
-                                    MarkerOptions marker = DatabaseExtractor.extractMapMarker(document);
+                                    MarkerOptions marker = DatabaseExtractor.extractMapMarker(document.getId(), document.getData());
                                     // If retrieval of info from database is successful, adds new marker to map
                                     if (marker != null) {
                                         markerIDMap.put(googleMap.addMarker(marker), document.getId());
@@ -218,6 +228,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         cameraBoundBuilder.include(marker.getPosition());
                                     }
                                 }
+                            }
+                            if (markerIDMap.isEmpty()) {
+                                displayNoLocationsDialog();
                             }
                             // Once all markers are added to map, create bound and move camera with bound
                             createDefaultCameraPosition(cameraBoundBuilder);
@@ -243,11 +256,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    // Displays a dialog indicating that no locations match the user's chosen application-wide settings
+    private void displayNoLocationsDialog() {
+        // Display the dialog
+        new MaterialAlertDialogBuilder(getActivity(), R.style.ThemeOverlay_MaterialComponents)
+                .setIcon(R.mipmap.ic_launcher_round)
+                .setTitle(R.string.no_location_match_title)
+                .setMessage(R.string.no_location_match_message)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
     // Opens a new location fragment for the location corresponding to the provided marker
     private void openLocationFragment(Marker marker) {
 
         // Creates a new location fragment and opens it using the location ID
-        LocationFragment lf = new LocationFragment(markerIDMap.get(marker));
+        LocationFragment lf = LocationFragment.newInstance(markerIDMap.get(marker));
         getActivity()
                 .getSupportFragmentManager()
                 .beginTransaction()
@@ -292,11 +316,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Display the dialog
         Dialog introDialog = new MaterialAlertDialogBuilder(getActivity(), R.style.ThemeOverlay_MaterialComponents)
                 .setIcon(R.mipmap.ic_launcher_round)
-                .setTitle("Welcome to NE Architectural")
-                .setMessage("Tap on a Map Marker to see an information popup about the chosen location. " +
-                        "Hold your finger on the map to zoom back out and see all Locations. " +
-                        "Enjoy!")
-                .setPositiveButton("Ok", null)
+                .setTitle(R.string.intro_message_title)
+                .setMessage(R.string.intro_message_body)
+                .setPositiveButton(R.string.ok, null)
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
@@ -313,6 +335,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
          * https://stackoverflow.com/questions/9467026/changing-position-of-the-dialog-on-screen-android
          */
         Window window = introDialog.getWindow();
+        assert window != null;
         WindowManager.LayoutParams windowLayoutParams = window.getAttributes();
         windowLayoutParams.gravity = Gravity.BOTTOM;
         windowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -322,6 +345,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     // Method to handle the result of a location permissions request
     public void locationPermissionsResult(boolean permissionsGranted) {
         mLocationPermissionsGranted = permissionsGranted;
-        googleMap.setMyLocationEnabled(mLocationPermissionsGranted);
+        if (googleMap != null)
+            googleMap.setMyLocationEnabled(mLocationPermissionsGranted);
     }
 }

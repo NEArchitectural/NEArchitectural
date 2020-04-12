@@ -3,7 +3,6 @@ package com.nearchitectural.ui.adapters;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,9 +46,9 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
     // Constructor initialises necessary attributes
-    public MapMarkerWindowAdapter(Context mContext) {
+    public MapMarkerWindowAdapter(Context context) {
         db = FirebaseFirestore.getInstance();
-        window = LayoutInflater.from(mContext).inflate(R.layout.custom_info_panel, null);
+        window = View.inflate(context, R.layout.custom_info_panel, null);
     }
 
     // Renders a window containing the location title and summary for the selected marker
@@ -110,7 +109,8 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 .load(thumbnailURL)
                 .centerCrop()
                 .override(520, 520)
-                .error(R.mipmap.ic_launcher_round)
+                .error(R.drawable.ic_error_message)
+                .placeholder(R.drawable.ic_loading_message)
                 .signature(new ObjectKey(thumbnailURL.hashCode()))
                 .listener(new RequestListener<Drawable>() {
                     @Override

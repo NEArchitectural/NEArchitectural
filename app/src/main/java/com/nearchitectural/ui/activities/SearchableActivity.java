@@ -78,6 +78,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     private String currentQuery; // The string value stored in the text search bar
     private List<Location> locationsToShow; // List of all locations to show
     private TagMapper searchTagMapper; // Utility object used to aid in handling search by tag
+    private static final String SEARCH_QUERY_KEY = "search_query"; // Bundle key for storing/retrieving the search query string
 
     /* Variables used to determine if search results must be updated (i.e. if a
     * current value is different from its 'last' value, search results need updating */
@@ -137,13 +138,14 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         // Set the view model for displaying search results
         searchResults = ViewModelProviders.of(this).get(SearchResultsModel.class);
 
-        // Set the action bar (top bar)
+        // Initialise the action bar (top bar)
         setSupportActionBar(searchViewToolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayShowHomeEnabled(false);
+            getSupportActionBar().setElevation(10);
         }
-        actionBarTitle.setText(R.string.search_actionBar_title);
+        actionBarTitle.setText(R.string.search);
 
         // Enable/disable the distance slider based on whether location is enabled
         if (!Settings.getInstance().locationPermissionsAreGranted()) {
@@ -251,7 +253,6 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         lastLikedLocationIDs = Settings.getInstance().getLikedLocations();
         lastLatitude = CurrentCoordinates.getCoords().latitude;
         lastLongitude = CurrentCoordinates.getCoords().longitude;
-
     }
 
     // Handles creating the expanding search field on press of the magnifying glass icon
@@ -263,6 +264,12 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         MenuItem searchItem = menu.findItem(R.id.search_item);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) searchItem.getActionView();
+
+        // Sets the query upon UI state restore (i.e. when the user changes screen orientation)
+        if (!currentQuery.equals("")) {
+            searchItem.expandActionView();
+            searchView.setQuery(currentQuery, false);
+        }
 
         // Make sure search field takes up whole action bar even in landscape
         searchView.setMaxWidth(Integer.MAX_VALUE);
@@ -292,7 +299,6 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
 
     @Override
     protected void onPause() {
-
         // When activity is paused, record the last known values of each variable
         lastLikedLocationIDs = Settings.getInstance().getLikedLocations();
         lastLatitude = CurrentCoordinates.getCoords().latitude;
@@ -333,15 +339,15 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     public void openLocationPage(View view) {
         // Open a location page for the location with the provided ID
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-        myIntent.putExtra("openLocationPage", view.getTag().toString());
+        myIntent.putExtra(getString(R.string.navigation_location_page), view.getTag().toString());
         SearchableActivity.this.startActivity(myIntent);
         Log.d(TAG, "goToLocation");
     }
 
     // Opens the appropriate fragment corresponding to the provided fragment name
-    public void openFragment(String fragmentName) {
+    public void openFragment(int fragmentID) {
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
-        myIntent.putExtra("openFragment", fragmentName); // Optional parameters
+        myIntent.putExtra(getString(R.string.navigation_open_fragment), fragmentID); // Optional parameters
         this.startActivity(myIntent);
     }
 
@@ -402,26 +408,48 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         // Switch statement to handle which fragment should be opened
         switch (item.getItemId()) {
             case R.id.nav_timeline:
-                openFragment("Timeline");
+                openFragment(R.string.navigation_timeline);
                 break;
 
             case R.id.nav_map:
-                openFragment("Map");
+                openFragment(R.string.navigation_map);
                 break;
 
             case R.id.nav_settings:
-                openFragment("Settings");
+                openFragment(R.string.navigation_settings);
                 break;
 
             case R.id.nav_info:
-                openFragment("About");
+                openFragment(R.string.navigation_about);
                 break;
 
             case R.id.nav_help:
-                openFragment("Help");
+                openFragment(R.string.navigation_help);
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save the current search query for state change
+        for (TagID tag : TagID.values()) {
+            outState.putBoolean(tag.name(), searchTagMapper.getTagValuesMap().get(tag));
+        }
+        outState.putString(SEARCH_QUERY_KEY, currentQuery);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Restore the search query on state change
+        for (TagID tag : TagID.values()) {
+            searchTagMapper.addTagToMapper(tag, savedInstanceState.getBoolean(tag.name()));
+        }
+        currentQuery = savedInstanceState.getString(SEARCH_QUERY_KEY);
     }
 }

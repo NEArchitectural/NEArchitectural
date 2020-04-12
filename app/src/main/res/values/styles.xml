@@ -20,6 +20,7 @@
         <item name="font_medium">16sp</item>
         <item name="font_large">18sp</item>
         <item name="font_margin">16dp</item>
+        <item name="divider_margin">29dp</item>
     </style>
 
     <style name="FontStyle.Medium">
@@ -27,6 +28,7 @@
         <item name="font_medium">18sp</item>
         <item name="font_large">20sp</item>
         <item name="font_margin">12dp</item>
+        <item name="divider_margin">30dp</item>
     </style>
 
     <style name="FontStyle.Large">
@@ -34,6 +36,7 @@
         <item name="font_medium">22sp</item>
         <item name="font_large">24sp</item>
         <item name="font_margin">10dp</item>
+        <item name="divider_margin">34dp</item>
     </style>
 
     <style name="NavigationViewStyle">
@@ -45,10 +48,13 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/DialogTheme.DialogTitle</item>
         <item name="android:windowTitleStyle">@style/DialogTheme.DialogTitle</item>
     </style>
 
-    <style name="DialogTheme.DialogTitle">
+    <style name="DialogTheme.DialogTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
         <item name="android:textSize">?attr/font_large</item>
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
+
 </resources>

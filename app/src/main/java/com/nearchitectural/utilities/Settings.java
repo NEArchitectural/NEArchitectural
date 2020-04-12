@@ -19,8 +19,8 @@ public class Settings implements Serializable {
     private static double maxDistance; // The maximum distance within which locations will be shown
     private static int maxDistanceSliderVal; // The UI slider value for the selected max distance
     private static HashSet<String> likedLocations; // A set containing the IDs of all liked locations
-    // A boolean representing if application has been initialised (i.e. if settings have loaded)
-    private static boolean settingsLoaded = false;
+    // A boolean representing if application has been initialised (i.e. the settings file exists in storage)
+    private static boolean settingsFileExists = false;
 
     public boolean isInitialOpening() {
         return initialOpening;
@@ -73,13 +73,14 @@ public class Settings implements Serializable {
         return soleInstance;
     }
 
-    // Set settings loaded to true once settings are initially retrieved
-    void setSettingsLoaded() {
-        settingsLoaded = true;
+    // Indicates that the settings file exists (hence not a first time launch)
+    void setSettingsFileExists(boolean doesSettingsFileExist) {
+        settingsFileExists = doesSettingsFileExist;
     }
 
-    public boolean isSettingsLoaded() {
-        return settingsLoaded;
+    // Setter for file exists boolean
+    public boolean settingsFileExist() {
+        return settingsFileExists;
     }
 
     public TagMapper getTagMapper() {
@@ -117,9 +118,10 @@ public class Settings implements Serializable {
     // Sets the max distance and corresponding slider value for a given distance unit
     public void setMaxDistance(double newMaxDistance) {
         maxDistance = newMaxDistance;
-        maxDistanceSliderVal = (int) maxDistance/distanceUnit.conversionRate;
-        if (maxDistanceSliderVal < 0 || maxDistanceSliderVal > 10)
-            maxDistanceSliderVal = 0;
+    }
+
+    public void setMaxDistanceSliderVal(int newMaxDistanceSliderVal) {
+        maxDistanceSliderVal = newMaxDistanceSliderVal;
     }
 
     public int getMaxDistanceSliderVal() {

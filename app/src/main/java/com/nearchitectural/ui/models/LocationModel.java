@@ -19,32 +19,34 @@ import com.nearchitectural.utilities.models.Location;
  */
 public class LocationModel implements SortedListAdapter.ViewModel {
 
-    // Location object containing all info for a given location
-    private final Location locationInfo;
-    // No setter for this field as it will necessarily be provided in the constructor
-    private double mDistanceFromCurrentPos; // Distance from user's current location
+    private final Location locationInfo; // Location object containing all info for a given location
+    private double distanceFromUser; // Distance from user's current location
     private String distanceStringForListItem; // String representation of distance from user
 
-    public LocationModel(Location locationInfo, double mDistanceFromCurrentPos) {
+    public LocationModel(Location locationInfo, double distanceFromUser) {
 
         // Set the conversion rate to be used (for kilometers/miles) from settings
         int conversionRate = Settings.getInstance().getDistanceUnit().getConversionRate();
         this.locationInfo = locationInfo;
-        this.mDistanceFromCurrentPos = mDistanceFromCurrentPos;
-        int distance = (int) mDistanceFromCurrentPos/conversionRate;
+        this.distanceFromUser = distanceFromUser;
+        int distance = (int) distanceFromUser /conversionRate;
 
         // If distance from user is less than 1 measure of the distance unit, show a smaller measure
         if (distance <= 0) {
             if (Settings.getInstance().getDistanceUnit() == Settings.DistanceUnit.KILOMETER) {
                 // If kilometers, show distance in meters
-                this.distanceStringForListItem = (int) mDistanceFromCurrentPos + " meters away";
+                this.distanceStringForListItem = (int) distanceFromUser + " meters away";
             } else {
                 // If miles, show distance as a decimal of a mile (i.e. 0.32 miles away)
-                this.distanceStringForListItem = "0." + distance*100 + " miles away";
+                this.distanceStringForListItem = "0." + (int) (distanceFromUser/conversionRate*100) + " miles away";
             }
         } else {
             // Else show the measure and the distance unit
-            this.distanceStringForListItem = distance + " " + Settings.getInstance().getDistanceUnit().getDisplayName() + " away";
+            String displayName = Settings.getInstance().getDistanceUnit().getDisplayName();
+            if (distance == 1) {
+                displayName = displayName.substring(0, displayName.length()-1);
+            }
+            this.distanceStringForListItem = distance + " " + displayName + " away";
         }
     }
 
@@ -83,7 +85,7 @@ public class LocationModel implements SortedListAdapter.ViewModel {
 
     // Getters for distance from user (double value and string representation)
     public double getMDistanceFromCurrentPos() {
-        return mDistanceFromCurrentPos;
+        return distanceFromUser;
     }
 
     public String getDistanceStringForListItem() {
@@ -116,8 +118,8 @@ public class LocationModel implements SortedListAdapter.ViewModel {
                 .load(imageURL)
                 .override(500, 500)
                 .centerCrop()
-                .error(R.mipmap.ic_launcher_round)
-                .placeholder(R.mipmap.ic_launcher_round)
+                .error(R.drawable.ic_error_message)
+                .placeholder(R.drawable.ic_loading_message)
                 .into(imageView);
     }
 }

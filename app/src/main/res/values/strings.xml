@@ -1,55 +1,89 @@
 <resources>
+    <!-- General Text and Headings -->
     <string name="app_name">NE Architectural</string>
-    <string name="title_activity_maps">NE Architectural</string>
+    <string name="search">Search</string>
+    <string name="close">Close</string>
+    <string name="launcher_logo">Launcher Logo</string>
+    <string name="cancel">Cancel</string>
+    <string name="location_heading">Location</string>
+    <string name="search_icon">Magnifying glass/Search Icon</string>
+    <string name="ok">OK</string>
+
+    <!-- Navigation Drawer Related -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Tags and Text -->
     <string name="wheelChair_accessibility_text">Wheelchair accessible</string>
     <string name="cheap_entry_text">Cheap entry</string>
     <string name="free_entry_text">No entry fee</string>
     <string name="child_friendly_text">Suitable for children</string>
+    <string name="liked_locations_icon">Liked Locations Icon</string>
+    <string name="wheelchair_accessible_icon">Wheelchair Accessible Icon</string>
+    <string name="tag_selector_title">Select Tags</string>
+
+    <!-- Map Page Text -->
+    <string name="no_location_match_title">No Location Matches</string>
+    <string name="no_location_match_message">No locations matching your chosen application-wide filters were found. Please adjust your application-wide filters to see more locations.</string>
+    <string name="intro_message_title">Welcome to NE Architectural</string>
+    <string name="intro_message_body">Tap on a Map Marker to see an information popup about the chosen location. Hold your finger on the map to zoom back out and see all Locations. Enjoy!</string>
+
+    <!-- Location Page Text -->
     <string name="general_information">General Information</string>
-    <string name="photos">Photos</string>
+    <string name="photos">Photo Gallery</string>
     <string name="take_me_here">Take me here!</string>
     <string name="like_button_text">I like this place</string>
     <string name="show_references">Show references</string>
     <string name="references">References</string>
     <string name="hide_references">Hide references</string>
-    <string name="search">Search</string>
     <string name="show_all_tags">Showing All Tags</string>
-    <string name="launcher_logo">Launcher Logo</string>
-    <string name="close">Close</string>
-    <string name="thumbnail">Location Thumbnail</string>
     <string name="all_tags_button">Show All Tags Button</string>
     <string name="reference_placeholder">No References To Display</string>
-    <string name="search_actionBar_title">Search</string>
+    <string name="location_thumbnail">Location Thumbnail</string>
+    <string name="slideshow_text">%d/%d</string>
+
+    <!-- Slider related Text -->
     <string name="slider_max_distance">Showing locations over 10 %1$s</string>
     <string name="slider_distance">Showing locations within %1$d %2$s</string>
     <string name="slider_unset_text">Use slider to adjust maximum distance</string>
+    <string name="slider_disabled">Please enable location for distance filtering</string>
+    <string name="slider_enabled">Showing all Locations</string>
+
+    <!-- Search Related -->
     <plurals name="search_results_count">
         <item quantity="one">1 Result</item>
         <item quantity="other">%d Results</item>
     </plurals>
-    <string name="font_size_string">Font Size</string>
-    <string name="slider_disabled">Please enable location for distance filtering</string>
-    <string name="slider_enabled">Showing all Locations</string>
+    <string name="more_tags_icon">More Tags Icon</string>
+
+    <!-- Settings Related -->
     <string name="gps_network_not_enabled_title">Location Services Not Enabled</string>
     <string name="gps_network_not_enabled">Location services are not enabled. Please enable your location services to use location features.</string>
     <string name="open_location_settings">Open Settings</string>
-    <string name="cancel">Cancel</string>
-    <string name="search_icon">Magnifying glass/Search Icon</string>
-    <string name="liked_locations_icon">Liked Locations Icon</string>
-    <string name="wheelchair_accessible_icon">Wheelchair Accessible Icon</string>
-    <string name="more_tags_icon">More Tags Icon</string>
-    <string name="location_thumbnail">Location Thumbnail</string>
-    <string name="font_size_small">Small</string>
-    <string name="font_size_medium">Medium</string>
-    <string name="font_size_large">Large</string>
     <string name="location_enabled">Location Enabled</string>
     <string name="app_wide_filters">Application-wide Location Filters</string>
     <string name="select_tags">Select Tags</string>
+
+    <!-- Font Text -->
+    <string name="font_size_string">Font Size</string>
+    <string name="font_size_small">Small</string>
+    <string name="font_size_medium">Medium</string>
+    <string name="font_size_large">Large</string>
+
+    <!-- Distance Text -->
     <string name="distance_unit">Distance Unit</string>
     <string name="kilometers">Kilometers</string>
     <string name="miles">Miles</string>
+
+    <!-- Navigation Strings -->
+    <string name="navigation_location_page">openLocationPage</string>
+    <string name="navigation_open_fragment">openFragment</string>
+    <string name="navigation_map">Map</string>
+    <string name="navigation_timeline">Timeline</string>
+    <string name="navigation_settings">Settings</string>
+    <string name="navigation_about">About</string>
+    <string name="navigation_help">Help</string>
+    <string name="navigation_location_details">Details</string>
 
     <!--Settings keys-->
     <string name="settings_file_key">com.nearchitectural.SETTINGS_FILE_KEY</string>
@@ -61,4 +95,5 @@
     <string name="settings_liked_locations">com.nearchitectural.SETTINGS_LIKED_LOCATIONS</string>
     <string name="settings_location_permissions_granted">com.nearchitectural.SETTINGS_LOCATION_PERMISSIONS</string>
     <string name="settings_max_distance">com.nearchitectural.SETTINGS_MAX_DISTANCE</string>
+    <string name="settings_max_distance_slider">com.nearchitectural.SETTINGS_MAX_DISTANCE_SLIDER</string>
 </resources>
