@@ -2,18 +2,27 @@ package com.nearchitectural.utilities;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/02/20
- * Version: 1.2
+ * Version: 1.3
  * Purpose: Extracts information from the database using the provided document
  *          and produces and returns a model object containing the necessary information
  */
@@ -23,6 +32,10 @@ public class DatabaseExtractor {
 
     // Placeholder string for failed database retrieval
     private static final String UNKNOWN = "Unknown";
+
+    // Keys for the Firebase collections
+    private static final String LOCATION_COLLECTION_KEY = "locations";
+    private static final String REPORT_COLLECTION_KEY = "reports";
 
     // Database field strings for Location collection
     private static final String NAME = "name";
@@ -40,9 +53,89 @@ public class DatabaseExtractor {
     private static final String SLIDESHOW_URLS = "slideshowURLs";
     private static final String REFERENCES = "references";
 
+    // Instance of the Firebase database in which information is stored
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    /* Callback interface for retrieving information from the Firestore database
+       Idea taken and adapted from the following link:
+       https://stackoverflow.com/questions/42128909/return-value-from-valueeventlistener-java
+     */
+    public interface DatabaseCallback<T> {
+        void onDataRetrieved(T data);
+    }
+
+
+    // Returns a list of all locations in the database location collection via callback
+    public void extractAllLocations(@NonNull final DatabaseCallback<List<Location>> finishedCallback) {
+
+        db.collection(LOCATION_COLLECTION_KEY)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        // List to store all locations in
+                        List<Location> locationList = new ArrayList<>();
+
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, String.valueOf(document.getData().get(NAME)));
+                                // For each location create a new Location instance and add it to the list
+                                Location locationTemp = parseLocation(document.getId(), document.getData());
+                                locationList.add(locationTemp);
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                            finishedCallback.onDataRetrieved(locationList);
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                            finishedCallback.onDataRetrieved(null);
+                        }
+                    }
+                });
+    }
+
+    // Returns a specific location corresponding to a provided location ID in the database via callback
+    public void extractLocationByID(String locationID, @NonNull final DatabaseCallback<Location> finishedCallback) {
+
+        db.collection(LOCATION_COLLECTION_KEY)
+                .document(locationID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Location location = parseLocation(task.getResult().getId(), task.getResult().getData());
+                            finishedCallback.onDataRetrieved(location);
+                        } else {
+                            Log.w(TAG, "Error getting report.", task.getException());
+                            finishedCallback.onDataRetrieved(null);
+                        }
+                    }
+                });
+    }
+
+    // Returns a specific report corresponding to a provided report ID in the database via callback
+    public void extractReport(String reportID, @NonNull final DatabaseCallback<Report> finishedCallback) {
+
+        db.collection(REPORT_COLLECTION_KEY)
+                .document(reportID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Report report = parseReport(task.getResult().getId(), task.getResult().getData());
+                            finishedCallback.onDataRetrieved(report);
+                        } else {
+                            Log.w(TAG, "Error getting report.", task.getException());
+                            finishedCallback.onDataRetrieved(null);
+                        }
+                    }
+                });
+    }
 
     // Takes all fields from the database report document and converts them into a report object
-    public static Report extractReport(String reportID, Map<String, Object> reportData) {
+    private Report parseReport(String reportID, Map<String, Object> reportData) {
 
         ArrayList<String> paragraphs = new ArrayList<>();
         ArrayList<String> slideshowURLs = new ArrayList<>();
@@ -64,50 +157,24 @@ public class DatabaseExtractor {
         return new Report(reportID, paragraphs, slideshowURLs, references);
     }
 
-    // Takes necessary fields from the database location document and converts them to a Map Marker
-    public static MarkerOptions extractMapMarker(String locationID, Map<String, Object> locationData) {
+    // Takes necessary fields from a location object and converts them to a Map Marker
+    public MarkerOptions parseMapMarker(Location location) {
 
         // Gather only information needed for marker
-        String name = locationData.get(NAME) == null ?
-                UNKNOWN : (String) locationData.get(NAME);
+        String name = location.getName();
+        String summary = location.getSummary();
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
 
-        String summary = locationData.get(SUMMARY) == null ?
-                UNKNOWN : (String) locationData.get(SUMMARY);
-
-        // Evade accidental use of Strings in number fields in the database
-        double latitude = 0;
-        if (locationData.get(LATITUDE) != null) {
-            try {
-                latitude = (double) locationData.get(LATITUDE);
-            } catch (Exception ignored) {
-                latitude = 0;
-            }
-        }
-        double longitude = 0;
-        if (locationData.get(LONGITUDE) != null) {
-            try {
-                longitude = (double) locationData.get(LONGITUDE);
-            } catch (Exception ignored) {
-                longitude = 0;
-            }
-        }
-
-        Log.d(TAG, locationID + " => " + locationData);
-
-        // Only add a marker if name and coordinates are identified (since both are necessary)
-        assert name != null;
-        if (!(name.equals(UNKNOWN) || (latitude == 0 && longitude == 0))) {
-            return new MarkerOptions().flat(false)
-                    .position(new LatLng(latitude, longitude))
-                    .title(name)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                    .snippet(summary);
-        }
-        return null;
+        return new MarkerOptions().flat(false)
+                .position(new LatLng(latitude, longitude))
+                .title(name)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .snippet(summary);
     }
 
     // Takes all fields from the database location document and converts them to a Location object
-    public static Location extractLocation(String documentID, Map<String, Object> locationData) {
+    private Location parseLocation(String documentID, Map<String, Object> locationData) {
 
         // For each location in database create a new Location instance and add it to the list
         String name = locationData.get(NAME) == null ?

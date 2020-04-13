@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +24,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
@@ -79,7 +78,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
     private TextView slideshowNumber;
 
     private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
-    private FirebaseFirestore db; // Database reference field
+    private DatabaseExtractor extractor; // Used to extract location/report information from database
     private Location location; // Location object to contain all the info
     private Report locationReport; // Report object to contain full location report and slideshow images
     private MarkerOptions marker; // Information representing the location marker to be placed on the google map
@@ -118,9 +117,8 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         slideshowNumber = locationBinding.slideshowNumber;
         likeButton = locationBinding.likeButton;
 
-        /* Get an instance of the database in order to
-         retrieve/update the data for the specific location */
-        db = FirebaseFirestore.getInstance();
+        // Instantiate extractor for retrieval of location information from database
+        extractor = new DatabaseExtractor();
         retrieveLocation();
 
         // Hides references by default
@@ -162,44 +160,12 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         likeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-                // Increments value of likes attribute for location document in database
-                db.collection("locations")
-                        .document(location.getId())
-                        .update("likes", location.getLikes() + 1)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                            /* If database update is successful, add like to
-                            location object and update value on UI */
-                                location.addLike();
-                                likesCount.setText(String.valueOf(location.getLikes()));
-                                // Update settings with new liked location
-                                Settings.getInstance().addLikedLocation(location.getId());
-                                new SettingsManager(getContext()).saveSettings();
-                                location.getAllTags().put(TagID.LIKED_BY_YOU, true);
-                            }
-                        });
+                likeLocation(likeButton);
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
-                // Decrements value of likes attribute for location document in database
-                db.collection("locations")
-                        .document(location.getId())
-                        .update("likes", location.getLikes() - 1)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                /* If database update is successful, remove like from
-                                location object and update value on UI */
-                                location.removeLike();
-                                likesCount.setText(String.valueOf(location.getLikes()));
-                                // Update settings by removing location from liked locations
-                                Settings.getInstance().removeLikedLocation(location.getId());
-                                new SettingsManager(getContext()).saveSettings();
-                                location.getAllTags().put(TagID.LIKED_BY_YOU, false);
-                            }
-                        });
+                unlikeLocation(likeButton);
             }
         });
 
@@ -270,51 +236,37 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         // ID of the location to be displayed
         String locationID = getArguments().getString("locationID");
 
-        db.collection("locations")
-                .document(locationID)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Set up binding for location info once report is retrieved
-                            location = DatabaseExtractor.extractLocation(task.getResult().getId(), task.getResult().getData());
-                            marker = DatabaseExtractor.extractMapMarker(task.getResult().getId(), task.getResult().getData());
-                            locationBinding.setLocation(location); // Set selected location as data binding model
-
-                            // Handle displaying UI elements which use location values
-                            likeButton.setLiked(Settings.getInstance().locationIsLiked(location.getId()));
-                            displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
-                            // Initialise UI elements requiring the location model
-                            initialiseMap();
-                            displayThumbnail(location.getThumbnailURL());
-                            retrieveReport();
-                        } else {
-                            Log.w(TAG, "Error getting report.", task.getException());
-                        }
-                    }
-                });
+        // Retrieve location info via callback and update UI with retrieved information
+        extractor.extractLocationByID(locationID, new DatabaseExtractor.DatabaseCallback<Location>() {
+            @Override
+            public void onDataRetrieved(Location data) {
+                if (data != null) {
+                    location = data;
+                    locationBinding.setLocation(location); // Set selected location as data binding model
+                    // Handle displaying UI elements which use location values
+                    likeButton.setLiked(Settings.getInstance().locationIsLiked(location.getId()));
+                    displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
+                    displayThumbnail(location.getThumbnailURL());
+                    retrieveReport(location.getReportID());
+                    initialiseMap();
+                }
+            }
+        });
     }
 
     // Retrieves report corresponding to location from database and handles appropriate UI bindings
-    private void retrieveReport() {
-        db.collection("reports")
-                .document(location.getReportID())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Set up binding for location info once report is retrieved
-                            locationReport = DatabaseExtractor.extractReport(task.getResult().getId(), task.getResult().getData());
-                            locationBinding.setReport(locationReport);
-                            reportText = locationBinding.reportText;
-                            createSlideshow();
-                        } else {
-                            Log.w(TAG, "Error getting report.", task.getException());
-                        }
-                    }
-                });
+    private void retrieveReport(String reportID) {
+        extractor.extractReport(reportID, new DatabaseExtractor.DatabaseCallback<Report>() {
+            @Override
+            public void onDataRetrieved(Report data) {
+                if (data != null) {
+                    locationReport = data;
+                    locationBinding.setReport(locationReport);
+                    reportText = locationBinding.reportText;
+                    createSlideshow();
+                }
+            }
+        });
     }
 
     // Sets up the slideshow ViewPager and accompanying slideshow number text
@@ -377,7 +329,68 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         dialog.show();
     }
 
+    // Handles the incrementing of likes for location across database and application
+    private void likeLocation(final LikeButton likeButton) {
+        // Access location document via database
+        FirebaseFirestore.getInstance()
+                .collection("locations")
+                .document(location.getId())
+                //Increment likes field by one
+                .update("likes", location.getLikes() + 1)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                            /* If database update is successful, add like to
+                            location object and update value on UI */
+                        location.addLike();
+                        likesCount.setText(String.valueOf(location.getLikes()));
+                        // Update settings with new liked location
+                        Settings.getInstance().addLikedLocation(location.getId());
+                        new SettingsManager(getContext()).saveSettings();
+                        location.getAllTags().put(TagID.LIKED_BY_YOU, true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // If update fails, do not change state of like button
+                        likeButton.setLiked(false);
+                    }
+                });
+    }
+
+    // Handles the decrementing of likes for location across database and application
+    private void unlikeLocation(final LikeButton likeButton) {
+        // Access location document via database
+        FirebaseFirestore.getInstance()
+                .collection("locations")
+                .document(location.getId())
+                .update("likes", location.getLikes() - 1)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                                /* If database update is successful, remove like from
+                                location object and update value on UI */
+                        location.removeLike();
+                        likesCount.setText(String.valueOf(location.getLikes()));
+                        // Update settings by removing location from liked locations
+                        Settings.getInstance().removeLikedLocation(location.getId());
+                        new SettingsManager(getContext()).saveSettings();
+                        location.getAllTags().put(TagID.LIKED_BY_YOU, false);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // If update fails, do not change state of like button
+                        likeButton.setLiked(true);
+                    }
+                });;
+    }
+
+    // Initialises up the Google Map fragment and map marker
     private void initialiseMap() {
+        marker = extractor.parseMapMarker(location);
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
@@ -385,6 +398,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        // Once map is ready, add marker and move camera to appropriate position
         googleMap.addMarker(marker);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 12.5f));
     }

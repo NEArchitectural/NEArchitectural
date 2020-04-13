@@ -2,12 +2,12 @@ package com.nearchitectural.ui.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.load.DataSource;
@@ -17,14 +17,11 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 import com.nearchitectural.utilities.Settings;
+
+import java.util.Map;
 
 /* Author:  Kristiyan Doykov
  * Since:   13/12/19
@@ -37,17 +34,12 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private final String TAG = "MapMarkerWindowAdapter"; // Tag used for logging status of application
 
     private final View window; // The window view itself
-    private FirebaseFirestore db; // Database reference for retrieving information/image to display
     private ImageView thumbnailImage; // View holding the thumbnail image
-    private String thumbnailURL; // The URL hosting the thumbnail image
-
-    private void setThumbnailURL(String thumbnailURL) {
-        this.thumbnailURL = thumbnailURL;
-    }
+    private Map<Marker, String> markerThumbnailMap; // Map of markers to their corresponding thumbnailURLs
 
     // Constructor initialises necessary attributes
-    public MapMarkerWindowAdapter(Context context) {
-        db = FirebaseFirestore.getInstance();
+    public MapMarkerWindowAdapter(Context context, Map<Marker, String> markerThumbnailMap) {
+        this.markerThumbnailMap = markerThumbnailMap;
         window = View.inflate(context, R.layout.custom_info_panel, null);
     }
 
@@ -60,25 +52,7 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
         // Initialise UI layout references
         TextView textViewTitle = view.findViewById(R.id.title);
         thumbnailImage = view.findViewById(R.id.picture);
-
-        // Get location thumbnail using marker name and display image
-        db.collection("locations").whereEqualTo("name", marker.getTitle())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (final QueryDocumentSnapshot document : task.getResult()) {
-                                // Get thumbnail URL from database
-                                thumbnailURL = (String) document.getData().get("thumbnail");
-                                setThumbnailURL(thumbnailURL);
-                                displayImage(context, marker);
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        displayImage(context, marker, markerThumbnailMap.get(marker));
 
         // Set window information
         textViewTitle.setText(title);
@@ -102,7 +76,9 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
     // Handles the displaying of the thumbnail image associated with the location
-    private void displayImage(Context context, final Marker marker) {
+    private void displayImage(Context context, final Marker marker, String thumbnailURL) {
+
+        Log.d(TAG, thumbnailURL);
 
         // Display and render thumbnail as an image inside window using URL
         GlideApp.with(context.getApplicationContext())
@@ -120,9 +96,17 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        if (marker.isInfoWindowShown()) {
-                            marker.showInfoWindow();
-                        }
+                        /* When image is loaded, post to main thread via runnable
+                        *  taken and adapted from the following link:
+                        *  https://github.com/bumptech/glide/issues/2920 */
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (marker.isInfoWindowShown()) {
+                                    marker.showInfoWindow();
+                                }
+                            }
+                        });
                         return false;
                     }
                 })

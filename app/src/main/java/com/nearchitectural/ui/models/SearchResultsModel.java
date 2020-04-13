@@ -2,17 +2,10 @@ package com.nearchitectural.ui.models;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.DistanceCalculator;
@@ -62,80 +55,62 @@ public class SearchResultsModel extends ViewModel {
     // Takes a list of locations to update and replaces each with the updated version stored in the database
     public void refineSearchResults(List<Location> locationsToUpdate) {
 
-        // Initialises database and lists to hold location and model data
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DatabaseExtractor extractor = new DatabaseExtractor();
 
-        // Loops through each location in the list and updates it
-        for (final Location location : locationsToUpdate) {
-            db.collection("locations")
-                    .document(location.getId())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
+        for (Location location : locationsToUpdate) {
+            extractor.extractLocationByID(location.getId(), new DatabaseExtractor.DatabaseCallback<Location>() {
+                @Override
+                public void onDataRetrieved(Location data) {
+                    if (data != null) {
+                        locationsToShow.put(data.getId(), data);
 
-                                DocumentSnapshot document = task.getResult();
+                        // Find current distance between user and location
+                        double distanceToUser = DistanceCalculator.calculateDistance(
+                                CurrentCoordinates.getCoords().latitude, data.getLatitude(),
+                                CurrentCoordinates.getCoords().longitude, data.getLongitude());
 
-                                // Create location from database
-                                Location locationTemp = DatabaseExtractor.extractLocation(document.getId(), document.getData());
-                                locationsToShow.put(locationTemp.getId(), locationTemp);
-
-                                // Find current distance between user and location
-                                double distanceToUser = DistanceCalculator.calculateDistance(
-                                        CurrentCoordinates.getCoords().latitude, locationTemp.getLatitude(),
-                                        CurrentCoordinates.getCoords().longitude, locationTemp.getLongitude());
-
-                                // Create location model from location object and distance to user
-                                locationModelsList.put(locationTemp.getId(), new LocationModel(locationTemp, distanceToUser));
-                            }
-                            locationModels.postValue(new ArrayList<>(locationModelsList.values())); // Post model to model list
-                            locations.postValue(new ArrayList<>(locationsToShow.values())); // Post location to location list
-                        }
-                    });
+                        // Create location model from location object and distance to user
+                        locationModelsList.put(data.getId(), new LocationModel(data, distanceToUser));
+                    }
+                    locationModels.postValue(new ArrayList<>(locationModelsList.values())); // Post model to model list
+                    locations.postValue(new ArrayList<>(locationsToShow.values())); // Post location to location list
+                }
+            });
         }
     }
 
     // Initially retrieves locations from the database and creates results model
     private void createSearchResults() {
 
-        // Initialises database and lists to hold location and model data
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DatabaseExtractor extractor = new DatabaseExtractor();
 
-        // Creates location and models from database and posts each to their respective lists
-        db.collection("locations")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, String.valueOf(document.getData().get("name")));
+        extractor.extractAllLocations(new DatabaseExtractor.DatabaseCallback<List<Location>>() {
+            @Override
+            public void onDataRetrieved(List<Location> data) {
+                if (data != null) {
+                    for (Location location : data) {
+                        locationsToShow.put(location.getId(), location);
 
-                                // For each location create a new Location instance and add it to the list
-                                Location locationTemp = DatabaseExtractor.extractLocation(document.getId(), document.getData());
-                                locationsToShow.put(locationTemp.getId(), locationTemp);
+                        // Find current distance between user and location
+                        double distanceToUser = DistanceCalculator.calculateDistance(
+                                CurrentCoordinates.getCoords().latitude, location.getLatitude(),
+                                CurrentCoordinates.getCoords().longitude, location.getLongitude());
 
-                                // Find current distance between user and location
-                                double distanceToUser = DistanceCalculator.calculateDistance(
-                                        CurrentCoordinates.getCoords().latitude, locationTemp.getLatitude(),
-                                        CurrentCoordinates.getCoords().longitude, locationTemp.getLongitude());
-
-                                // Create location model from location object and distance to user
-                                locationModelsList.put(locationTemp.getId(), new LocationModel(locationTemp, distanceToUser));
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            locationModels.postValue(new ArrayList<>(locationModelsList.values())); // Post model to model list
-                            locations.postValue(new ArrayList<>(locationsToShow.values())); // Post location to location list
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                            // Send an empty results list
-                            locationsToShow = new HashMap<>();
-                            locations.postValue(new ArrayList<>(locationsToShow.values()));
-                            locationModelsList = new HashMap<>();
-                            locationModels.postValue(new ArrayList<>(locationModelsList.values()));
-                        }
+                        // Create location model from location object and distance to user
+                        locationModelsList.put(location.getId(), new LocationModel(location, distanceToUser));
+                        Log.d(TAG, location.getId() + " => " + location.getName());
                     }
-                });
+                    locationModels.postValue(new ArrayList<>(locationModelsList.values())); // Post model to model list
+                    locations.postValue(new ArrayList<>(locationsToShow.values())); // Post location to location list
+                } else {
+                    Log.w(TAG, "Error getting documents.");
+                    // Send an empty results list
+                    locationsToShow = new HashMap<>();
+                    locations.postValue(new ArrayList<>(locationsToShow.values()));
+                    locationModelsList = new HashMap<>();
+                    locationModels.postValue(new ArrayList<>(locationModelsList.values()));
+                }
+            }
+        });
     }
 }

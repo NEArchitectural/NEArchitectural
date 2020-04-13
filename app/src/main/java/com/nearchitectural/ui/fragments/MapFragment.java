@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,13 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.nearchitectural.R;
 import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.MapMarkerWindowAdapter;
@@ -42,9 +35,10 @@ import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.DistanceCalculator;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.TagID;
-import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.models.Location;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
@@ -58,18 +52,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private MapView mapView; // View object displaying the map
     private GoogleMap googleMap; // Object representing the map itself
-    private FirebaseFirestore db; // The Firebase database containing location information
+    private DatabaseExtractor extractor;
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
     private boolean introDialogNeeded; // Flag boolean to signal if the introductory dialog should show
     private CameraUpdate defaultCameraPosition; // The default position the map camera will hover over
     private Map<Marker, String> markerIDMap; // Map of markers to corresponding location IDs
+    private Map<Marker, String> markerThumbnailURLMap;
     // Bundle key for storing/retrieving the initial startup dialog boolean
-    private static final String introDialogKey = "INTRO_DIALOG_KEY";
+    private static final String INTRO_DIALOG_KEY = "introDialogKey";
 
     // Stores a boolean indicating if the introductory dialog must be shown every new instance
     public static MapFragment newInstance(boolean introDialogNeeded) {
         Bundle introDialogBundle = new Bundle();
-        introDialogBundle.putBoolean(introDialogKey, introDialogNeeded);
+        introDialogBundle.putBoolean(INTRO_DIALOG_KEY, introDialogNeeded);
         MapFragment mapFragment = new MapFragment();
         mapFragment.setArguments(introDialogBundle);
         return mapFragment;
@@ -80,7 +75,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                              Bundle savedInstanceState) {
         // Gets the boolean for the introductory dialog from the bundle
         assert getArguments() != null;
-        introDialogNeeded = getArguments().getBoolean(introDialogKey);
+        introDialogNeeded = getArguments().getBoolean(INTRO_DIALOG_KEY);
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
@@ -95,7 +90,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);
         parentActivity.setActionBarTitle(getString(R.string.navigation_map));
 
-        db = FirebaseFirestore.getInstance(); // Instance of the db for requesting/updating data
+        extractor = new DatabaseExtractor();
 
         parentActivity.requestLocationPermissions(); // Request location permissions if needed
         mLocationPermissionsGranted = Settings.getInstance().locationPermissionsAreGranted();
@@ -169,9 +164,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
 
-        /* Set the map to use the application custom info window */
-        googleMap.setInfoWindowAdapter(new MapMarkerWindowAdapter(getActivity()));
-
         /* Navigation feature - when the user holds finger on the screen, hide the
          * current info window and return to the default position */
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -208,38 +200,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         final LatLngBounds.Builder cameraBoundBuilder = new LatLngBounds.Builder();
         // Map of markers to location IDs for opening a location page
         markerIDMap = new HashMap<>();
+        markerThumbnailURLMap = new HashMap<>();
 
-        // Cycle through all locations in database and set a marker if appropriate
-        db.collection("locations")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Cycles through all location documents in database and adds a map marker
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                if (locationMeetsSettingsCriteria(document)) {
-                                    // Creates a marker using database extractor
-                                    MarkerOptions marker = DatabaseExtractor.extractMapMarker(document.getId(), document.getData());
-                                    // If retrieval of info from database is successful, adds new marker to map
-                                    if (marker != null) {
-                                        markerIDMap.put(googleMap.addMarker(marker), document.getId());
-                                        // Add marker position to camera bounds
-                                        cameraBoundBuilder.include(marker.getPosition());
-                                    }
-                                }
-                            }
-                            if (markerIDMap.isEmpty()) {
-                                displayNoLocationsDialog();
-                            }
-                            // Once all markers are added to map, create bound and move camera with bound
-                            createDefaultCameraPosition(cameraBoundBuilder);
-                            googleMap.moveCamera(defaultCameraPosition);
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
+        // Cycle through all locations in database and set a marker if settings criteria is met
+        extractor.extractAllLocations(new DatabaseExtractor.DatabaseCallback<List<Location>>() {
+            @Override
+            public void onDataRetrieved(List<Location> data) {
+                if (data != null) {
+                    for (Location location : data) {
+                        if (locationMeetsSettingsCriteria(location)) {
+                            // Add marker to map and ID and thumbnail maps
+                            Marker marker = googleMap.addMarker(extractor.parseMapMarker(location));
+                            markerIDMap.put(marker, location.getId());
+                            markerThumbnailURLMap.put(marker, location.getThumbnailURL());
+                            // Include marker in camera bounds for showing all locations on map
+                            cameraBoundBuilder.include(marker.getPosition());
                         }
                     }
-                });
+                    // Set the map to use the application custom info window
+                    googleMap.setInfoWindowAdapter(new MapMarkerWindowAdapter(getActivity(), markerThumbnailURLMap));
+                    // Show an informative dialog if no markers have been added to map
+                    if (markerIDMap.isEmpty()) {
+                        displayIntroDialog();
+                    }
+                    // Once all markers are added to map, create bound and move camera with bound
+                    createDefaultCameraPosition(cameraBoundBuilder);
+                    googleMap.moveCamera(defaultCameraPosition);
+                }
+            }
+        });
     }
 
     /* Uses the positions of map markers to create a bound for the map camera such
@@ -281,25 +270,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     // Method used to determine if location used for map marker meets the criteria of the user settings
-    private boolean locationMeetsSettingsCriteria(QueryDocumentSnapshot document) {
+    private boolean locationMeetsSettingsCriteria(Location location) {
 
         Settings userSettings = Settings.getInstance();
 
-        // Create TagMapper for checking tags of the given location
-        TagMapper locationTagMapper = new TagMapper(document.getId(), document.getData());
+        // Guard against database retrieval errors
+        if (location.getName().equals("Unknown")
+                || (location.getLatitude() == 0 && location.getLongitude() == 0)) {
+            return false;
+        }
 
         // Ensures location matches all set tags
         for (TagID tag: TagID.values()) {
-            if (userSettings.getTagValue(tag) && !locationTagMapper.getTagValuesMap().get(tag)) {
+            if (userSettings.getTagValue(tag) && !location.getTagValue(tag)) {
                 return false;
             }
         }
 
         // Ensures location is within the user specified max distance
         return (DistanceCalculator.calculateDistance(CurrentCoordinates.getCoords().latitude,
-                (double) document.getData().get("latitude"),
+                location.getLatitude(),
                 CurrentCoordinates.getCoords().longitude,
-                (double) document.getData().get("longitude")) <= userSettings.getMaxDistance());
+                location.getLongitude()) <= userSettings.getMaxDistance());
     }
 
     /* Displays the introductory dialog on the first use of the map fragment during each
