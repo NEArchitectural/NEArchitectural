@@ -3,12 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-
         <variable
             name="model"
             type="com.nearchitectural.utilities.models.TimeLine" />
-
-
     </data>
 
     <RelativeLayout
@@ -43,7 +40,7 @@
         android:contentDescription="@string/castletest"
         android:cropToPadding="false"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/newcastlecastle" />
+        bind:thumbnail="@{model.thumbnailURL}"/>
 
     <ImageButton
         android:id="@+id/rightarrow"

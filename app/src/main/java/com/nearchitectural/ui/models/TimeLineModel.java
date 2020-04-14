@@ -4,11 +4,12 @@ import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;
 
+import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
 import com.nearchitectural.utilities.models.TimeLine;
 
-public class TimeLineModel {
+public class TimeLineModel implements SortedListAdapter.ViewModel {
 
     private final TimeLine TimeLineInfo;
 

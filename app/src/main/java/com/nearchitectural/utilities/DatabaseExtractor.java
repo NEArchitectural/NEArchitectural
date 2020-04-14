@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
+import com.nearchitectural.utilities.models.TimeLine;
 
 import java.util.ArrayList;
 
@@ -154,5 +155,35 @@ public class DatabaseExtractor {
                 locationTagMapper.getTagValuesMap(),
                 thumbnailAddress,
                 reportID);
+    }
+
+    public static TimeLine extractTimeline(QueryDocumentSnapshot document) {
+
+
+        String id = document.getId();
+
+        String name = document.getData().get("name") == null ?
+                "Unknown" : (String) document.getData().get("name");
+
+        String summary = document.getData().get("summary") == null ?
+                "Unknown" : (String) document.getData().get("summary");
+
+        String thumbnailAddress = document.getData().get("thumbnail") == null ?
+                "" : (String) document.getData().get("thumbnail");
+
+        long yearOpened = 0;
+        if (document.getData().get("yearOpened") != null) {
+            try {
+                yearOpened = (long) document.getData().get("yearOpened");
+            } catch (Exception ignored) {
+            }
+        }
+
+        return new TimeLine(
+                name,
+                summary,
+                yearOpened,
+                thumbnailAddress);
+
     }
 }
