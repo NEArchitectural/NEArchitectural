@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -47,8 +46,6 @@ public class TimelineFragment extends Fragment {
     private TimeLine timeLine;
     private TextView yearOpened;
     private FragmentTimelineBinding timeLineBinding;
-    private DocumentReference DocRef = db.collection("locations").document("2gkTmImrIVsxfCMCuO5d");
-
 
 
     public TimeLine getTimeLine() {
@@ -62,21 +59,6 @@ public class TimelineFragment extends Fragment {
         timeLineBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_timeline, container, false);
         timeLineBinding.setModel(timeLine); // Set selected location as data binding model
 
-        return inflater.inflate(R.layout.fragment_timeline, container, false);
-    }
-
-    @Override
-    public void onViewCreated( View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        MapsActivity parentActivity = (MapsActivity) this.getActivity();
-        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);
-        parentActivity.setActionBarTitle("Timeline");
-
-    }
-
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         title = timeLineBinding.timelineTitle;
         summaryTimeLine = timeLineBinding.timelineSummary;
         thumbnail = timeLineBinding.castleTest;
@@ -86,7 +68,6 @@ public class TimelineFragment extends Fragment {
         title.findViewById(R.id.timelineTitle);
         summaryTimeLine.findViewById(R.id.timelineSummary);
         thumbnail.findViewById(R.id.castleTest);
-
         db = FirebaseFirestore.getInstance();
 
         db.collection("locations")
@@ -110,6 +91,25 @@ public class TimelineFragment extends Fragment {
                         }
                     }
                 });
+
+        return inflater.inflate(R.layout.fragment_timeline, container, false);
+    }
+
+    @Override
+    public void onViewCreated( View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);
+        parentActivity.setActionBarTitle("Timeline");
+
+    }
+
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+
+
 
 
 

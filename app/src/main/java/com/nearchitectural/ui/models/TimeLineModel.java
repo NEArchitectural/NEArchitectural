@@ -14,9 +14,7 @@ public class TimeLineModel implements SortedListAdapter.ViewModel {
     private final TimeLine TimeLineInfo;
 
     public TimeLineModel (TimeLine TimeLineInfo){
-
         this.TimeLineInfo = TimeLineInfo;
-
     }
 
     public TimeLine getTimeLineInfo() {

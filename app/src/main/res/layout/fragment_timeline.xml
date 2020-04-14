@@ -31,16 +31,15 @@
             android:scaleType="fitXY"
             app:srcCompat="@drawable/carddesign" />
 
-    <ImageView
-        android:id="@+id/castleTest"
-        android:layout_width="260dp"
-        android:layout_height="391dp"
-        android:layout_above="@id/divider"
-        android:layout_centerInParent="true"
-        android:contentDescription="@string/castletest"
-        android:cropToPadding="false"
-        android:scaleType="centerInside"
-        bind:thumbnail="@{model.thumbnailURL}"/>
+        <ImageView
+            android:id="@+id/castleTest"
+            bind:thumbnail="@{model.thumbnailURL}"
+            android:layout_width="260dp"
+            android:layout_height="391dp"
+            android:layout_centerInParent="true"
+            android:contentDescription="@string/castletest"
+            android:cropToPadding="false"
+            android:scaleType="centerInside" />
 
     <ImageButton
         android:id="@+id/rightarrow"
@@ -91,38 +90,18 @@
         android:layout_centerInParent="true"
         android:text="@{model.summaryTimeLine}"/>
 
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignBottom="@id/cardBackground"
-            android:layout_marginBottom="121dp"
-            android:background="?android:attr/listDivider"
-            tools:visibility="invisible" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_above="@id/castleTest"
-            android:layout_marginBottom="-497dp"
-            android:background="?android:attr/listDivider"
-            tools:visibility="invisible" />
-
         <TextView
             android:id="@+id/yearOpened"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/divider3"
-            android:layout_centerHorizontal="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="215dp"
+            android:layout_marginLeft="215dp"
+            android:layout_marginBottom="12dp"
             android:text="@{model.yearOpenedString}" />
 
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentBottom="true"
-            android:background="?android:attr/listDivider" />
     </RelativeLayout>
 
 
