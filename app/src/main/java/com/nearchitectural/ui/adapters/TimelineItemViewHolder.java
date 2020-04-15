@@ -8,6 +8,12 @@ import com.nearchitectural.databinding.TimelineItemBinding;
 import com.nearchitectural.ui.models.LocationModel;
 import com.nearchitectural.utilities.Settings;
 
+/* Author:  Taylor Stubbs
+ * Since:   02/04/20
+ * Version: 1.0
+ * Purpose: Handles the displaying of the locations in the timeline (i.e. a list of locations)
+ *          to the UI using binding
+ */
 public class TimelineItemViewHolder extends SortedListAdapter.ViewHolder<LocationModel> {
 
     private final TimelineItemBinding mBinding;
