@@ -96,4 +96,14 @@
     <string name="settings_location_permissions_granted">com.nearchitectural.SETTINGS_LOCATION_PERMISSIONS</string>
     <string name="settings_max_distance">com.nearchitectural.SETTINGS_MAX_DISTANCE</string>
     <string name="settings_max_distance_slider">com.nearchitectural.SETTINGS_MAX_DISTANCE_SLIDER</string>
+    <string name="about_ne_architectural">About NE Architectural</string>
+    <string name="about_northumberland">About Northumberland</string>
+    <string name="about_us">About Us</string>
+    <string name="contact">Contact</string>
+    <string name="about_header_image">About Header Image</string>
+    <string name="ne_architectural_logo">NE Architectural logo</string>
+    <string name="about_us_image">About Us Image</string>
+    <string name="timeline_start_icon">Timeline Start Icon</string>
+    <string name="timeline_end_icon">Timeline End Icon</string>
+    <string name="like_button">Like Button</string>
 </resources>

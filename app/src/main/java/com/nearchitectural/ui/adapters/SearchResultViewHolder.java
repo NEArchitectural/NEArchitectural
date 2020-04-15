@@ -15,11 +15,11 @@ import com.nearchitectural.utilities.Settings;
  * Purpose: Handles the displaying of the search results (i.e. a list of locations) to the UI
  *          using binding
  */
-public class LocationSearchResultViewHolder extends SortedListAdapter.ViewHolder<LocationModel> {
+public class SearchResultViewHolder extends SortedListAdapter.ViewHolder<LocationModel> {
 
     private final ListItemBinding mBinding;
 
-    LocationSearchResultViewHolder(ListItemBinding binding) {
+    SearchResultViewHolder(ListItemBinding binding) {
         super(binding.getRoot());
         mBinding = binding;
     }
@@ -28,10 +28,11 @@ public class LocationSearchResultViewHolder extends SortedListAdapter.ViewHolder
     protected void performBind(final LocationModel locationModel) {
         mBinding.setLocation(locationModel);
 
+        // Get layout elements
         final TextView summary = mBinding.listItemSummary;
         final TextView yearOpened = mBinding.listItemYearOpened;
         final TextView distanceToUser = mBinding.listItemDistance;
-        int viewVisibility = View.GONE;
+        int viewVisibility = View.GONE; // Used to alter visibility of layout elements
 
         // If location permissions are granted, display distance to user
         if (!Settings.getInstance().locationPermissionsAreGranted()) {

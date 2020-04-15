@@ -4,6 +4,7 @@ import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;
 
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
@@ -13,7 +14,7 @@ import com.nearchitectural.utilities.models.Location;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/12/19
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Internally uses a Location object to model location information to be adapted
  *          for a given layout
  */
@@ -22,6 +23,9 @@ public class LocationModel implements SortedListAdapter.ViewModel {
     private final Location locationInfo; // Location object containing all info for a given location
     private double distanceFromUser; // Distance from user's current location
     private String distanceStringForListItem; // String representation of distance from user
+    private boolean isFirstInList = false; // Flags if model is the first in list (i.e. index 0)
+    private boolean isLastInList = false; // Flags if model is the last in list (i.e. index n-1)
+    private boolean oddIndex = false; // Flags if model has an odd index (i.e. index % 2 is false)
 
     public LocationModel(Location locationInfo, double distanceFromUser) {
 
@@ -72,7 +76,7 @@ public class LocationModel implements SortedListAdapter.ViewModel {
     }
 
     public String getYearOpenedString() {
-        return "Opened: " + locationInfo.getYearOpenedString();
+        return locationInfo.getYearOpenedString();
     }
 
     public String getThumbnailURL() {
@@ -92,6 +96,31 @@ public class LocationModel implements SortedListAdapter.ViewModel {
         return distanceStringForListItem;
     }
 
+    // Getters and setters for isFirstInList and isLastInList booleans
+    public boolean isFirstInList() {
+        return isFirstInList;
+    }
+
+    public void setFirstInList(boolean firstInList) {
+        isFirstInList = firstInList;
+    }
+
+    public boolean isLastInList() {
+        return isLastInList;
+    }
+
+    public void setLastInList(boolean lastInList) {
+        isLastInList = lastInList;
+    }
+
+    // Getter and setter for whether location model is odd number in list
+    public boolean isOddIndex() {
+        return oddIndex;
+    }
+
+    public void setOddIndex(boolean oddIndex) {
+        this.oddIndex = oddIndex;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -111,8 +140,8 @@ public class LocationModel implements SortedListAdapter.ViewModel {
     }
 
     // Loads thumbnail image associated with Location
-    @BindingAdapter({"thumbnail"})
-    public static void loadImage(ImageView imageView, String imageURL) {
+    @BindingAdapter({"thumbnailSquare"})
+    public static void loadImageSquare(ImageView imageView, String imageURL) {
 
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
@@ -120,6 +149,21 @@ public class LocationModel implements SortedListAdapter.ViewModel {
                 .centerCrop()
                 .error(R.drawable.ic_error_message)
                 .placeholder(R.drawable.ic_loading_message)
+                .transition(DrawableTransitionOptions.withCrossFade(600))
+                .into(imageView);
+    }
+
+    // Loads thumbnail image associated with Location
+    @BindingAdapter({"thumbnailCircle"})
+    public static void loadImageCircle(ImageView imageView, String imageURL) {
+
+        GlideApp.with(imageView.getContext())
+                .load(imageURL)
+                .override(500, 500)
+                .circleCrop()
+                .error(R.drawable.ic_error_message)
+                .placeholder(R.drawable.ic_loading_message)
+                .transition(DrawableTransitionOptions.withCrossFade(600))
                 .into(imageView);
     }
 }

@@ -38,7 +38,7 @@
             </androidx.appcompat.widget.Toolbar>
 
             <RelativeLayout
-                android:id="@+id/root_of_search_fragment"
+                android:id="@+id/root_of_timeline_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"

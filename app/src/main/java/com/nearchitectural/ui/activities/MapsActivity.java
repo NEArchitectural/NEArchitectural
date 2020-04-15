@@ -153,8 +153,18 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             }
+            openFragment(fragmentToOpen, false);
+        }
+    }
 
-            // Opens the appropriate fragment (Map by default)
+    // Opens the provided fragment
+    public void openFragment(Fragment fragmentToOpen, boolean addToBackStack) {
+        if (addToBackStack) {
+            // Opens fragment and adds to backstack if boolean is set
+            fragmentManager.beginTransaction().replace(R.id.fragment_container,
+                    fragmentToOpen).addToBackStack(fragmentToOpen.getTag()).commit();
+        } else {
+            // else just opens the new fragment
             fragmentManager.beginTransaction().replace(R.id.fragment_container,
                     fragmentToOpen).commit();
         }
@@ -316,34 +326,33 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         /* Switch statement to handle the opening of the appropriate fragment for
            each navigation item */
+
+        Fragment selectedFragment = MapFragment.newInstance(false);
+
         switch (item.getItemId()) {
 
             case R.id.nav_timeline:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new TimelineFragment()).addToBackStack(TimelineFragment.TAG).commit();
+                selectedFragment = new TimelineFragment();
                 break;
 
             case R.id.nav_map:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        MapFragment.newInstance(false)).addToBackStack(MapFragment.TAG).commit();
+                selectedFragment = MapFragment.newInstance(false);
                 break;
 
             case R.id.nav_settings:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new SettingsFragment()).addToBackStack(SettingsFragment.TAG).commit();
+                selectedFragment = new SettingsFragment();
                 break;
 
             case R.id.nav_info:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new AboutFragment()).addToBackStack(AboutFragment.TAG).commit();
+                selectedFragment = new AboutFragment();
                 break;
 
             case R.id.nav_help:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new HelpFragment()).addToBackStack(HelpFragment.TAG).commit();
+                selectedFragment = new HelpFragment();
                 break;
         }
         canRequestLocation = true;
+        openFragment(selectedFragment, false);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

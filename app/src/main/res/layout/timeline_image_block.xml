@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="location"
+            type="com.nearchitectural.ui.models.LocationModel" />
+
+        <import type="android.view.Gravity" />
+        <import type="android.view.View"/>
+        <variable
+            name="sale"
+            type="java.lang.Boolean"/>
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/image_block_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="@{location.oddIndex ? Gravity.BOTTOM : Gravity.TOP}">
+
+        <TextView
+            android:id="@+id/date_top"
+            android:visibility="@{location.oddIndex ? View.GONE : View.VISIBLE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="@{location.yearOpenedString}"
+            android:textSize="?attr/font_large" />
+
+        <ImageView
+            android:id="@+id/timeline_thumbnail"
+            android:layout_gravity="center"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:contentDescription="@{location.title}"
+            android:textSize="?attr/font_small"
+            bind:thumbnailCircle="@{location.thumbnailURL}" />
+
+        <TextView
+            android:id="@+id/date_bottom"
+            android:visibility="@{location.oddIndex ? View.VISIBLE : View.GONE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="@{location.yearOpenedString}"
+            android:textSize="?attr/font_large" />
+
+    </LinearLayout>
+</layout>

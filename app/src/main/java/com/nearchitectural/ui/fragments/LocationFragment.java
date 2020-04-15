@@ -58,7 +58,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
     public static final String TAG = "LocationFragment";
 
     // Binding between location fragment and layout
-    FragmentLocationBinding locationBinding;
+    private FragmentLocationBinding locationBinding;
 
     // LAYOUT ELEMENTS
     private List<TextView> tagsTextViews; // List of text views for important tags
@@ -385,7 +385,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
                         // If update fails, do not change state of like button
                         likeButton.setLiked(true);
                     }
-                });;
+                });
     }
 
     // Initialises up the Google Map fragment and map marker

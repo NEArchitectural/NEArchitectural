@@ -19,18 +19,19 @@ import java.util.Map;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   12/12/19
  * Version: 1.1
- * Purpose: Acts as a model which holds the list of search results (i.e. a list of locations models)
- *          to be adapted and displayed on the UI
+ * Purpose: Retrieves location information from the database and produces the location models
+ *          to be used in displaying location information on a layout
+ *
  */
-public class SearchResultsModel extends ViewModel {
+public class ModelProducer extends ViewModel {
 
-    private static final String TAG = "SAViewModel";
+    private static final String TAG = "ModelProducerViewModel";
     private Map<String, Location> locationsToShow; // List of locations to be displayed in results
     private Map<String, LocationModel> locationModelsList; // List of models corresponding to location
     private MutableLiveData<List<Location>> locations; // Observes the state of the locations list
     private MutableLiveData<List<LocationModel>> locationModels; // Observes the state of the models list
 
-    public SearchResultsModel() {
+    public ModelProducer() {
         locationsToShow = new HashMap<>();
         locationModelsList = new HashMap<>();
         createSearchResults(); // Create results initially when instantiated

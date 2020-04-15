@@ -32,10 +32,10 @@ import com.google.android.material.slider.Slider;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.ActivitySearchBinding;
 import com.nearchitectural.databinding.ActivitySearchLandscapeBinding;
-import com.nearchitectural.ui.adapters.LocationSearchResultAdapter;
+import com.nearchitectural.ui.adapters.SearchResultAdapter;
 import com.nearchitectural.ui.fragments.TagSelectorFragment;
 import com.nearchitectural.ui.models.LocationModel;
-import com.nearchitectural.ui.models.SearchResultsModel;
+import com.nearchitectural.ui.models.ModelProducer;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Filter;
 import com.nearchitectural.utilities.Settings;
@@ -70,8 +70,8 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     private TextView actionBarTitle;
     private TextView resultsCount;
     private Toolbar searchViewToolbar;
-    private SearchResultsModel searchResults; // UI model for list of location search results
-    private LocationSearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
+    private ModelProducer searchResults; // UI model for list of location search results
+    private SearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
 
     private List<LocationModel> mModels; // Location cards
     private double distanceSelected; // The user-selected distance outside of which locations will not be displayed
@@ -136,7 +136,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         }
 
         // Set the view model for displaying search results
-        searchResults = ViewModelProviders.of(this).get(SearchResultsModel.class);
+        searchResults = ViewModelProviders.of(this).get(ModelProducer.class);
 
         // Initialise the action bar (top bar)
         setSupportActionBar(searchViewToolbar);
@@ -190,9 +190,9 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
 
         // If locations are granted order by results by distance to user, else order alphabetically by name
         if (Settings.getInstance().locationPermissionsAreGranted()) {
-            searchResultsAdapter = new LocationSearchResultAdapter(this, new ShortestDistanceComparator());
+            searchResultsAdapter = new SearchResultAdapter(this, new ShortestDistanceComparator());
         } else {
-            searchResultsAdapter = new LocationSearchResultAdapter(this, new AlphabeticComparator());
+            searchResultsAdapter = new SearchResultAdapter(this, new AlphabeticComparator());
         }
 
         // Query string is empty in the beginning

@@ -2,13 +2,222 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/holo_purple">
+    android:background="@color/grey">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="About Fragment"
-        android:textSize="?attr/font_large"
-        android:layout_centerInParent="true"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:background="@color/grey">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/header_image_one"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:src="@drawable/launcher_icon"
+                android:contentDescription="@string/about_header_image"/>
+
+            <ImageView
+                android:id="@+id/header_image_two"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:contentDescription="@string/about_header_image"/>
+
+            <TextView
+                android:id="@+id/about_ne_architectural"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/header_image_one"
+                android:layout_marginTop="?attr/about_title_margin"
+                android:padding="4dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="14dp"
+                android:textAlignment="textEnd"
+                android:layout_marginBottom="12dp"
+                android:text="@string/about_ne_architectural"
+                android:background="@drawable/rounded_corner"
+                android:textColor="@color/white"
+                android:textSize="?attr/font_medium"
+                android:textStyle="bold"
+                android:paddingEnd="14dp"
+                android:gravity="end" />
+
+            <View
+                android:id="@+id/dividerOne"
+                android:layout_below="@id/header_image_one"
+                android:layout_toRightOf="@id/about_ne_architectural"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@color/colorPrimary"
+                android:layout_toEndOf="@id/about_ne_architectural" />
+
+            <LinearLayout
+                android:id="@+id/about_ne_architectural_section"
+                android:layout_below="@id/about_ne_architectural"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:contentDescription="@string/ne_architectural_logo">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="200dp"
+                    android:src="@drawable/launcher_icon"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="?attr/font_small"
+                    android:justificationMode="inter_word"
+                    android:text="Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sit ameteleifend purus. Vivamus in magna euismod, maximus quam id, pretiumaugue. Cras volutpat metus eu quam porttitor imperdiet. Proinscelerisque mi ante, a viverra felis pulvinar ac. Praesent egetrisus nec sapien venenatis euismod. Maecenas tortor dolor,suscipit vitae odio sit amet, fermentum euismod risus. Ut odio tellus, faucibus sed eros in, cursus rhoncus tortor. Praesent magna justo, ultrices sit amet finibus vel, sagittis quis justo."/>
+
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/about_northumberland"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/about_ne_architectural_section"
+                android:layout_marginTop="16dp"
+                android:padding="4dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="14dp"
+                android:textAlignment="textEnd"
+                android:layout_marginBottom="20dp"
+                android:text="@string/about_northumberland"
+                android:background="@drawable/rounded_corner"
+                android:textColor="@color/white"
+                android:textSize="?attr/font_medium"
+                android:textStyle="bold"
+                android:paddingEnd="14dp"
+                android:gravity="end" />
+
+            <View
+                android:id="@+id/dividerTwo"
+                android:layout_marginTop="?attr/divider_margin"
+                android:layout_below="@id/about_ne_architectural_section"
+                android:layout_toRightOf="@id/about_northumberland"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/colorPrimary"
+                android:layout_toEndOf="@id/about_northumberland" />
+
+            <LinearLayout
+                android:id="@+id/about_northumberland_section"
+                android:layout_below="@id/about_northumberland"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="?attr/font_small"
+                    android:justificationMode="inter_word"
+                    android:text="Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sit ameteleifend purus. Vivamus in magna euismod, maximus quam id, pretiumaugue. Cras volutpat metus eu quam porttitor imperdiet. Proinscelerisque mi ante, a viverra felis pulvinar ac. Praesent egetrisus nec sapien venenatis euismod. Maecenas tortor dolor,suscipit vitae odio sit amet, fermentum euismod risus. Ut odio tellus, faucibus sed eros in, cursus rhoncus tortor. Praesent magna justo, ultrices sit amet finibus vel, sagittis quis justo."/>
+
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/about_us"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/about_northumberland_section"
+                android:layout_marginTop="16dp"
+                android:padding="4dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="14dp"
+                android:textAlignment="textEnd"
+                android:layout_marginBottom="20dp"
+                android:text="@string/about_us"
+                android:background="@drawable/rounded_corner"
+                android:textColor="@color/white"
+                android:textSize="?attr/font_medium"
+                android:textStyle="bold"
+                android:paddingEnd="14dp"
+                android:gravity="end" />
+
+            <View
+                android:id="@+id/dividerThree"
+                android:layout_marginTop="?attr/divider_margin"
+                android:layout_below="@id/about_northumberland_section"
+                android:layout_toRightOf="@id/about_us"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/colorPrimary"
+                android:layout_toEndOf="@id/about_us" />
+
+            <LinearLayout
+                android:id="@+id/about_us_section"
+                android:layout_below="@id/about_us"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="200dp"
+                    android:src="@drawable/launcher_icon"
+                    android:contentDescription="@string/about_us_image"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="?attr/font_small"
+                    android:justificationMode="inter_word"
+                    android:text="Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sit ameteleifend purus. Vivamus in magna euismod, maximus quam id, pretiumaugue. Cras volutpat metus eu quam porttitor imperdiet. Proinscelerisque mi ante, a viverra felis pulvinar ac. Praesent egetrisus nec sapien venenatis euismod. Maecenas tortor dolor,suscipit vitae odio sit amet, fermentum euismod risus. Ut odio tellus, faucibus sed eros in, cursus rhoncus tortor. Praesent magna justo, ultrices sit amet finibus vel, sagittis quis justo."/>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/contacts_section"
+                android:layout_below="@id/contacts_title"
+                android:textSize="?attr/font_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:background="@color/colorPrimary"
+                android:textColor="@color/white"
+                android:textAlignment="center"
+                android:text="\nClass aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sit ameteleifend purus. Vivamus in magna euismod, maximus quam id, pretiumaugue.\n"
+                android:gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/contacts_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/about_us_section"
+                android:layout_marginTop="10dp"
+                android:padding="4dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="14dp"
+                android:textAlignment="textEnd"
+                android:layout_marginBottom="?attr/about_title_margin"
+                android:text="@string/contact"
+                android:background="@drawable/rounded_corner"
+                android:textColor="@color/white"
+                android:textSize="?attr/font_medium"
+                android:textStyle="bold"
+                android:paddingEnd="14dp"
+                android:gravity="end" />
+
+
+        </RelativeLayout>
+
+    </ScrollView>
 
 </RelativeLayout>
