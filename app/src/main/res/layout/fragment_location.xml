@@ -109,8 +109,53 @@
                     android:text="@{report.fullReport}"
                     android:textAlignment="textStart"
                     android:textColor="@color/black"
-                    android:textSize="?attr/font_small"
-                    tools:ignore="RtlSymmetry" />
+                    android:textSize="?attr/font_small" />
+
+                <TextView
+                    android:id="@+id/architectural_information"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/report_text"
+                    android:layout_marginTop="16dp"
+                    android:padding="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingRight="14dp"
+                    android:textAlignment="textEnd"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/architectural_information"
+                    android:background="@drawable/rounded_corner"
+                    android:textColor="@color/white"
+                    android:textSize="?attr/font_medium"
+                    android:textStyle="bold"
+                    android:paddingEnd="14dp"
+                    android:gravity="end" />
+
+                <View
+                    android:id="@+id/dividerTwo"
+                    android:layout_marginTop="?attr/divider_margin"
+                    android:layout_below="@id/report_text"
+                    android:layout_toRightOf="@id/architectural_information"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="@color/colorPrimary"
+                    android:layout_toEndOf="@id/architectural_information" />
+
+                <TextView
+                    android:id="@+id/architectural_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/architectural_information"
+                    android:layout_gravity="start"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:justificationMode="inter_word"
+                    android:text="@{report.timelineSnippet}"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/black"
+                    android:textSize="?attr/font_small" />
 
                 <LinearLayout
                     android:id="@+id/filter_box"
@@ -215,7 +260,7 @@
                     android:id="@+id/photos_heading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/report_text"
+                    android:layout_below="@id/architectural_text"
                     android:layout_marginTop="16dp"
                     android:padding="4dp"
                     android:paddingLeft="10dp"
@@ -233,9 +278,9 @@
                     android:gravity="end" />
 
                 <View
-                    android:id="@+id/dividerTwo"
+                    android:id="@+id/dividerThree"
                     android:layout_marginTop="?attr/divider_margin"
-                    android:layout_below="@id/report_text"
+                    android:layout_below="@id/architectural_text"
                     android:layout_toRightOf="@id/photos_heading"
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
@@ -319,7 +364,7 @@
                 android:textSize="?attr/font_small" />
 
             <View
-                android:id="@+id/dividerThree"
+                android:id="@+id/dividerFour"
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
                 android:background="@color/colorPrimary" />

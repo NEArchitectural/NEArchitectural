@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.Slider;
 import com.nearchitectural.R;
@@ -35,7 +36,7 @@ import com.nearchitectural.databinding.ActivitySearchLandscapeBinding;
 import com.nearchitectural.ui.adapters.SearchResultAdapter;
 import com.nearchitectural.ui.fragments.TagSelectorFragment;
 import com.nearchitectural.ui.models.LocationModel;
-import com.nearchitectural.ui.models.ModelProducer;
+import com.nearchitectural.ui.models.ModelController;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Filter;
 import com.nearchitectural.utilities.Settings;
@@ -43,11 +44,12 @@ import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
 import com.nearchitectural.utilities.comparators.AlphabeticComparator;
 import com.nearchitectural.utilities.comparators.ShortestDistanceComparator;
-import com.nearchitectural.utilities.models.Location;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /* Author:  Kristyan Doykov, Joel Bell-Wilding
  * Since:   12/12/19
@@ -70,13 +72,12 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     private TextView actionBarTitle;
     private TextView resultsCount;
     private Toolbar searchViewToolbar;
-    private ModelProducer searchResults; // UI model for list of location search results
-    private SearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
 
-    private List<LocationModel> mModels; // Location cards
+    private SearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
+    private ModelController searchResultsController; // ModelController to maintain/update search results
+    private Map<String, LocationModel> modelMap; // Map of location IDs to their models
     private double distanceSelected; // The user-selected distance outside of which locations will not be displayed
     private String currentQuery; // The string value stored in the text search bar
-    private List<Location> locationsToShow; // List of all locations to show
     private TagMapper searchTagMapper; // Utility object used to aid in handling search by tag
     private static final String SEARCH_QUERY_KEY = "search_query"; // Bundle key for storing/retrieving the search query string
 
@@ -85,6 +86,8 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     private HashSet<String> lastLikedLocationIDs;
     private double lastLatitude;
     private double lastLongitude;
+
+    private String openedLocationID; // Location ID of location being viewed when search result is tapped
 
     // Handles initialisation of activity upon opening
     @Override
@@ -136,7 +139,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         }
 
         // Set the view model for displaying search results
-        searchResults = ViewModelProviders.of(this).get(ModelProducer.class);
+        searchResultsController = ViewModelProviders.of(this).get(ModelController.class);
 
         // Initialise the action bar (top bar)
         setSupportActionBar(searchViewToolbar);
@@ -177,6 +180,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 setTag(TagID.LIKED_BY_YOU, isChecked);
                 filterAndRearrange();
+                searchResultsRecyclerView.scrollToPosition(0);
             }
         });
 
@@ -185,6 +189,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 setTag(TagID.WHEELCHAIR_ACCESSIBLE, isChecked);
                 filterAndRearrange();
+                searchResultsRecyclerView.scrollToPosition(0);
             }
         });
 
@@ -200,27 +205,18 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
         // Set adapter for recycler view
         searchResultsRecyclerView.setAdapter(searchResultsAdapter);
 
-        // Retrieve locations from database using live data (i.e. results will appear when retrieved from database)
-        locationsToShow = new ArrayList<>();
-        searchResults.getLocationsToShow().observe(this, new Observer<List<Location>>() {
+        // Create locations models using live data (results will appear when retrieved from database)
+        modelMap = new HashMap<>();
+        searchResultsController.updateAllLocationModels().observe(this, new Observer<Map<String, LocationModel>>() {
             @Override
-            public void onChanged(List<Location> locations) {
-                locationsToShow = locations;
-            }
-        });
-
-        // Create locations models from database using live data (i.e. results will appear when retrieved from database)
-        mModels = new ArrayList<>();
-        searchResults.getLocationModels().observe(this, new Observer<List<LocationModel>>() {
-            @Override
-            public void onChanged(List<LocationModel> locationModels) {
-                mModels = locationModels;
+            public void onChanged(Map<String, LocationModel> modelIDMap) {
+                modelMap = modelIDMap;
                 filterAndRearrange();
             }
         });
 
         // Add all models to the search results adapter
-        searchResultsAdapter.add(mModels);
+        searchResultsAdapter.add(new ArrayList<>(modelMap.values()));
 
         /* When the user uses the slider to choose max distance, update the list of locations shown */
         slider.addOnChangeListener(new Slider.OnChangeListener() {
@@ -246,13 +242,9 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
                     sliderText.setText(R.string.slider_unset_text);
                 }
                 filterAndRearrange();
+                searchResultsRecyclerView.scrollToPosition(0);
             }
         });
-
-        // When activity is created, assign the current values for each variable
-        lastLikedLocationIDs = Settings.getInstance().getLikedLocations();
-        lastLatitude = CurrentCoordinates.getCoords().latitude;
-        lastLongitude = CurrentCoordinates.getCoords().longitude;
     }
 
     // Handles creating the expanding search field on press of the magnifying glass icon
@@ -308,35 +300,32 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
 
     @Override
     protected void onResume() {
+        // If location has been liked/unliked after location page opened, update search result for location
+        if (openedLocationID != null && !lastLikedLocationIDs.equals(Settings.getInstance().getLikedLocations())) {
+            searchResultsController.updateLocationModel(openedLocationID);
+        }
+        openedLocationID = null;
 
-        // Update current coordinates
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
-
-        // Check if a location has been liked/unliked
-        if (lastLikedLocationIDs.size() != Settings.getInstance().getLikedLocations().size()
-                && searchResults != null) {
-
-            // Select all locations which have been liked/unliked and update them
-            List<Location> locationsToUpdate = new ArrayList<>();
-            for (Location location : locationsToShow) {
-                if (lastLikedLocationIDs.contains(location.getId()) || Settings.getInstance().getLikedLocations().contains(location.getId())) {
-                    locationsToUpdate.add(location);
+        // Determine if user's location has significantly changed from previous interaction and update results if so
+        CurrentCoordinates.getInstance().getDeviceLocation(this, new CurrentCoordinates.LocationCallback<LatLng>() {
+            @Override
+            public void onLocationRetrieved(LatLng coordinates) {
+                double threshold = 0.001;
+                /* Update results if there is a significant difference between user's last known position
+                 * and user's current position */
+                if ((Math.abs(lastLatitude-CurrentCoordinates.getCoords().latitude) > threshold)
+                        || Math.abs(lastLongitude-CurrentCoordinates.getCoords().longitude) > threshold) {
+                    searchResultsController.updateAllLocationModels();
                 }
             }
-            searchResults.refineSearchResults(locationsToUpdate);
+        });
 
-        // Check if user's location has changed
-        } else if ((lastLatitude != CurrentCoordinates.getCoords().latitude
-                || lastLongitude != CurrentCoordinates.getCoords().longitude)
-                && searchResults != null) {
-            // Update all locations with new distances
-            searchResults.refineSearchResults(locationsToShow);
-        }
         super.onResume();
     }
 
     /* Handle a location card being pressed and take the user to the according Location page */
     public void openLocationPage(View view) {
+        openedLocationID = view.getTag().toString();
         // Open a location page for the location with the provided ID
         Intent myIntent = new Intent(SearchableActivity.this, MapsActivity.class);
         myIntent.putExtra(getString(R.string.navigation_location_page), view.getTag().toString());
@@ -381,10 +370,9 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     /* Use Filter with current search criteria and update search results */
     public void filterAndRearrange() {
         List<LocationModel> filteredModelList =
-                Filter.apply(mModels, currentQuery, distanceSelected,
+                Filter.apply(new ArrayList<>(modelMap.values()), currentQuery, distanceSelected,
                         searchTagMapper.getTagValuesMap());
         searchResultsAdapter.replaceAll(filteredModelList);
-        searchResultsRecyclerView.scrollToPosition(0);
 
         // Edit the number of matches upon filtering
         String resultsText = getResources().getQuantityString(R.plurals.search_results_count,

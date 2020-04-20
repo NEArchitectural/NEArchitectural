@@ -30,11 +30,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.nearchitectural.R;
 import com.nearchitectural.ui.activities.MapsActivity;
 import com.nearchitectural.ui.adapters.MapMarkerWindowAdapter;
-import com.nearchitectural.utilities.CurrentCoordinates;
+import com.nearchitectural.ui.interfaces.BackHandleFragment;
+import com.nearchitectural.ui.interfaces.LocationHandleFragment;
 import com.nearchitectural.utilities.DatabaseExtractor;
-import com.nearchitectural.utilities.DistanceCalculator;
+import com.nearchitectural.utilities.Filter;
 import com.nearchitectural.utilities.Settings;
-import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.models.Location;
 
 import java.util.HashMap;
@@ -46,18 +46,20 @@ import java.util.Map;
  * Version: 1.1
  * Purpose: Handles events and presentation related to the Google Maps section of the home screen
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback, BackHandleFragment, LocationHandleFragment {
 
     public static final String TAG = "MapFragment"; // Tag used for logging status of application
 
     private MapView mapView; // View object displaying the map
     private GoogleMap googleMap; // Object representing the map itself
-    private DatabaseExtractor extractor;
+    private DatabaseExtractor extractor; // Used to retrieve location information and create map markers
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
     private boolean introDialogNeeded; // Flag boolean to signal if the introductory dialog should show
+    private Marker activeMarker; // The marker whose info window is currently showing (if any)
     private CameraUpdate defaultCameraPosition; // The default position the map camera will hover over
     private Map<Marker, String> markerIDMap; // Map of markers to corresponding location IDs
-    private Map<Marker, String> markerThumbnailURLMap;
+    // Map of markers to the thumbnail URLs for their locations
+    private Map<Marker, String> markerThumbnailURLMap = new HashMap<>();
     // Bundle key for storing/retrieving the initial startup dialog boolean
     private static final String INTRO_DIALOG_KEY = "introDialogKey";
 
@@ -114,8 +116,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap map) {
 
-        // Array holding the marker who's info window is currently visible
-        final Marker[] visibleMarker = new Marker[1];
         // Default camera position overlooking Newcastle and Northumberland before all map markers are created
         defaultCameraPosition = CameraUpdateFactory.newLatLngZoom(new LatLng(55.25, -1.9979), 9f);
 
@@ -170,8 +170,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onMapLongClick(LatLng latLng) {
                 googleMap.animateCamera(defaultCameraPosition);
-                if (visibleMarker[0] != null)
-                    visibleMarker[0].hideInfoWindow();
+                if (activeMarker != null)
+                    activeMarker.hideInfoWindow();
             }
         });
 
@@ -182,13 +182,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public boolean onMarkerClick(Marker marker) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14.5f));
                 marker.showInfoWindow();
-                visibleMarker[0] = marker;
+                activeMarker = marker;
                 return true;
             }
         });
 
         // If application is in start up for the first time, display intro dialog
-        if (Settings.getInstance().isInitialOpening()) {
+        if (introDialogNeeded) {
             displayIntroDialog();
         }
     }
@@ -208,7 +208,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onDataRetrieved(List<Location> data) {
                 if (data != null) {
                     for (Location location : data) {
-                        if (locationMeetsSettingsCriteria(location)) {
+                        if (Filter.locationMeetsSettingsCriteria(location)) {
                             // Add marker to map and ID and thumbnail maps
                             Marker marker = googleMap.addMarker(extractor.parseMapMarker(location));
                             markerIDMap.put(marker, location.getId());
@@ -221,7 +221,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     googleMap.setInfoWindowAdapter(new MapMarkerWindowAdapter(getActivity(), markerThumbnailURLMap));
                     // Show an informative dialog if no markers have been added to map
                     if (markerIDMap.isEmpty()) {
-                        displayIntroDialog();
+                        ((MapsActivity) getActivity()).displayNoLocationsDialog();
                     }
                     // Once all markers are added to map, create bound and move camera with bound
                     createDefaultCameraPosition(cameraBoundBuilder);
@@ -245,17 +245,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    // Displays a dialog indicating that no locations match the user's chosen application-wide settings
-    private void displayNoLocationsDialog() {
-        // Display the dialog
-        new MaterialAlertDialogBuilder(getActivity(), R.style.ThemeOverlay_MaterialComponents)
-                .setIcon(R.mipmap.ic_launcher_round)
-                .setTitle(R.string.no_location_match_title)
-                .setMessage(R.string.no_location_match_message)
-                .setPositiveButton(R.string.ok, null)
-                .show();
-    }
-
     // Opens a new location fragment for the location corresponding to the provided marker
     private void openLocationFragment(Marker marker) {
 
@@ -269,37 +258,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 .commit();
     }
 
-    // Method used to determine if location used for map marker meets the criteria of the user settings
-    private boolean locationMeetsSettingsCriteria(Location location) {
-
-        Settings userSettings = Settings.getInstance();
-
-        // Guard against database retrieval errors
-        if (location.getName().equals("Unknown")
-                || (location.getLatitude() == 0 && location.getLongitude() == 0)) {
-            return false;
-        }
-
-        // Ensures location matches all set tags
-        for (TagID tag: TagID.values()) {
-            if (userSettings.getTagValue(tag) && !location.getTagValue(tag)) {
-                return false;
-            }
-        }
-
-        // Ensures location is within the user specified max distance
-        return (DistanceCalculator.calculateDistance(CurrentCoordinates.getCoords().latitude,
-                location.getLatitude(),
-                CurrentCoordinates.getCoords().longitude,
-                location.getLongitude()) <= userSettings.getMaxDistance());
-    }
-
     /* Displays the introductory dialog on the first use of the map fragment during each
      * instance of the application */
     private void displayIntroDialog() {
-
-        // Once dialog has been displayed, set false to indicate it will not be displayed again
-        Settings.getInstance().setInitialOpening(false);
 
         // Initially hide the Google Map UI elements
         googleMap.getUiSettings().setZoomControlsEnabled(false);
@@ -334,8 +295,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         window.setAttributes(windowLayoutParams);
     }
 
-    // Method to handle the result of a location permissions request
-    public void locationPermissionsResult(boolean permissionsGranted) {
+    @Override
+    public boolean onBackPressed() {
+        /* Checks if a marker is active, and if so closes info window and returns
+         * to default camera position */
+        if (activeMarker != null && activeMarker.isInfoWindowShown()) {
+            activeMarker.hideInfoWindow();
+            googleMap.animateCamera(defaultCameraPosition);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void handleLocation(boolean permissionsGranted) {
+        // Enables the map to use locations if permissions are granted
         mLocationPermissionsGranted = permissionsGranted;
         if (googleMap != null)
             googleMap.setMyLocationEnabled(mLocationPermissionsGranted);

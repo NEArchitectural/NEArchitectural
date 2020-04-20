@@ -14,12 +14,14 @@ public class Report {
     private List<String> paragraphs; // A list of paragraphs which together form the full report
     private List<String> slideshowURLs; // A list of images to be displayed on the location page
     private List<String> references; // A list of all references for the location info and images
+    private String timelineSnippet; // A snippet of architectural information to be displayed in the timeline
 
-    public Report(String reportID, List<String> paragraphs, List<String> slideshowURLs, List<String> references) {
+    public Report(String reportID, List<String> paragraphs, List<String> slideshowURLs, List<String> references, String timelineSnippet) {
         this.reportID = reportID;
         this.paragraphs = paragraphs;
         this.slideshowURLs = slideshowURLs;
         this.references = references;
+        this.timelineSnippet = timelineSnippet;
     }
 
     // Getters
@@ -37,6 +39,10 @@ public class Report {
 
     public List<String> getSlideshowURLs() {
         return slideshowURLs;
+    }
+
+    public String getTimelineSnippet() {
+        return timelineSnippet;
     }
 
     /* Concatenates all paragraphs together to produce a single text string
@@ -64,5 +70,4 @@ public class Report {
         // In case no references have been registered in the database display an appropriate message
         return "No references to display";
     }
-
 }

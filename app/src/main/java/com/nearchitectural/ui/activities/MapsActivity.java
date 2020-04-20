@@ -23,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.nearchitectural.R;
@@ -33,6 +34,8 @@ import com.nearchitectural.ui.fragments.LocationFragment;
 import com.nearchitectural.ui.fragments.MapFragment;
 import com.nearchitectural.ui.fragments.SettingsFragment;
 import com.nearchitectural.ui.fragments.TimelineFragment;
+import com.nearchitectural.ui.interfaces.BackHandleFragment;
+import com.nearchitectural.ui.interfaces.LocationHandleFragment;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
@@ -73,7 +76,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Apply user's chosen font size across activity and child fragments
         getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
         // Get user coordinates initially
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
+        CurrentCoordinates.getInstance().getDeviceLocation(this, null);
 
         // Binding between to the maps activity layout
         ActivityMapsBinding mapsBinding = DataBindingUtil.setContentView(this, R.layout.activity_maps);
@@ -278,26 +281,26 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         canRequestLocation = false;
 
         // Boolean determining if application has been granted location permissions
-        boolean permissionsGranted = grantResults.length > 0
+        final boolean permissionsGranted = grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED && locationServicesEnabled();
 
         // Update Settings and coordinates to handle the result of permissions request
         Settings.getInstance().setLocationPermissionsGranted(permissionsGranted);
         new SettingsManager(this).saveSettings();
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
-
-        handleFragmentPermissions(permissionsGranted);
+        // Handle location permissions for active fragment once the user's coordinates are retrieved
+        CurrentCoordinates.getInstance().getDeviceLocation(this, new CurrentCoordinates.LocationCallback<LatLng>() {
+            @Override
+            public void onLocationRetrieved(LatLng coordinates) {
+                handleFragmentPermissions(permissionsGranted);
+            }
+        });
     }
 
     // Invokes the location permission handling methods of child fragments which use location
     private void handleFragmentPermissions(boolean permissionsGranted) {
         Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        if (activeFragment instanceof SettingsFragment) {
-            // If Settings page is open, handle location permissions result within fragment
-            ((SettingsFragment) activeFragment).locationPermissionsResult(permissionsGranted);
-        } else if (activeFragment instanceof MapFragment) {
-            // If Maps page is open, handle location permissions result within fragment
-            ((MapFragment) activeFragment).locationPermissionsResult(permissionsGranted);
+        if (activeFragment instanceof LocationHandleFragment) {
+            ((LocationHandleFragment) activeFragment).handleLocation(permissionsGranted);
         }
     }
 
@@ -317,8 +320,14 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Close the nav drawer if open
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else {
+            // Check if active fragment can handle back press
+            Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            if (!(activeFragment instanceof BackHandleFragment) || !((BackHandleFragment) activeFragment).onBackPressed()) {
+                // If unable to handle back press or no behaviour needed, perform usual back press behaviour
+                super.onBackPressed();
+            }
         }
-        super.onBackPressed();
     }
 
     /* Listener for click events on the nav drawer menu items */
@@ -352,7 +361,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         canRequestLocation = true;
-        openFragment(selectedFragment, false);
+        openFragment(selectedFragment, true);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -363,10 +372,21 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         MapsActivity.this.startActivity(myIntent);
     }
 
+    // Displays a dialog indicating that no locations match the user's chosen application-wide settings
+    public void displayNoLocationsDialog() {
+        // Display the dialog
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents)
+                .setIcon(R.mipmap.ic_launcher_round)
+                .setTitle(R.string.no_location_match_title)
+                .setMessage(R.string.no_location_match_message)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         // Update coordinates with last known position when activity is paused
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
+        CurrentCoordinates.getInstance().getDeviceLocation(this, null);
     }
 }

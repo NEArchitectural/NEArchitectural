@@ -15,20 +15,11 @@ public class Settings implements Serializable {
     private static int fontSize; // An integer representing the selected font-size
     private static DistanceUnit distanceUnit; // The selected distance unit
     private static boolean locationPermissionsGranted; // Boolean for location permissions
-    private static boolean initialOpening; // Boolean for if first time opening the app
     private static double maxDistance; // The maximum distance within which locations will be shown
     private static int maxDistanceSliderVal; // The UI slider value for the selected max distance
     private static HashSet<String> likedLocations; // A set containing the IDs of all liked locations
     // A boolean representing if application has been initialised (i.e. the settings file exists in storage)
     private static boolean settingsFileExists = false;
-
-    public boolean isInitialOpening() {
-        return initialOpening;
-    }
-
-    public void setInitialOpening(boolean initialOpening) {
-        Settings.initialOpening = initialOpening;
-    }
 
     // Enumerator to represent the available distance units
     public enum DistanceUnit {
@@ -154,12 +145,12 @@ public class Settings implements Serializable {
     }
 
     public HashSet<String> getLikedLocations() {
-        return likedLocations;
+        return new HashSet<>(likedLocations);
     }
 
     // Sets the initial value of liked locations when read in from the device
     void setLikedLocations(HashSet<String> initialLikedLocations) {
-        likedLocations = initialLikedLocations;
+        likedLocations = new HashSet<>(initialLikedLocations);
     }
 
     public void addLikedLocation(String likedLocationID) {

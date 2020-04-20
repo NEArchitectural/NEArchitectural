@@ -15,34 +15,38 @@ import com.nearchitectural.utilities.models.Location;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/12/19
  * Version: 1.1
- * Purpose: Internally uses a Location object to model location information to be adapted
- *          for a given layout
+ * Purpose: Uses static location information and session-based information to provide a model
+ *          of a location object which can be adapted and displayed on the UI
  */
 public class LocationModel implements SortedListAdapter.ViewModel {
 
     private final Location locationInfo; // Location object containing all info for a given location
     private double distanceFromUser; // Distance from user's current location
     private String distanceStringForListItem; // String representation of distance from user
-    private boolean isFirstInList = false; // Flags if model is the first in list (i.e. index 0)
-    private boolean isLastInList = false; // Flags if model is the last in list (i.e. index n-1)
-    private boolean oddIndex = false; // Flags if model has an odd index (i.e. index % 2 is false)
 
     public LocationModel(Location locationInfo, double distanceFromUser) {
+        this.locationInfo = locationInfo;
+        this.distanceFromUser = distanceFromUser;
+        this.distanceStringForListItem = createDistanceString();
+    }
+
+    // Creates the string to be displayed for the distance between user and location
+    private String createDistanceString() {
+
+        String distanceString;
 
         // Set the conversion rate to be used (for kilometers/miles) from settings
         int conversionRate = Settings.getInstance().getDistanceUnit().getConversionRate();
-        this.locationInfo = locationInfo;
-        this.distanceFromUser = distanceFromUser;
         int distance = (int) distanceFromUser /conversionRate;
 
         // If distance from user is less than 1 measure of the distance unit, show a smaller measure
         if (distance <= 0) {
             if (Settings.getInstance().getDistanceUnit() == Settings.DistanceUnit.KILOMETER) {
                 // If kilometers, show distance in meters
-                this.distanceStringForListItem = (int) distanceFromUser + " meters away";
+                distanceString = (int) distanceFromUser + " meters away";
             } else {
                 // If miles, show distance as a decimal of a mile (i.e. 0.32 miles away)
-                this.distanceStringForListItem = "0." + (int) (distanceFromUser/conversionRate*100) + " miles away";
+                distanceString = "0." + (int) (distanceFromUser/conversionRate*100) + " miles away";
             }
         } else {
             // Else show the measure and the distance unit
@@ -50,8 +54,10 @@ public class LocationModel implements SortedListAdapter.ViewModel {
             if (distance == 1) {
                 displayName = displayName.substring(0, displayName.length()-1);
             }
-            this.distanceStringForListItem = distance + " " + displayName + " away";
+            distanceString = distance + " " + displayName + " away";
         }
+
+        return distanceString;
     }
 
     // Getter for location information
@@ -96,32 +102,6 @@ public class LocationModel implements SortedListAdapter.ViewModel {
         return distanceStringForListItem;
     }
 
-    // Getters and setters for isFirstInList and isLastInList booleans
-    public boolean isFirstInList() {
-        return isFirstInList;
-    }
-
-    public void setFirstInList(boolean firstInList) {
-        isFirstInList = firstInList;
-    }
-
-    public boolean isLastInList() {
-        return isLastInList;
-    }
-
-    public void setLastInList(boolean lastInList) {
-        isLastInList = lastInList;
-    }
-
-    // Getter and setter for whether location model is odd number in list
-    public boolean isOddIndex() {
-        return oddIndex;
-    }
-
-    public void setOddIndex(boolean oddIndex) {
-        this.oddIndex = oddIndex;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -139,7 +119,7 @@ public class LocationModel implements SortedListAdapter.ViewModel {
         return result;
     }
 
-    // Loads thumbnail image associated with Location
+    // Loads thumbnail image associated with Location as a square
     @BindingAdapter({"thumbnailSquare"})
     public static void loadImageSquare(ImageView imageView, String imageURL) {
 
@@ -153,13 +133,12 @@ public class LocationModel implements SortedListAdapter.ViewModel {
                 .into(imageView);
     }
 
-    // Loads thumbnail image associated with Location
+    // Loads thumbnail image associated with Location as a circle
     @BindingAdapter({"thumbnailCircle"})
     public static void loadImageCircle(ImageView imageView, String imageURL) {
 
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
-                .override(500, 500)
                 .circleCrop()
                 .error(R.drawable.ic_error_message)
                 .placeholder(R.drawable.ic_loading_message)

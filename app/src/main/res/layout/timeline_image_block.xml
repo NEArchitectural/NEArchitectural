@@ -6,13 +6,10 @@
 
         <variable
             name="location"
-            type="com.nearchitectural.ui.models.LocationModel" />
+            type="com.nearchitectural.ui.models.TimelineModel" />
 
         <import type="android.view.Gravity" />
         <import type="android.view.View"/>
-        <variable
-            name="sale"
-            type="java.lang.Boolean"/>
 
     </data>
 
@@ -25,10 +22,10 @@
 
         <TextView
             android:id="@+id/date_top"
-            android:visibility="@{location.oddIndex ? View.GONE : View.VISIBLE}"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="10dp"
             android:textAlignment="center"
             android:gravity="center_horizontal"
             android:text="@{location.yearOpenedString}"
@@ -36,19 +33,19 @@
 
         <ImageView
             android:id="@+id/timeline_thumbnail"
-            android:layout_gravity="center"
+            android:visibility="@{location.landscapeLayout ? View.GONE : View.VISIBLE}"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:layout_gravity="center"
             android:contentDescription="@{location.title}"
-            android:textSize="?attr/font_small"
             bind:thumbnailCircle="@{location.thumbnailURL}" />
 
         <TextView
             android:id="@+id/date_bottom"
-            android:visibility="@{location.oddIndex ? View.VISIBLE : View.GONE}"
+            android:visibility="@{location.landscapeLayout? View.GONE : location.oddIndex ? View.VISIBLE : View.GONE}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:gravity="center_horizontal"
             android:text="@{location.yearOpenedString}"

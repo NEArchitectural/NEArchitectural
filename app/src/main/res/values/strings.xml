@@ -64,6 +64,30 @@
     <string name="app_wide_filters">Application-wide Location Filters</string>
     <string name="select_tags">Select Tags</string>
 
+    <!-- About Related -->
+    <string name="about_ne_architectural">About NE Architectural</string>
+    <string name="about_north_east">About the North East</string>
+    <string name="about_us">About Us</string>
+    <string name="contact">Contact</string>
+    <string name="about_header_image">About Header Image</string>
+    <string name="ne_architectural_logo">NE Architectural logo</string>
+    <string name="about_us_image">About Us Image</string>
+    <string name="contact_text">\nIf you would like to get in touch with us, e-mail us at: nearchitecturalteam6@gmail.com\n</string>
+    <string name="about_us_text"><![CDATA[We are a group of students from Newcastle University who have developed the app for Northumblerand County Council. The aim for the project was to produce an application which would highlight interesting areas from both Northumberland and Tyne & Wear, providing some educational material about the history and architecture of these locations, as well as act as a tourism companion for discovering these areas yourself.]]></string>
+    <string name="about_north_east_text">The North East is home to Northumberland and Tyne and Wear, both of which have a rich history as is showcased by its many culturally, historically and architecturally significant buildings and monuments. Northumberland is the most northern county in England and won gold in ‘Best UK Holiday County/Destination’ in the prestigious 2018 British Travel Awards, whilst Tyne and Wear is brimming with cultural quayside cities and sandy North Sea beaches. You can use our app to navigate through the history of the North East, with many sites being within walking distance of Newcastle City Centre, and numerous others dotted around the area for if a day trip is in order.</string>
+    <string name="about_ne_architectural_text"><![CDATA[NE Architectural is an app designed to showcase places of historical and architectural significance in and around the Northumberland and Tyne & Wear area. The app was designed to cater to the needs of any and all tourists, allowing visitors to the area to choose which locations are suited to their specific needs. Whether you wish to find out more about the area\'s local history, or plan a day out sightseeing, NE Architectural is your handy companion for discovering the North East!]]></string>
+
+    <!-- Timeline Related -->
+    <string name="timeline_start_icon">Timeline Start Icon</string>
+    <string name="timeline_end_icon">Timeline End Icon</string>
+    <string name="like_button">Like Button</string>
+    <string name="oldest_to_newest">Oldest To Newest</string>
+    <string name="apply_app_wide_filters">Apply App-wide Filters</string>
+    <string name="timeline_find_out_more">Tap a location on the timeline to find out more</string>
+    <string name="find_out_more_button_text">Find out More</string>
+    <string name="location_report_error">Error finding Location Report</string>
+    <string name="no_locations_found">No locations found</string>
+
     <!-- Font Text -->
     <string name="font_size_string">Font Size</string>
     <string name="font_size_small">Small</string>
@@ -72,7 +96,7 @@
 
     <!-- Distance Text -->
     <string name="distance_unit">Distance Unit</string>
-    <string name="kilometers">Kilometers</string>
+    <string name="kilometres">Kilometres</string>
     <string name="miles">Miles</string>
 
     <!-- Navigation Strings -->
@@ -96,14 +120,6 @@
     <string name="settings_location_permissions_granted">com.nearchitectural.SETTINGS_LOCATION_PERMISSIONS</string>
     <string name="settings_max_distance">com.nearchitectural.SETTINGS_MAX_DISTANCE</string>
     <string name="settings_max_distance_slider">com.nearchitectural.SETTINGS_MAX_DISTANCE_SLIDER</string>
-    <string name="about_ne_architectural">About NE Architectural</string>
-    <string name="about_northumberland">About Northumberland</string>
-    <string name="about_us">About Us</string>
-    <string name="contact">Contact</string>
-    <string name="about_header_image">About Header Image</string>
-    <string name="ne_architectural_logo">NE Architectural logo</string>
-    <string name="about_us_image">About Us Image</string>
-    <string name="timeline_start_icon">Timeline Start Icon</string>
-    <string name="timeline_end_icon">Timeline End Icon</string>
-    <string name="like_button">Like Button</string>
+    <string name="architectural_information">Architectural Information</string>
+
 </resources>

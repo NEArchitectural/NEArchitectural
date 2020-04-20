@@ -206,7 +206,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:checked="@{settings.distanceUnit.displayName.equals(settings.kilometerString)}"
-                        android:text="@string/kilometers"
+                        android:text="@string/kilometres"
                         android:textSize="?attr/font_medium" />
 
                     <RadioButton

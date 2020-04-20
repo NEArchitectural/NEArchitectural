@@ -7,7 +7,7 @@
 
         <variable
             name="location"
-            type="com.nearchitectural.ui.models.LocationModel" />
+            type="com.nearchitectural.ui.models.TimelineModel" />
 
         <import type="android.view.Gravity" />
 
@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="8dp"
-        android:gravity="@{location.oddIndex ? Gravity.TOP : Gravity.BOTTOM}">
+        android:gravity="@{location.landscapeLayout ? Gravity.BOTTOM : location.oddIndex ? Gravity.TOP : Gravity.BOTTOM}">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_view"
@@ -42,12 +42,13 @@
 
                 <TextView
                     android:id="@+id/timeline_title"
-                    android:layout_width="match_parent"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:text="@{location.title, default=Title}"
                     android:textColor="@color/black"
                     android:textSize="?attr/font_medium"
                     android:textStyle="bold"
+                    android:maxLines="2"
                     android:textAlignment="center"
                     android:gravity="center_horizontal" />
 
@@ -60,7 +61,6 @@
                     android:gravity="center_horizontal"
                     android:textSize="?attr/font_small" />
 
-
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -71,7 +71,7 @@
                         android:layout_centerInParent="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        tools:ignore="UseCompoundDrawables">
+                        tools:ignore="UseCompoundDrawables,UselessParent">
 
                         <ImageView
                             android:id="@+id/like_button"
@@ -103,6 +103,7 @@
                     android:layout_width="200dp"
                     android:layout_height="match_parent"
                     android:ellipsize="end"
+                    android:maxLines="3"
                     android:layout_marginBottom="5dp"
                     android:textSize="?attr/font_small"
                     android:textColor="@color/black"

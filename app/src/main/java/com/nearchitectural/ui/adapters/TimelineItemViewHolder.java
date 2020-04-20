@@ -1,20 +1,22 @@
 package com.nearchitectural.ui.adapters;
 
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.TimelineItemBinding;
-import com.nearchitectural.ui.models.LocationModel;
+import com.nearchitectural.ui.models.TimelineModel;
 import com.nearchitectural.utilities.Settings;
 
 /* Author:  Taylor Stubbs
  * Since:   02/04/20
- * Version: 1.0
+ * Version: 1.1
  * Purpose: Handles the displaying of the locations in the timeline (i.e. a list of locations)
- *          to the UI using binding
+ *          to the UI using data binding
  */
-public class TimelineItemViewHolder extends SortedListAdapter.ViewHolder<LocationModel> {
+public class TimelineItemViewHolder extends SortedListAdapter.ViewHolder<TimelineModel> {
 
     private final TimelineItemBinding mBinding;
 
@@ -24,26 +26,33 @@ public class TimelineItemViewHolder extends SortedListAdapter.ViewHolder<Locatio
     }
 
     @Override
-    protected void performBind(final LocationModel locationModel) {
-        mBinding.setLocation(locationModel);
-        if (locationModel.isOddIndex()) {
-            handleText(mBinding.timelineInfoBlockTop.timelineSnippet);
-        } else {
-            handleText(mBinding.timelineInfoBlockBottom.timelineSnippet);
+    protected void performBind(final TimelineModel model) {
+        mBinding.setLocation(model);
+
+        // If in landscape, alter timeline item layout to fit landscape layout
+        if (model.isLandscapeLayout()) {
+            ViewGroup.LayoutParams params;
+            params = mBinding.timelineInfoBlockTop.cardView.getLayoutParams();
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            params = mBinding.timelineImageBlockBottom.getRoot().getLayoutParams();
+            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
+
+        handleText(mBinding.timelineInfoBlockTop.timelineSnippet);
+        handleText(mBinding.timelineInfoBlockBottom.timelineSnippet);
     }
 
+    // Handles the displaying/hiding of the location summary to cater for font-size
     private void handleText(TextView snippet) {
 
-        // Handles the displaying/hiding of textviews on the location card to cater for font-size
         switch (Settings.getInstance().getFontSize()) {
             case R.style.FontStyle_Large:
-                snippet.setMaxLines(6);
+                snippet.setVisibility(View.GONE);
                 break;
             case R.style.FontStyle_Small:
                 snippet.setMaxLines(4);
             default:
-                snippet.setMaxLines(4);
+                snippet.setMaxLines(3);
                 break;
         }
     }

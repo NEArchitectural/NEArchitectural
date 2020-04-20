@@ -6,12 +6,9 @@
 
         <variable
             name="location"
-            type="com.nearchitectural.ui.models.LocationModel" />
+            type="com.nearchitectural.ui.models.TimelineModel" />
 
         <import type="android.view.View"/>
-        <variable
-            name="sale"
-            type="java.lang.Boolean"/>
     </data>
 
     <LinearLayout
@@ -23,23 +20,21 @@
 
         <include android:id="@+id/timeline_info_block_top"
             layout="@layout/timeline_info_block"
-            android:visibility="@{location.oddIndex ? View.GONE : View.VISIBLE}"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
             bind:location="@{location}"
             android:layout_height="200dp"
             android:layout_width="match_parent" />
 
         <include android:id="@+id/timeline_image_block_top"
             layout="@layout/timeline_image_block"
-            android:visibility="@{location.oddIndex ? View.VISIBLE : View.GONE}"
+            android:visibility="@{location.landscapeLayout ? View.GONE : location.oddIndex ? View.VISIBLE : View.GONE}"
             bind:location="@{location}"
             android:layout_height="200dp"
             android:layout_width="match_parent" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/timeline_start"
@@ -53,10 +48,12 @@
                 android:contentDescription="@string/timeline_start_icon"/>
 
             <View
-                android:id="@+id/timeline_interval_left"
-                android:visibility="@{location.firstInList ? View.GONE : View.VISIBLE}"
+                android:id="@+id/timeline_interval"
+                android:visibility="@{location.firstInList ? View.INVISIBLE : View.VISIBLE}"
                 android:layout_gravity="start"
                 android:layout_width="3dp"
+                android:layout_marginLeft="-1dp"
+                android:layout_marginStart="-1dp"
                 android:layout_height="30dp"
                 android:background="@color/colorPrimary" />
 
@@ -73,7 +70,7 @@
 
                 <View
                     android:id="@+id/timeline_marker_top"
-                    android:visibility="@{location.oddIndex ? View.VISIBLE : View.INVISIBLE}"
+                    android:visibility="@{location.landscapeLayout ? View.INVISIBLE : location.oddIndex ? View.VISIBLE : View.INVISIBLE}"
                     android:layout_gravity="center_horizontal"
                     android:layout_width="2dp"
                     android:layout_height="12dp"
@@ -87,7 +84,7 @@
 
                 <View
                     android:id="@+id/timeline_marker_bottom"
-                    android:visibility="@{location.oddIndex ? View.INVISIBLE : View.VISIBLE}"
+                    android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.INVISIBLE : View.VISIBLE}"
                     android:layout_gravity="center_horizontal"
                     android:layout_width="2dp"
                     android:layout_height="12dp"
@@ -112,14 +109,14 @@
 
         <include android:id="@+id/timeline_image_block_bottom"
             layout="@layout/timeline_image_block"
-            android:visibility="@{location.oddIndex ? View.GONE : View.VISIBLE}"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
             bind:location="@{location}"
             android:layout_height="200dp"
             android:layout_width="match_parent"/>
 
         <include android:id="@+id/timeline_info_block_bottom"
             layout="@layout/timeline_info_block"
-            android:visibility="@{location.oddIndex ? View.VISIBLE: View.GONE}"
+            android:visibility="@{location.landscapeLayout ? View.GONE : location.oddIndex ? View.VISIBLE: View.GONE}"
             bind:location="@{location}"
             android:layout_height="200dp"
             android:layout_width="match_parent"/>
