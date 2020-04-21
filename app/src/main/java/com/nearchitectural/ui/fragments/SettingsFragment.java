@@ -151,7 +151,7 @@ public class SettingsFragment extends Fragment implements BackHandleFragment, Lo
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 // Update setting with selected distance unit and save settings
                 if (checkedId == settingsBinding.kilometersButton.getId()) {
-                    userSettings.setDistanceUnit(Settings.DistanceUnit.KILOMETER);
+                    userSettings.setDistanceUnit(Settings.DistanceUnit.KILOMETRE);
                 } else if (checkedId == settingsBinding.milesButton.getId()) {
                     userSettings.setDistanceUnit(Settings.DistanceUnit.MILE);
                 }
@@ -166,6 +166,8 @@ public class SettingsFragment extends Fragment implements BackHandleFragment, Lo
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Set the navigation bar title and navigation menu item
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_settings).setChecked(true);

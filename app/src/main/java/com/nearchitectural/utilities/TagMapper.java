@@ -1,5 +1,7 @@
 package com.nearchitectural.utilities;
 
+import com.nearchitectural.utilities.models.TagID;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 

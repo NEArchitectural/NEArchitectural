@@ -1,4 +1,4 @@
-package com.nearchitectural.utilities;
+package com.nearchitectural.utilities.models;
 
 /* Author:  Joel Bell-Wilding
  * Since:   07/02/20

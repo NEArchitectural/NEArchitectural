@@ -1,7 +1,5 @@
 package com.nearchitectural.utilities.models;
 
-import com.nearchitectural.utilities.TagID;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

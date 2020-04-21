@@ -40,10 +40,10 @@ import com.nearchitectural.ui.models.ModelController;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Filter;
 import com.nearchitectural.utilities.Settings;
-import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
 import com.nearchitectural.utilities.comparators.AlphabeticComparator;
 import com.nearchitectural.utilities.comparators.ShortestDistanceComparator;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -41,6 +41,7 @@
     <string name="reference_placeholder">No References To Display</string>
     <string name="location_thumbnail">Location Thumbnail</string>
     <string name="slideshow_text">%d/%d</string>
+    <string name="architectural_information">Architectural Information</string>
 
     <!-- Slider related Text -->
     <string name="slider_max_distance">Showing locations over 10 %1$s</string>
@@ -88,6 +89,12 @@
     <string name="location_report_error">Error finding Location Report</string>
     <string name="no_locations_found">No locations found</string>
 
+    <!-- Help Related -->
+    <string name="first_time_launch_button_text">Explore NE Architectural</string>
+    <string name="help_guide_image">Help Guide Image</string>
+    <string name="help_guide_menu_image">Help Guide Menu Image</string>
+    <string name="return_button_text">Return</string>
+
     <!-- Font Text -->
     <string name="font_size_string">Font Size</string>
     <string name="font_size_small">Small</string>
@@ -120,6 +127,5 @@
     <string name="settings_location_permissions_granted">com.nearchitectural.SETTINGS_LOCATION_PERMISSIONS</string>
     <string name="settings_max_distance">com.nearchitectural.SETTINGS_MAX_DISTANCE</string>
     <string name="settings_max_distance_slider">com.nearchitectural.SETTINGS_MAX_DISTANCE_SLIDER</string>
-    <string name="architectural_information">Architectural Information</string>
 
 </resources>

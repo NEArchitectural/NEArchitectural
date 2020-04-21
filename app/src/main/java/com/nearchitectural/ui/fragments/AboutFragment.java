@@ -45,6 +45,13 @@ public class AboutFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Set the navigation bar title and navigation menu item
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        assert parentActivity != null;
+        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_info).setChecked(true);
+        parentActivity.setActionBarTitle(getString(R.string.navigation_about));
 
         // Initialise layout elements
         headerImageViewOne = view.findViewById(R.id.header_image_one);
@@ -71,12 +78,6 @@ public class AboutFragment extends Fragment {
                 } // Else default image will be displayed
             }
         });
-
-        super.onViewCreated(view, savedInstanceState);
-        MapsActivity parentActivity = (MapsActivity) this.getActivity();
-        assert parentActivity != null;
-        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_info).setChecked(true);
-        parentActivity.setActionBarTitle(getString(R.string.navigation_about));
     }
 
     @Override

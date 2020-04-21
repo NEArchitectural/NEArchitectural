@@ -2,6 +2,7 @@ package com.nearchitectural.utilities;
 
 import com.nearchitectural.ui.models.LocationModel;
 import com.nearchitectural.utilities.models.Location;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.List;

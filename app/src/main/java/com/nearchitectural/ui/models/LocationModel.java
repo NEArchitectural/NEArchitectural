@@ -41,7 +41,7 @@ public class LocationModel implements SortedListAdapter.ViewModel {
 
         // If distance from user is less than 1 measure of the distance unit, show a smaller measure
         if (distance <= 0) {
-            if (Settings.getInstance().getDistanceUnit() == Settings.DistanceUnit.KILOMETER) {
+            if (Settings.getInstance().getDistanceUnit() == Settings.DistanceUnit.KILOMETRE) {
                 // If kilometers, show distance in meters
                 distanceString = (int) distanceFromUser + " meters away";
             } else {

@@ -245,6 +245,8 @@ public class TimelineFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Set the navigation bar title and navigation menu item
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_timeline).setChecked(true);

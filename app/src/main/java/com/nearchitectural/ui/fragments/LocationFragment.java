@@ -36,9 +36,9 @@ import com.nearchitectural.ui.adapters.LocationSlideshowAdapter;
 import com.nearchitectural.utilities.DatabaseExtractor;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
-import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.models.Location;
 import com.nearchitectural.utilities.models.Report;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

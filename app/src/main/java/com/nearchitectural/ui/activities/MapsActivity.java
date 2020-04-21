@@ -60,6 +60,9 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     private boolean canRequestLocation; // Boolean to flag whether the application can request the user's location
     private FragmentManager fragmentManager; // Utility for switching between fragments
 
+    // Bundle key to indicate to the help fragment to perform the first time launch guide routine
+    private final String LAUNCH_GUIDE_KEY = "PERFORM_LAUNCH_GUIDE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -116,10 +119,19 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
          * page needs to be opened */
         Bundle bundle = getIntent().getExtras();
 
+        // If user launches application for the first time, open the help fragment with an introductory guide
+        if (firstTimeLaunch) {
+            Bundle launchIntroGuideBundle = new Bundle();
+            launchIntroGuideBundle.putBoolean(LAUNCH_GUIDE_KEY, true);
+            HelpFragment helpFragment = new HelpFragment();
+            helpFragment.setArguments(launchIntroGuideBundle);
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, helpFragment).commit();
+        }
+
         // If application does not need to restore state, launch as normal
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && !firstTimeLaunch) {
             // Fragment to be opened based on user's choice (Map by default)
-            Fragment fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
+            Fragment fragmentToOpen = MapFragment.newInstance(false);
 
             String openLocationPage = getString(R.string.navigation_location_page);
             String openFragment = getString(R.string.navigation_open_fragment);
@@ -135,7 +147,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                     // Switch statement to handle which fragment should be opened
                     switch (fragmentID) {
                         case R.string.navigation_map:
-                            fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
+                            fragmentToOpen = MapFragment.newInstance(false);
                             break;
                         case R.string.navigation_settings:
                             fragmentToOpen = new SettingsFragment();

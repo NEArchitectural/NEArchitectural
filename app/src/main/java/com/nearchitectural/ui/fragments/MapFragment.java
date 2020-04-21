@@ -86,7 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Set up map fragment using Map Activity information
+        // Set the navigation bar title and navigation menu item
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_map).setChecked(true);

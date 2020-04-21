@@ -1,5 +1,7 @@
 package com.nearchitectural.utilities;
 
+import com.nearchitectural.utilities.models.TagID;
+
 import java.io.Serializable;
 import java.util.HashSet;
 
@@ -24,7 +26,7 @@ public class Settings implements Serializable {
     // Enumerator to represent the available distance units
     public enum DistanceUnit {
 
-        KILOMETER(1000, "kilometers"),
+        KILOMETRE(1000, "kilometres"),
         MILE(1609, "miles");
 
         private final int conversionRate; // The conversion rate from meters
@@ -47,7 +49,7 @@ public class Settings implements Serializable {
     //private constructor
     private Settings() {
         activeTags = new TagMapper();
-        distanceUnit = DistanceUnit.KILOMETER;
+        distanceUnit = DistanceUnit.KILOMETRE;
         //Prevent form the reflection api.
         if (soleInstance != null) {
             throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
@@ -129,7 +131,7 @@ public class Settings implements Serializable {
 
     // Used for data binding radio buttons when Settings used as model in settings layout XML
     public String getKilometerString() {
-        return DistanceUnit.KILOMETER.displayName;
+        return DistanceUnit.KILOMETRE.displayName;
     }
 
     public String getMilesString() {

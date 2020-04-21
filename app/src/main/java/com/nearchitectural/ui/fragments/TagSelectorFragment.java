@@ -10,8 +10,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.nearchitectural.R;
-import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.List;
