@@ -90,6 +90,10 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     @Override
     public View getInfoWindow(Marker marker) {
+        ImageView thumbnailView = window.findViewById(R.id.picture);
+        // thumbnailView.setVisibility(View.GONE);
+        thumbnailView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_loading_message));
+
         Drawable thumbnail = thumbnails.get(marker); // Gets cached thumbnail from map
         // Check whether thumbnail has been loaded before
         if (thumbnail == null) {
@@ -104,12 +108,12 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
                     .into(getTarget(marker));
         } else {
             // If cached, set the thumbnail for this location
-            ImageView thumbnailView = window.findViewById(R.id.picture);
             thumbnailView.setImageDrawable(thumbnail);
         }
         renderWindowText(marker, window); // Handle display of text for window
         return window;
     }
+
 
     @Override
     public View getInfoContents(Marker marker) {

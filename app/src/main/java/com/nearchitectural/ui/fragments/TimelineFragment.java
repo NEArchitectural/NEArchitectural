@@ -2,7 +2,6 @@ package com.nearchitectural.ui.fragments;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +12,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -73,6 +73,7 @@ public class TimelineFragment extends Fragment {
     private LinearLayout locationInfoContainer;
     private Switch settingsFilterSwitch;
     private Spinner orderSpinner;
+    private RelativeLayout progressBarContainer;
 
     private LinearLayoutManager recyclerManager; // Layout manager for the timeline recycler
     private ModelController timelineModelController; // ModelController to maintain/update timeline models
@@ -130,7 +131,8 @@ public class TimelineFragment extends Fragment {
         } else {
             timelineItemAdapter = new TimelineItemAdapter(this, new NewestToOldestComparator());
         }
-        modelIDMap = new HashMap<>(); // Instantiate map for use in onResume
+
+        modelIDMap = new HashMap<>(); // Instantiate map for use
 
         // Create timeline models using live data (i.e. results will appear when retrieved from database)
         timelineModelController.updateAllLocationModels().observe(this, new Observer<Map<String, LocationModel>>() {
@@ -175,6 +177,7 @@ public class TimelineFragment extends Fragment {
             initialTextview = timelineLandscapeBinding.timelineInitialTextview;
             settingsFilterSwitch = timelineLandscapeBinding.settingsFiltersSwitch;
             orderSpinner = timelineLandscapeBinding.timelineOrderSpinner;
+            progressBarContainer = timelineLandscapeBinding.progressBarContainer;
         } else {
             timelineBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_timeline, container, false);
             // Bind all UI elements (portrait)
@@ -188,6 +191,7 @@ public class TimelineFragment extends Fragment {
             initialTextview = timelineBinding.timelineInitialTextview;
             settingsFilterSwitch = timelineBinding.settingsFiltersSwitch;
             orderSpinner = timelineBinding.timelineOrderSpinner;
+            progressBarContainer = timelineBinding.progressBarContainer;
         }
 
         // Create an image fader to perform slideshow in timeline info snippet box
@@ -266,6 +270,11 @@ public class TimelineFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // Update locations if model map values have not been retained
+        if (modelIDMap.isEmpty()) {
+            timelineModelController.updateAllLocationModels();
+        }
+
         // Display timeline info for the previously selected/opened location open return to fragment
         if (displayedLocationID != null) {
             if (displayedReport == null) {
@@ -287,7 +296,6 @@ public class TimelineFragment extends Fragment {
                Object[] updateIDs = Sets.symmetricDifference(lastLikedLocationIDs, Settings.getInstance().getLikedLocations()).toArray();
                // Cycle through locations and update
                 for (Object locationID : updateIDs) {
-                    Log.d(TAG, modelIDMap.get((String) locationID).getTitle());
                     timelineModelController.updateLocationModel((String) locationID);
                 }
                 applyFilters();
@@ -324,8 +332,8 @@ public class TimelineFragment extends Fragment {
     // Sets up the spinner in the appropriate state to deal with timeline order
     private void initialiseSpinner() {
         // Create a new adapter with Oldest to Newest and Newest to Oldest options
-        ArrayAdapter<CharSequence> orderAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.timeline_order_spinner_options, android.R.layout.simple_spinner_item);
-        orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> orderAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.timeline_order_spinner_options, R.layout.custom_spinner_layout);
+        orderAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
         // Set adapter
         orderSpinner.setAdapter(orderAdapter);
         // Set item to Newest to Oldest initially if needed
@@ -390,6 +398,8 @@ public class TimelineFragment extends Fragment {
     public void getReportInfoAndDisplay(final String locationID) {
         // Ensure no location or provided location is not already selected
         if (displayedLocationID == null || !displayedLocationID.equals(locationID)) {
+            initialTextview.setVisibility(View.GONE);
+            progressBarContainer.setVisibility(View.VISIBLE); // Show progress bar while retrieving from db
             displayedLocationID = locationID;
             String reportID = modelIDMap.get(locationID).getLocationInfo().getReportID();
             // Get report from database
@@ -402,6 +412,8 @@ public class TimelineFragment extends Fragment {
                     } else {
                         // If unsuccessful db call, show error message
                         initialTextview.setText(R.string.location_report_error);
+                        initialTextview.setVisibility(View.VISIBLE);
+                        progressBarContainer.setVisibility(View.GONE);
                     }
                 }
             });
@@ -412,6 +424,7 @@ public class TimelineFragment extends Fragment {
     private void displayReportInfo(String locationID, Report report) {
         // Hide placeholder message and show location info
         locationInfoContainer.setVisibility(View.VISIBLE);
+        progressBarContainer.setVisibility(View.GONE); // Hide progress bar once report is displayed
         initialTextview.setVisibility(View.GONE);
         this.locationTitle.setText(modelIDMap.get(locationID).getTitle());
         locationInfo.setText(report.getTimelineSnippet());

@@ -91,8 +91,6 @@ public class CurrentCoordinates implements Serializable {
                                 // If device location successfully retrieved, update coordinates
                                 coords = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
                             }
-                        } else {
-                            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
                         }
                         // If coords are needed, pass back through callback
                         if (locationRetrievedCallback != null)

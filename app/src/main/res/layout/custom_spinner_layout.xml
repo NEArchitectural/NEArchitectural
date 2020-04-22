@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/custom_spinner_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="?attr/font_small"
+    android:drawableRight="@drawable/ic_arrow_down"
+    android:drawableEnd="@drawable/ic_arrow_down"
+    android:drawablePadding="2dp"
+    android:textColor="@color/material_on_surface_emphasis_medium" />

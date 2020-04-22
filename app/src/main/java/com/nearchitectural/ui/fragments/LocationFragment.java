@@ -11,6 +11,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -74,6 +76,8 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
     private LikeButton likeButton;
     private ViewPager slideshow;
     private TextView slideshowNumber;
+    private ScrollView contentContainer;
+    private ProgressBar progressBar;
 
     private LocationSlideshowAdapter locationSlideshowAdapter; // Adapter for slideshow
     private DatabaseExtractor extractor; // Used to extract location/report information from database
@@ -114,6 +118,9 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         slideshow = locationBinding.slideshow;
         slideshowNumber = locationBinding.slideshowNumber;
         likeButton = locationBinding.likeButton;
+        contentContainer = locationBinding.scrollContainer;
+        progressBar = locationBinding.progressBar;
+        reportText = locationBinding.reportText;
 
         // Instantiate extractor for retrieval of location information from database
         extractor = new DatabaseExtractor();
@@ -238,6 +245,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         extractor.extractLocationByID(locationID, new DatabaseExtractor.DatabaseCallback<Location>() {
             @Override
             public void onDataRetrieved(Location data) {
+                // Check if db retrieval successful
                 if (data != null) {
                     location = data;
                     locationBinding.setLocation(location); // Set selected location as data binding model
@@ -247,6 +255,13 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
                     displayThumbnail(location.getThumbnailURL());
                     retrieveReport(location.getReportID());
                     initialiseMap();
+                } else {
+                    // Hide progress bar and display error message
+                    likeButton.setVisibility(View.GONE);
+                    likesCount.setVisibility(View.GONE);
+                    title.setText("Error retrieving location");
+                    progressBar.setVisibility(View.GONE);
+                    contentContainer.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -257,12 +272,20 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         extractor.extractReport(reportID, new DatabaseExtractor.DatabaseCallback<Report>() {
             @Override
             public void onDataRetrieved(Report data) {
+                // Check if db retrieval successful
                 if (data != null) {
+                    // If successful, set report on UI
                     locationReport = data;
                     locationBinding.setReport(locationReport);
-                    reportText = locationBinding.reportText;
                     createSlideshow();
+                } else {
+                    // Else display error message
+                    reportText = locationBinding.reportText;
+                    reportText.setText("Error retrieving report");
                 }
+                // Hide progress bar and display content
+                progressBar.setVisibility(View.GONE);
+                contentContainer.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -311,7 +334,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         // Implement custom list adapter
         ListAdapter tagsAdapter = new ArrayAdapter<TagID>(getContext(), R.layout.tags_list_view, location.getActiveTags()) {
 
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
                 View tagView;
 

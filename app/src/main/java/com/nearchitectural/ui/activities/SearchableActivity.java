@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -72,6 +73,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
     private TextView actionBarTitle;
     private TextView resultsCount;
     private Toolbar searchViewToolbar;
+    private ProgressBar progressBar;
 
     private SearchResultAdapter searchResultsAdapter; // Adapter for filtering search results
     private ModelController searchResultsController; // ModelController to maintain/update search results
@@ -119,6 +121,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
             wheelChairCheckBox = searchBinding.accessibleCb;
             likedLocationsCheckBox = searchBinding.likedLocationsCb;
             resultsCount = searchBinding.resultsCount;
+            progressBar = searchBinding.progressBar;
 
         } else {
 
@@ -136,6 +139,7 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
             wheelChairCheckBox = searchLandscapeBinding.accessibleCb;
             likedLocationsCheckBox = searchLandscapeBinding.likedLocationsCb;
             resultsCount = searchLandscapeBinding.resultsCount;
+            progressBar = searchLandscapeBinding.progressBar;
         }
 
         // Set the view model for displaying search results
@@ -211,6 +215,9 @@ public class SearchableActivity extends AppCompatActivity implements NavigationV
             @Override
             public void onChanged(Map<String, LocationModel> modelIDMap) {
                 modelMap = modelIDMap;
+                // Once location loaded, hide progress bar and show search results
+                progressBar.setVisibility(View.GONE);
+                searchResultsRecyclerView.setVisibility(View.VISIBLE);
                 filterAndRearrange();
             }
         });

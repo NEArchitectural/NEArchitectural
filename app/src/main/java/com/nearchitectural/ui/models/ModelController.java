@@ -1,7 +1,5 @@
 package com.nearchitectural.ui.models;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -52,10 +50,10 @@ public class ModelController extends ViewModel {
     // Retrieves and posts the location model for the location with the provided ID
     private void retrieveModel(String locationID) {
 
-        DatabaseExtractor extractor = new DatabaseExtractor();
-        extractor.extractLocationByID(locationID, new DatabaseExtractor.DatabaseCallback<Location>() {
+        new DatabaseExtractor().extractLocationByID(locationID, new DatabaseExtractor.DatabaseCallback<Location>() {
             @Override
             public void onDataRetrieved(Location data) {
+
                 if (data != null) {
                     // Find current distance between user and location
                     double distanceToUser = DistanceCalculator.calculateDistance(
@@ -73,11 +71,10 @@ public class ModelController extends ViewModel {
     // Retrieves and posts all location models to the modelIDMap
     private void retrieveAllModels() {
 
-        DatabaseExtractor extractor = new DatabaseExtractor();
-
-        extractor.extractAllLocations(new DatabaseExtractor.DatabaseCallback<List<Location>>() {
+        new DatabaseExtractor().extractAllLocations(new DatabaseExtractor.DatabaseCallback<List<Location>>() {
             @Override
             public void onDataRetrieved(List<Location> data) {
+
                 if (data != null) {
                     for (Location location : data) {
 
@@ -88,11 +85,9 @@ public class ModelController extends ViewModel {
 
                         // Create location model from location object and distance to user
                         modelIDMap.put(location.getId(), new LocationModel(location, distanceToUser));
-                        Log.d(TAG, location.getId() + " => " + location.getName());
                     }
                     locationModels.postValue(modelIDMap); // Post model to map
                 } else {
-                    Log.w(TAG, "Error getting documents.");
                     // Send an empty results map if db retrieval fails
                     modelIDMap = new HashMap<>();
                     locationModels.postValue(modelIDMap);

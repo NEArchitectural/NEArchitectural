@@ -56,12 +56,6 @@ public class HelpFragment extends Fragment implements BackHandleFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Set the navigation bar title and navigation menu item
-        MapsActivity parentActivity = (MapsActivity) this.getActivity();
-        assert parentActivity != null;
-        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_help).setChecked(true);
-        parentActivity.setActionBarTitle(getString(R.string.navigation_help));
-
         // Get all layout elements
         helpGuideMenu = view.findViewById(R.id.help_guide_menu);
         guideContainer = view.findViewById(R.id.help_guide_container);
@@ -89,6 +83,16 @@ public class HelpFragment extends Fragment implements BackHandleFragment {
             introGuideDisplayed = getArguments().getBoolean(LAUNCH_GUIDE_KEY);
             // If first time launch, display the introductory guide
             displayGuide(HelpGuide.INTRO_AND_MAP);
+        }
+
+        // Set the navigation bar title and navigation menu item
+        MapsActivity parentActivity = (MapsActivity) this.getActivity();
+        assert parentActivity != null;
+        parentActivity.getNavigationView().getMenu().findItem(R.id.nav_help).setChecked(true);
+        if (introGuideDisplayed) {
+            parentActivity.setActionBarTitle(getString(R.string.welcome));
+        } else {
+            parentActivity.setActionBarTitle(getString(R.string.navigation_help));
         }
 
     }
@@ -149,7 +153,12 @@ public class HelpFragment extends Fragment implements BackHandleFragment {
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(true)).commit();
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(true)).commit();
+                } else {
+                    hideGuideLayout();
+                    guideIsDisplayed = false;
+                }
             }
         });
     }

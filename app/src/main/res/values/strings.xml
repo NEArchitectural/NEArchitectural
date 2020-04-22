@@ -23,8 +23,8 @@
     <string name="tag_selector_title">Select Tags</string>
 
     <!-- Map Page Text -->
-    <string name="no_location_match_title">No Location Matches</string>
-    <string name="no_location_match_message">No locations matching your chosen application-wide filters were found. Please adjust your application-wide filters to see more locations.</string>
+    <string name="no_location_match_title">No Locations Shown</string>
+    <string name="no_location_match_message">No locations were found. Either the internet connection was not strong enough to retrieve any locations, or your application-wide filters did not match any locations.</string>
     <string name="intro_message_title">Welcome to NE Architectural</string>
     <string name="intro_message_body">Tap on a Map Marker to see an information popup about the chosen location. Hold your finger on the map to zoom back out and see all Locations. Enjoy!</string>
 
@@ -83,17 +83,19 @@
     <string name="timeline_end_icon">Timeline End Icon</string>
     <string name="like_button">Like Button</string>
     <string name="oldest_to_newest">Oldest To Newest</string>
-    <string name="apply_app_wide_filters">Apply App-wide Filters</string>
+    <string name="apply_app_wide_filters">Filter</string>
     <string name="timeline_find_out_more">Tap a location on the timeline to find out more</string>
     <string name="find_out_more_button_text">Find out More</string>
     <string name="location_report_error">Error finding Location Report</string>
     <string name="no_locations_found">No locations found</string>
+    <string name="location_slideshow_image">Location Slideshow Image</string>
 
     <!-- Help Related -->
     <string name="first_time_launch_button_text">Explore NE Architectural</string>
     <string name="help_guide_image">Help Guide Image</string>
     <string name="help_guide_menu_image">Help Guide Menu Image</string>
     <string name="return_button_text">Return</string>
+    <string name="welcome">Welcome</string>
 
     <!-- Font Text -->
     <string name="font_size_string">Font Size</string>

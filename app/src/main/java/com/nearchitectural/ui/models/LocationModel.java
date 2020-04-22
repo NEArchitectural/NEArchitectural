@@ -4,7 +4,6 @@ import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;
 
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 import com.nearchitectural.GlideApp;
 import com.nearchitectural.R;
@@ -129,7 +128,6 @@ public class LocationModel implements SortedListAdapter.ViewModel {
                 .centerCrop()
                 .error(R.drawable.ic_error_message)
                 .placeholder(R.drawable.ic_loading_message)
-                .transition(DrawableTransitionOptions.withCrossFade(600))
                 .into(imageView);
     }
 
@@ -142,7 +140,6 @@ public class LocationModel implements SortedListAdapter.ViewModel {
                 .circleCrop()
                 .error(R.drawable.ic_error_message)
                 .placeholder(R.drawable.ic_loading_message)
-                .transition(DrawableTransitionOptions.withCrossFade(600))
                 .into(imageView);
     }
 }

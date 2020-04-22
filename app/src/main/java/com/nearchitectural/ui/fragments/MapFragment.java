@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -50,6 +51,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
 
     public static final String TAG = "MapFragment"; // Tag used for logging status of application
 
+    private FrameLayout mapContainer;
+    private RelativeLayout progressBarContainer;
     private MapView mapView; // View object displaying the map
     private GoogleMap googleMap; // Object representing the map itself
     private DatabaseExtractor extractor; // Used to retrieve location information and create map markers
@@ -97,6 +100,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
         parentActivity.requestLocationPermissions(); // Request location permissions if needed
         mLocationPermissionsGranted = Settings.getInstance().locationPermissionsAreGranted();
 
+        // Get the progress bar container and map container
+        progressBarContainer = view.findViewById(R.id.progress_bar_container);
+        mapContainer = view.findViewById(R.id.map_container);
+
         // Set up the map
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -141,11 +148,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
         googleMap.getUiSettings().setTiltGesturesEnabled(true);
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
         googleMap.setMyLocationEnabled(mLocationPermissionsGranted);
-
-        // Adjusts the padding of the map to account for the activity action bar (i.e. the top bar)
-        int actionBarPadding  = ((MapsActivity) getActivity()).getSupportActionBar().getHeight()
-                + (int) (40 * Resources.getSystem().getDisplayMetrics().density);
-        googleMap.setPadding(0, actionBarPadding , 0, 0);
 
         /* Move the "Center on my location" button to the bottom left */
         View locationButton =
@@ -226,6 +228,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
                     // Once all markers are added to map, create bound and move camera with bound
                     createDefaultCameraPosition(cameraBoundBuilder);
                     googleMap.moveCamera(defaultCameraPosition);
+                    // Hide progress bar and show map once ready
+                    progressBarContainer.setVisibility(View.GONE);
+                    mapContainer.setVisibility(View.VISIBLE);
+                } else {
+                    // If db retrieval failed, show empty map and no locations dialog
+                    progressBarContainer.setVisibility(View.GONE);
+                    ((MapsActivity) getActivity()).displayNoLocationsDialog();
                 }
             }
         });

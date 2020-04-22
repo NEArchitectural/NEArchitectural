@@ -88,7 +88,6 @@ public class DatabaseExtractor {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
                         // List to store all locations in
                         List<Location> locationList = new ArrayList<>();
 
@@ -162,7 +161,6 @@ public class DatabaseExtractor {
                 paragraphs = (ArrayList<String>) reportData.get(PARAGRAPHS);
                 slideshowURLs = (ArrayList<String>) reportData.get(SLIDESHOW_URLS);
                 references = (ArrayList<String>) reportData.get(REFERENCES);
-                Log.d(TAG, ""+reportData.get(TIMELINE_SNIPPET));
                 timelineSnippet = (String) reportData.get(TIMELINE_SNIPPET);
             } catch (ClassCastException ignored) {
                 // Ignored since report data has already been instantiated as empty lists

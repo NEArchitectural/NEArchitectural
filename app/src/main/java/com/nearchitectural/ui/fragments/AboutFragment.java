@@ -1,7 +1,6 @@
 package com.nearchitectural.ui.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +34,7 @@ public class AboutFragment extends Fragment {
     private ImageView headerImageViewTwo;
     private TextView title;
 
-    private ImageFader headerImageFader;
+    private ImageFader headerImageFader; // ImageFader utility for fading header image slideshow
 
     @Nullable
     @Override
@@ -67,11 +66,10 @@ public class AboutFragment extends Fragment {
             @Override
             public void onDataRetrieved(List<Location> data) {
                 // Check if database retrieval has failed
-                if (data != null) {
+                if (data != null && !data.isEmpty()) {
                     List<String> imageURLs = new ArrayList<>();
                     for (Location location : data) {
                         imageURLs.add(location.getThumbnailURL());
-                        Log.d(TAG, location.getThumbnailURL());
                     }
                     // Once all URLs gathered, animate header image
                     headerImageFader.animateLocationSlideshow(imageURLs, 5000, 1500);

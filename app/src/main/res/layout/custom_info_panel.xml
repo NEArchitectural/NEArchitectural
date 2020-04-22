@@ -7,6 +7,7 @@
     android:background="@color/grey">
 
     <RelativeLayout
+        android:id="@+id/content_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -42,13 +43,11 @@
             android:gravity="center_horizontal" />
     </RelativeLayout>
 
-
     <ImageView
         android:id="@+id/picture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:contentDescription="@string/location_thumbnail" />
-
 
 </RelativeLayout>
