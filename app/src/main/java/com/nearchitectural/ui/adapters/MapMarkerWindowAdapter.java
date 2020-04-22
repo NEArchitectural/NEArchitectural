@@ -91,7 +91,7 @@ public class MapMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
     @Override
     public View getInfoWindow(Marker marker) {
         ImageView thumbnailView = window.findViewById(R.id.picture);
-        // thumbnailView.setVisibility(View.GONE);
+        // Set image to show loading message initially
         thumbnailView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_loading_message));
 
         Drawable thumbnail = thumbnails.get(marker); // Gets cached thumbnail from map
