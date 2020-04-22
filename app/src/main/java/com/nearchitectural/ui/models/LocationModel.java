@@ -124,10 +124,11 @@ public class LocationModel implements SortedListAdapter.ViewModel {
 
         GlideApp.with(imageView.getContext())
                 .load(imageURL)
-                .override(500, 500)
-                .centerCrop()
                 .error(R.drawable.ic_error_message)
                 .placeholder(R.drawable.ic_loading_message)
+                .override(450, 450)
+                .centerCrop()
+                .dontAnimate()
                 .into(imageView);
     }
 

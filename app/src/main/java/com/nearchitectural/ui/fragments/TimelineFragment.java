@@ -53,7 +53,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
- * Since:   10/12/19
+ * Since:   10/12/19g
  * Version: 1.2
  * Purpose: Visually display a timeline showing locations in both chronological and reverse chronological
  *          order, as well as displaying additional architectural/timeline information
