@@ -23,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.nearchitectural.R;
@@ -33,6 +34,8 @@ import com.nearchitectural.ui.fragments.LocationFragment;
 import com.nearchitectural.ui.fragments.MapFragment;
 import com.nearchitectural.ui.fragments.SettingsFragment;
 import com.nearchitectural.ui.fragments.TimelineFragment;
+import com.nearchitectural.ui.interfaces.BackHandleFragment;
+import com.nearchitectural.ui.interfaces.LocationHandleFragment;
 import com.nearchitectural.utilities.CurrentCoordinates;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
@@ -57,6 +60,9 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     private boolean canRequestLocation; // Boolean to flag whether the application can request the user's location
     private FragmentManager fragmentManager; // Utility for switching between fragments
 
+    // Bundle key to indicate to the help fragment to perform the first time launch guide routine
+    private final String LAUNCH_GUIDE_KEY = "PERFORM_LAUNCH_GUIDE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -73,7 +79,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Apply user's chosen font size across activity and child fragments
         getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
         // Get user coordinates initially
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
+        CurrentCoordinates.getInstance().getDeviceLocation(this, null);
 
         // Binding between to the maps activity layout
         ActivityMapsBinding mapsBinding = DataBindingUtil.setContentView(this, R.layout.activity_maps);
@@ -113,10 +119,19 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
          * page needs to be opened */
         Bundle bundle = getIntent().getExtras();
 
+        // If user launches application for the first time, open the help fragment with an introductory guide
+        if (firstTimeLaunch) {
+            Bundle launchIntroGuideBundle = new Bundle();
+            launchIntroGuideBundle.putBoolean(LAUNCH_GUIDE_KEY, true);
+            HelpFragment helpFragment = new HelpFragment();
+            helpFragment.setArguments(launchIntroGuideBundle);
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, helpFragment).commit();
+        }
+
         // If application does not need to restore state, launch as normal
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && !firstTimeLaunch) {
             // Fragment to be opened based on user's choice (Map by default)
-            Fragment fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
+            Fragment fragmentToOpen = MapFragment.newInstance(false);
 
             String openLocationPage = getString(R.string.navigation_location_page);
             String openFragment = getString(R.string.navigation_open_fragment);
@@ -132,7 +147,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                     // Switch statement to handle which fragment should be opened
                     switch (fragmentID) {
                         case R.string.navigation_map:
-                            fragmentToOpen = MapFragment.newInstance(firstTimeLaunch);
+                            fragmentToOpen = MapFragment.newInstance(false);
                             break;
                         case R.string.navigation_settings:
                             fragmentToOpen = new SettingsFragment();
@@ -153,8 +168,18 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             }
+            openFragment(fragmentToOpen, false);
+        }
+    }
 
-            // Opens the appropriate fragment (Map by default)
+    // Opens the provided fragment
+    public void openFragment(Fragment fragmentToOpen, boolean addToBackStack) {
+        if (addToBackStack) {
+            // Opens fragment and adds to backstack if boolean is set
+            fragmentManager.beginTransaction().replace(R.id.fragment_container,
+                    fragmentToOpen).addToBackStack(fragmentToOpen.getTag()).commit();
+        } else {
+            // else just opens the new fragment
             fragmentManager.beginTransaction().replace(R.id.fragment_container,
                     fragmentToOpen).commit();
         }
@@ -268,26 +293,26 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         canRequestLocation = false;
 
         // Boolean determining if application has been granted location permissions
-        boolean permissionsGranted = grantResults.length > 0
+        final boolean permissionsGranted = grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED && locationServicesEnabled();
 
         // Update Settings and coordinates to handle the result of permissions request
         Settings.getInstance().setLocationPermissionsGranted(permissionsGranted);
         new SettingsManager(this).saveSettings();
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
-
-        handleFragmentPermissions(permissionsGranted);
+        // Handle location permissions for active fragment once the user's coordinates are retrieved
+        CurrentCoordinates.getInstance().getDeviceLocation(this, new CurrentCoordinates.LocationCallback<LatLng>() {
+            @Override
+            public void onLocationRetrieved(LatLng coordinates) {
+                handleFragmentPermissions(permissionsGranted);
+            }
+        });
     }
 
     // Invokes the location permission handling methods of child fragments which use location
     private void handleFragmentPermissions(boolean permissionsGranted) {
         Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        if (activeFragment instanceof SettingsFragment) {
-            // If Settings page is open, handle location permissions result within fragment
-            ((SettingsFragment) activeFragment).locationPermissionsResult(permissionsGranted);
-        } else if (activeFragment instanceof MapFragment) {
-            // If Maps page is open, handle location permissions result within fragment
-            ((MapFragment) activeFragment).locationPermissionsResult(permissionsGranted);
+        if (activeFragment instanceof LocationHandleFragment) {
+            ((LocationHandleFragment) activeFragment).handleLocation(permissionsGranted);
         }
     }
 
@@ -307,8 +332,14 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Close the nav drawer if open
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else {
+            // Check if active fragment can handle back press
+            Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            if (!(activeFragment instanceof BackHandleFragment) || !((BackHandleFragment) activeFragment).onBackPressed()) {
+                // If unable to handle back press or no behaviour needed, perform usual back press behaviour
+                super.onBackPressed();
+            }
         }
-        super.onBackPressed();
     }
 
     /* Listener for click events on the nav drawer menu items */
@@ -316,34 +347,33 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         /* Switch statement to handle the opening of the appropriate fragment for
            each navigation item */
+
+        Fragment selectedFragment = MapFragment.newInstance(false);
+
         switch (item.getItemId()) {
 
             case R.id.nav_timeline:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new TimelineFragment()).addToBackStack(TimelineFragment.TAG).commit();
+                selectedFragment = new TimelineFragment();
                 break;
 
             case R.id.nav_map:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        MapFragment.newInstance(false)).addToBackStack(MapFragment.TAG).commit();
+                selectedFragment = MapFragment.newInstance(false);
                 break;
 
             case R.id.nav_settings:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new SettingsFragment()).addToBackStack(SettingsFragment.TAG).commit();
+                selectedFragment = new SettingsFragment();
                 break;
 
             case R.id.nav_info:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new AboutFragment()).addToBackStack(AboutFragment.TAG).commit();
+                selectedFragment = new AboutFragment();
                 break;
 
             case R.id.nav_help:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,
-                        new HelpFragment()).addToBackStack(HelpFragment.TAG).commit();
+                selectedFragment = new HelpFragment();
                 break;
         }
         canRequestLocation = true;
+        openFragment(selectedFragment, true);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -354,10 +384,21 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         MapsActivity.this.startActivity(myIntent);
     }
 
+    // Displays a dialog indicating that no locations match the user's chosen application-wide settings
+    public void displayNoLocationsDialog() {
+        // Display the dialog
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents)
+                .setIcon(R.mipmap.ic_launcher_round)
+                .setTitle(R.string.no_location_match_title)
+                .setMessage(R.string.no_location_match_message)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         // Update coordinates with last known position when activity is paused
-        CurrentCoordinates.getInstance().getDeviceLocation(this);
+        CurrentCoordinates.getInstance().getDeviceLocation(this, null);
     }
 }

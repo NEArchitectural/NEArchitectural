@@ -21,6 +21,8 @@ import com.google.android.material.slider.Slider;
 import com.nearchitectural.R;
 import com.nearchitectural.databinding.FragmentSettingsBinding;
 import com.nearchitectural.ui.activities.MapsActivity;
+import com.nearchitectural.ui.interfaces.BackHandleFragment;
+import com.nearchitectural.ui.interfaces.LocationHandleFragment;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
 
@@ -31,7 +33,7 @@ import com.nearchitectural.utilities.SettingsManager;
  *          applications settings, allowing settings to be modified
  *          and saved to the device where desired.
  */
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends Fragment implements BackHandleFragment, LocationHandleFragment {
 
     // Binding between location fragment and layout
     private FragmentSettingsBinding settingsBinding;
@@ -149,7 +151,7 @@ public class SettingsFragment extends Fragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 // Update setting with selected distance unit and save settings
                 if (checkedId == settingsBinding.kilometersButton.getId()) {
-                    userSettings.setDistanceUnit(Settings.DistanceUnit.KILOMETER);
+                    userSettings.setDistanceUnit(Settings.DistanceUnit.KILOMETRE);
                 } else if (checkedId == settingsBinding.milesButton.getId()) {
                     userSettings.setDistanceUnit(Settings.DistanceUnit.MILE);
                 }
@@ -164,6 +166,8 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Set the navigation bar title and navigation menu item
         MapsActivity parentActivity = (MapsActivity) this.getActivity();
         assert parentActivity != null;
         parentActivity.getNavigationView().getMenu().findItem(R.id.nav_settings).setChecked(true);
@@ -193,7 +197,9 @@ public class SettingsFragment extends Fragment {
     private void handleSliderValue(int distanceSelected) {
 
         // Sets the appropriate message for the associated text view
-        if (distanceSelected <= 0 || distanceSelected >= 10) {
+        if (distanceSelected <= 0) {
+            distanceSliderText.setText(R.string.slider_unset_text);
+        } else if (distanceSelected >= 10) {
             distanceSliderText.setText(R.string.slider_enabled);
         } else {
             distanceSliderText.setText(String.format(getString(R.string.slider_distance),
@@ -204,16 +210,13 @@ public class SettingsFragment extends Fragment {
         // Sets the slider value in the settings singleton
         userSettings.setMaxDistanceSliderVal(distanceSelected);
 
+        // If distance is not selected (i.e. slider unset or at max), set max distance to show all locations
         if (distanceSelected <= 0 || distanceSelected >= 10 || !userSettings.locationPermissionsAreGranted()) {
             userSettings.setMaxDistance(Double.MAX_VALUE);
         } else {
+            // else set max distance to selected distance
             userSettings.setMaxDistance(distanceSelected * userSettings.getDistanceUnit().getConversionRate());
         }
-    }
-
-    // Method to handle the result of a location permissions request
-    public void locationPermissionsResult(boolean result) {
-        locationEnabledSwitch.setChecked(result);
     }
 
     // Refreshes the Maps Activity UI to reflect the user's choice of font size
@@ -230,5 +233,23 @@ public class SettingsFragment extends Fragment {
         parentActivity.startActivity(openSettingsIntent);
         parentActivity.overridePendingTransition(0, 0);
         parentActivity.finish();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        // Check if back stack is empty (i.e. settings opened via font-size layout change)
+        if (getFragmentManager() != null && getFragmentManager().getBackStackEntryCount() == 0) {
+            /* If opened from layout change, open map fragment instead of closing app */
+            getFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    MapFragment.newInstance(false)).addToBackStack(TAG).commit();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void handleLocation(boolean permissionGranted) {
+        // Set location switch enabled/disabled if location permissions granted
+        locationEnabledSwitch.setChecked(permissionGranted);
     }
 }

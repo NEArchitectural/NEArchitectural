@@ -17,11 +17,12 @@ import java.util.List;
 /* Author:  Kristiyan Doykov
  * Since:   13/12/19
  * Version: 1.0
- * Purpose: Handles operations for the search results (i.e. a list of locations) for the search
+ * Purpose: Handles operations for the search results recycler (i.e. a list of locations) for the search
  *          activity
  */
-public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSearchResultViewHolder> {
+public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultViewHolder> {
 
+    // Sorted list which ensures all locations are sorted by a provided comparator
     private final SortedList<LocationModel> mSortedList = new SortedList<>(LocationModel.class, new SortedList.Callback<LocationModel>() {
 
         @Override
@@ -63,24 +64,28 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
     private LayoutInflater mInflater; // Handles inflating the search results to the UI
     private Comparator<LocationModel> mComparator; // Comparator used to sort the location models
 
-    public LocationSearchResultAdapter(Context context, Comparator<LocationModel> comparator) {
+    public SearchResultAdapter(Context context, Comparator<LocationModel> comparator) {
         this.mInflater = LayoutInflater.from(context);
         this.mComparator = comparator;
         setHasStableIds(true);
     }
 
+    // Adds model to sorted list
     public void add(LocationModel model) {
         mSortedList.add(model);
     }
 
+    // Removes model from sorted list
     public void remove(LocationModel model) {
         mSortedList.remove(model);
     }
 
+    // Adds multiple models to sorted list
     public void add(List<LocationModel> models) {
         mSortedList.addAll(models);
     }
 
+    // Removes multiple models from sorted list
     public void remove(List<LocationModel> models) {
         mSortedList.beginBatchedUpdates();
         for (LocationModel model : models) {
@@ -89,6 +94,7 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
         mSortedList.endBatchedUpdates();
     }
 
+    // Replaces all models in list with new model
     public void replaceAll(List<LocationModel> models) {
         mSortedList.beginBatchedUpdates();
         for (int i = mSortedList.size() - 1; i >= 0; i--) {
@@ -103,13 +109,13 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
 
     @NonNull
     @Override
-    public LocationSearchResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SearchResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final ListItemBinding binding = ListItemBinding.inflate(mInflater, parent, false);
-        return new LocationSearchResultViewHolder(binding);
+        return new SearchResultViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(LocationSearchResultViewHolder holder, int position) {
+    public void onBindViewHolder(SearchResultViewHolder holder, int position) {
         final LocationModel model = mSortedList.get(position);
         holder.performBind(model);
     }
@@ -120,7 +126,7 @@ public class LocationSearchResultAdapter extends RecyclerView.Adapter<LocationSe
     }
 
     @Override
-    public void onViewAttachedToWindow(@NonNull LocationSearchResultViewHolder holder) {
+    public void onViewAttachedToWindow(@NonNull SearchResultViewHolder holder) {
         super.onViewAttachedToWindow(holder);
     }
 

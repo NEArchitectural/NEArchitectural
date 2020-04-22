@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="location"
+            type="com.nearchitectural.ui.models.TimelineModel" />
+
+        <import type="android.view.View"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical"
+        android:tag="@{location.id}">
+
+        <include android:id="@+id/timeline_info_block_top"
+            layout="@layout/timeline_info_block"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
+            bind:location="@{location}"
+            android:layout_height="200dp"
+            android:layout_width="match_parent" />
+
+        <include android:id="@+id/timeline_image_block_top"
+            layout="@layout/timeline_image_block"
+            android:visibility="@{location.landscapeLayout ? View.GONE : location.oddIndex ? View.VISIBLE : View.GONE}"
+            bind:location="@{location}"
+            android:layout_height="200dp"
+            android:layout_width="match_parent" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/timeline_start"
+                android:src="@drawable/circle"
+                android:visibility="@{location.firstInList ? View.VISIBLE : View.GONE}"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_centerVertical="true"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@string/timeline_start_icon"/>
+
+            <View
+                android:id="@+id/timeline_interval"
+                android:visibility="@{location.firstInList ? View.INVISIBLE : View.VISIBLE}"
+                android:layout_gravity="start"
+                android:layout_width="3dp"
+                android:layout_marginLeft="-1dp"
+                android:layout_marginStart="-1dp"
+                android:layout_height="30dp"
+                android:background="@color/colorPrimary" />
+
+            <LinearLayout
+                android:id="@+id/timeline_segment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/timeline_segment"
+                android:layout_toEndOf="@id/timeline_segment"
+                android:layout_toLeftOf="@id/timeline_segment"
+                android:layout_toStartOf="@id/timeline_segment"
+                android:orientation="vertical">
+
+                <View
+                    android:id="@+id/timeline_marker_top"
+                    android:visibility="@{location.landscapeLayout ? View.INVISIBLE : location.oddIndex ? View.VISIBLE : View.INVISIBLE}"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="2dp"
+                    android:layout_height="12dp"
+                    android:background="@color/colorPrimary" />
+
+                <View
+                    android:id="@+id/timeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:background="@color/colorPrimary" />
+
+                <View
+                    android:id="@+id/timeline_marker_bottom"
+                    android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.INVISIBLE : View.VISIBLE}"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="2dp"
+                    android:layout_height="12dp"
+                    android:background="@color/colorPrimary" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/timeline_end"
+                android:src="@drawable/circle"
+                android:visibility="@{location.lastInList ? View.VISIBLE : View.GONE}"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@string/timeline_end_icon"/>
+
+        </RelativeLayout>
+
+        <include android:id="@+id/timeline_image_block_bottom"
+            layout="@layout/timeline_image_block"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
+            bind:location="@{location}"
+            android:layout_height="200dp"
+            android:layout_width="match_parent"/>
+
+        <include android:id="@+id/timeline_info_block_bottom"
+            layout="@layout/timeline_info_block"
+            android:visibility="@{location.landscapeLayout ? View.GONE : location.oddIndex ? View.VISIBLE: View.GONE}"
+            bind:location="@{location}"
+            android:layout_height="200dp"
+            android:layout_width="match_parent"/>
+
+    </LinearLayout>
+</layout>

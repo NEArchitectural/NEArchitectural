@@ -52,9 +52,10 @@ public class DatabaseExtractor {
     private static final String PARAGRAPHS = "paragraphs";
     private static final String SLIDESHOW_URLS = "slideshowURLs";
     private static final String REFERENCES = "references";
+    private static final String TIMELINE_SNIPPET = "timeLineSnippet";
 
     // Instance of the Firebase database in which information is stored
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseFirestore db;
 
     /* Callback interface for retrieving information from the Firestore database
        Idea taken and adapted from the following link:
@@ -64,6 +65,20 @@ public class DatabaseExtractor {
         void onDataRetrieved(T data);
     }
 
+    // Retrieve new instance of database when instantiated
+    public DatabaseExtractor() {
+        db = FirebaseFirestore.getInstance();
+    }
+
+    // Retrieves a new instance of Firestore in case current instance is terminated
+    public void restoreInstance() {
+        db = FirebaseFirestore.getInstance();
+    }
+
+    // Terminates the instance of the Firestore and prevents callbacks from firing
+    public void cancelCallbacksAndDestroy() {
+        db.terminate();
+    }
 
     // Returns a list of all locations in the database location collection via callback
     public void extractAllLocations(@NonNull final DatabaseCallback<List<Location>> finishedCallback) {
@@ -73,7 +88,6 @@ public class DatabaseExtractor {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
                         // List to store all locations in
                         List<Location> locationList = new ArrayList<>();
 
@@ -140,12 +154,14 @@ public class DatabaseExtractor {
         ArrayList<String> paragraphs = new ArrayList<>();
         ArrayList<String> slideshowURLs = new ArrayList<>();
         ArrayList<String> references = new ArrayList<>();
+        String timelineSnippet = "";
 
         if (reportData != null) {
             try {
                 paragraphs = (ArrayList<String>) reportData.get(PARAGRAPHS);
                 slideshowURLs = (ArrayList<String>) reportData.get(SLIDESHOW_URLS);
-                references = (ArrayList<String>) reportData.get((REFERENCES));
+                references = (ArrayList<String>) reportData.get(REFERENCES);
+                timelineSnippet = (String) reportData.get(TIMELINE_SNIPPET);
             } catch (ClassCastException ignored) {
                 // Ignored since report data has already been instantiated as empty lists
             }
@@ -154,7 +170,7 @@ public class DatabaseExtractor {
         Log.d(TAG, reportID + " => " + reportData);
 
         // All the information about the current location
-        return new Report(reportID, paragraphs, slideshowURLs, references);
+        return new Report(reportID, paragraphs, slideshowURLs, references, timelineSnippet);
     }
 
     // Takes necessary fields from a location object and converts them to a Map Marker

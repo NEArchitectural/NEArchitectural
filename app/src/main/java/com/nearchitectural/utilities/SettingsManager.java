@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.nearchitectural.R;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class SettingsManager {
             SharedPreferences.Editor editor = settingsFile.edit();
             // Apply default values for each key in settings file
             editor.putInt(context.getString(R.string.settings_font_size), R.style.FontStyle_Medium);
-            editor.putString(context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETER.name());
+            editor.putString(context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETRE.name());
             editor.putBoolean(context.getString(R.string.settings_location_permissions_granted), false);
             editor.putFloat(context.getString(R.string.settings_max_distance), (float) Double.MAX_VALUE);
             editor.putInt(context.getString(R.string.settings_max_distance_slider), 0);
@@ -50,7 +51,7 @@ public class SettingsManager {
         Settings userSettings = Settings.getInstance();
         userSettings.setFontSize(settingsFile.getInt(context.getString(R.string.settings_font_size), R.style.FontStyle_Medium));
         userSettings.setDistanceUnit(Settings.DistanceUnit.valueOf(settingsFile.getString(
-                context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETER.name())));
+                context.getString(R.string.settings_distance_unit), Settings.DistanceUnit.KILOMETRE.name())));
         userSettings.setLocationPermissionsGranted(settingsFile.getBoolean(context.getString(R.string.settings_location_permissions_granted), false));
         userSettings.setMaxDistance(settingsFile.getFloat(context.getString(R.string.settings_max_distance), (float) Double.MAX_VALUE));
         userSettings.setMaxDistanceSliderVal(settingsFile.getInt(context.getString(R.string.settings_max_distance_slider), 0));

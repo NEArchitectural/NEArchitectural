@@ -15,7 +15,6 @@
             android:background="@android:color/transparent"
             android:orientation="vertical">
 
-
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -55,7 +54,6 @@
                         android:title="@string/search" />
 
                 </RelativeLayout>
-
 
             </androidx.appcompat.widget.Toolbar>
 

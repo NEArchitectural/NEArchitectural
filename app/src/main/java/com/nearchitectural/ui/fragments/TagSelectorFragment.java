@@ -10,8 +10,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.nearchitectural.R;
-import com.nearchitectural.utilities.TagID;
 import com.nearchitectural.utilities.TagMapper;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,14 +37,14 @@ public class TagSelectorFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new MaterialAlertDialogBuilder(getContext(), R.style.DialogTheme);
 
-        // Stores tag display names as a CharSequence array to set as the multi choice items
+        // Stores tag display names as a CharSequence array.xml to set as the multi choice items
         final CharSequence[] items = new CharSequence[tagMapper.getTagDisplayNameMap().size()];
         List<String> tagDisplayNames = new ArrayList<>(tagMapper.getTagDisplayNameMap().keySet());
         for (int i = 0; i < tagMapper.getTagDisplayNameMap().size(); i++) {
             items[i] = tagDisplayNames.get(i);
         }
 
-        // Stores tag boolean values as a boolean array to set as the multi choice item states
+        // Stores tag boolean values as a boolean array.xml to set as the multi choice item states
         final boolean[] currentStateOfItems = new boolean[tagMapper.getTagValuesMap().size()];
         List<Boolean> tagValues = new ArrayList<>(tagMapper.getTagValuesMap().values());
         for (int i = 0; i < tagMapper.getTagValuesMap().size(); i++) {

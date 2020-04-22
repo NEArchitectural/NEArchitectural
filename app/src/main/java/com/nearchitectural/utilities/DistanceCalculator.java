@@ -25,6 +25,6 @@ public class DistanceCalculator {
 
         double tempDistTwo = 2 * Math.atan2(Math.sqrt(tempDistOne), Math.sqrt(1 - tempDistOne));
         // Return distance in meters  (regardless of distance unit setting)
-        return EARTH_RADIUS * tempDistTwo * Settings.DistanceUnit.KILOMETER.getConversionRate();
+        return EARTH_RADIUS * tempDistTwo * Settings.DistanceUnit.KILOMETRE.getConversionRate();
     }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="location"
+            type="com.nearchitectural.ui.models.TimelineModel" />
+
+        <import type="android.view.Gravity" />
+        <import type="android.view.View"/>
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/image_block_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="@{location.oddIndex ? Gravity.BOTTOM : Gravity.TOP}">
+
+        <TextView
+            android:id="@+id/date_top"
+            android:visibility="@{location.landscapeLayout ? View.VISIBLE : location.oddIndex ? View.GONE : View.VISIBLE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="@{location.yearOpenedString}"
+            android:textSize="?attr/font_large" />
+
+        <ImageView
+            android:id="@+id/timeline_thumbnail"
+            android:visibility="@{location.landscapeLayout ? View.GONE : View.VISIBLE}"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:contentDescription="@{location.title}"
+            bind:thumbnailCircle="@{location.thumbnailURL}" />
+
+        <TextView
+            android:id="@+id/date_bottom"
+            android:visibility="@{location.landscapeLayout? View.GONE : location.oddIndex ? View.VISIBLE : View.GONE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="@{location.yearOpenedString}"
+            android:textSize="?attr/font_large" />
+
+    </LinearLayout>
+</layout>

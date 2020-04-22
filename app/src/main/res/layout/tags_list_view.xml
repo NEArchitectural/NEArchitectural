@@ -5,11 +5,13 @@
 
     <TextView
         android:id="@+id/tag_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:singleLine="true"
-        android:padding="5dp"
-        android:textSize="?attr/font_medium" />
+        android:padding="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/black"
+        android:textSize="?attr/font_small" />
 
 </RelativeLayout>

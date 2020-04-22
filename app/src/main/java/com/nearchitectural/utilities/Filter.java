@@ -1,6 +1,8 @@
 package com.nearchitectural.utilities;
 
 import com.nearchitectural.ui.models.LocationModel;
+import com.nearchitectural.utilities.models.Location;
+import com.nearchitectural.utilities.models.TagID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.Map;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   15/01/20
  * Version: 1.1
- * Purpose: Filter a list of locations based on a set of factors (tags applied, distance to user etc)
+ * Purpose: Filter locations based on a set of factors (tags applied, distance to user etc)
  */
 public class Filter {
 
@@ -62,5 +64,30 @@ public class Filter {
         filteredModelList.removeAll(nonMatchModels); // Remove all non-matching models
 
         return filteredModelList;
+    }
+
+    // Method used to determine if provided location meets the criteria of the user settings
+    public static boolean locationMeetsSettingsCriteria(Location location) {
+
+        Settings userSettings = Settings.getInstance();
+
+        // Guard against database retrieval errors
+        if (location.getName().equals("Unknown")
+                || (location.getLatitude() == 0 && location.getLongitude() == 0)) {
+            return false;
+        }
+
+        // Ensures location matches all set tags
+        for (TagID tag: TagID.values()) {
+            if (userSettings.getTagValue(tag) && !location.getTagValue(tag)) {
+                return false;
+            }
+        }
+
+        // Ensures location is within the user specified max distance
+        return (DistanceCalculator.calculateDistance(CurrentCoordinates.getCoords().latitude,
+                location.getLatitude(),
+                CurrentCoordinates.getCoords().longitude,
+                location.getLongitude()) <= userSettings.getMaxDistance());
     }
 }

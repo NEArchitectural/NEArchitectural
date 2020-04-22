@@ -28,6 +28,12 @@ public class CurrentCoordinates implements Serializable {
     // The default location used in cases where user's actual location cannot be determined
     private static final LatLng DEFAULT_LOCATION = new LatLng(54.9695, -1.6074);
 
+    /* Callback interface used to pass coordinates back upon retrieval.
+     * Null can be used as an indicator that callback is not necessary */
+    public interface LocationCallback<LatLng> {
+        void onLocationRetrieved(LatLng coordinates);
+    }
+
     //private constructor
     private CurrentCoordinates(){
 
@@ -56,7 +62,7 @@ public class CurrentCoordinates implements Serializable {
         return new LatLng(coords.latitude,coords.longitude);
     }
 
-    public static void setCoords(LatLng coords) {
+    private static void setCoords(LatLng coords) {
         CurrentCoordinates.coords = coords;
     }
 
@@ -65,17 +71,17 @@ public class CurrentCoordinates implements Serializable {
         return getInstance();
     }
 
-    // Attempts to get device's location if permissions are granted, otherwise returns a default location
-    public void getDeviceLocation(Context context) {
+    // Attempts to get device's location if permissions are granted, otherwise returns a default location via callback
+    public void getDeviceLocation(Context context, final LocationCallback<LatLng> locationRetrievedCallback) {
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
+        // Set coords to default position as fallback for location retrieval fail
         coords = DEFAULT_LOCATION;
 
         // Attempts to get device's location initially
         try {
             if (Settings.getInstance().locationPermissionsAreGranted()) {
-                // This warning cannot be evaded as we're using the Task api
-                Task location = mFusedLocationProviderClient.getLastLocation();
+                final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
@@ -85,9 +91,10 @@ public class CurrentCoordinates implements Serializable {
                                 // If device location successfully retrieved, update coordinates
                                 coords = new LatLng(currentLocationFound.getLatitude(), currentLocationFound.getLongitude());
                             }
-                        } else {
-                            Log.d(TAG, "onComplete: current location is null. Fallback to default location");
                         }
+                        // If coords are needed, pass back through callback
+                        if (locationRetrievedCallback != null)
+                            locationRetrievedCallback.onLocationRetrieved(coords);
                     }
                 });
             }
