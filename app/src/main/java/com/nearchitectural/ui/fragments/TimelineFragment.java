@@ -208,8 +208,7 @@ public class TimelineFragment extends Fragment {
         timelineRecyclerView.setLayoutManager(recyclerManager); // Set manager
         timelineRecyclerView.setAdapter(timelineItemAdapter); // Set adapter for recycler view
 
-        // Initialise the order spinner
-        initialiseSpinner();
+        initialiseSpinner(); // Initialise the order spinner
 
         // Open location page when the "Find out more" button is pressed
         openLocationPageButton.setOnClickListener(new View.OnClickListener() {
@@ -358,10 +357,10 @@ public class TimelineFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Only fire if listener is triggered by user input
                 if (fireSpinnerListener) {
-                    if (position == 0) {
+                    if (position == 0) { // If Oldest to Newest selected
                         timelineItemAdapter.changeComparator(new OldestToNewestComparator());
                         isOldestToNewest = true;
-                    } else if (position == 1) {
+                    } else if (position == 1) { // If Newest to Oldest selected
                         timelineItemAdapter.changeComparator(new NewestToOldestComparator());
                         isOldestToNewest = false;
                     }
@@ -380,10 +379,13 @@ public class TimelineFragment extends Fragment {
     private void restoreUIState() {
         // Check if configuration has changed
         if (getArguments() != null && recyclerManager != null) {
+
             // Restore scroll position
             recyclerManager.scrollToPosition(getArguments().getInt(SCROLL_KEY));
+
             // Retrieves the ID of the location being displayed if any
             displayedLocationID = getArguments().getString(DISPLAYED_LOCATION_KEY);
+
             // Display cached location/report information if present
             if (displayedLocationID != null) {
                 String reportID = getArguments().getString(REPORT_ID_KEY);
@@ -399,10 +401,14 @@ public class TimelineFragment extends Fragment {
     public void getReportInfoAndDisplay(final String locationID) {
         // Ensure no location or provided location is not already selected
         if (displayedLocationID == null || !displayedLocationID.equals(locationID)) {
+
+            // Show progress bar while retrieving from db
             initialTextview.setVisibility(View.GONE);
-            progressBarContainer.setVisibility(View.VISIBLE); // Show progress bar while retrieving from db
+            progressBarContainer.setVisibility(View.VISIBLE);
+
             displayedLocationID = locationID;
             String reportID = modelIDMap.get(locationID).getLocationInfo().getReportID();
+
             // Get report from database
             new DatabaseExtractor().extractReport(reportID, new DatabaseExtractor.DatabaseCallback<Report>() {
                 @Override
@@ -425,10 +431,13 @@ public class TimelineFragment extends Fragment {
     private void displayReportInfo(String locationID, Report report) {
         // Hide placeholder message and show location info
         locationInfoContainer.setVisibility(View.VISIBLE);
-        progressBarContainer.setVisibility(View.GONE); // Hide progress bar once report is displayed
         initialTextview.setVisibility(View.GONE);
-        this.locationTitle.setText(modelIDMap.get(locationID).getTitle());
+        progressBarContainer.setVisibility(View.GONE); // Hide progress bar once report is displayed
+
+        // Set text for UI elements
+        locationTitle.setText(modelIDMap.get(locationID).getTitle());
         locationInfo.setText(report.getTimelineSnippet());
+
         // Start fading slideshow for location URLs
         locationImageFader.animateLocationSlideshow(report.getSlideshowURLs(), 5000, 1500);
         displayedLocationID = locationID;
@@ -496,6 +505,8 @@ public class TimelineFragment extends Fragment {
         timelineState.putBoolean(ORIGINAL_ORDER_KEY, isOldestToNewest);
         // Saves the necessary report information to be displayed
         timelineState.putString(DISPLAYED_LOCATION_KEY, displayedLocationID);
+
+        // If report is being displayed, cache it for re-displaying after configuration change
         if (displayedReport != null) {
             String reportID = displayedReport.getReportID();
             String timelineSnippet = displayedReport.getTimelineSnippet();
@@ -504,6 +515,7 @@ public class TimelineFragment extends Fragment {
             timelineState.putString(REPORT_SNIPPET_KEY, timelineSnippet);
             timelineState.putStringArray(REPORT_URLS_KEY, reportSlideshowURLs);
         }
+
         // Creates a new timeline fragment to use portrait/landscape layout upon configuration change
         TimelineFragment timelineFragment = new TimelineFragment();
         timelineFragment.setArguments(timelineState);

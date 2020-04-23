@@ -13,10 +13,8 @@ import java.util.Map;
  */
 public class TagMapper {
 
-    // Map of Tag IDs to their state (true = active, false = inactive)
-    private Map<TagID, Boolean> tagValuesMap;
-    // Map of Tag Display Names (presented on UI) to Tag IDs
-    private Map<String, TagID> tagDisplayNameMap;
+    private Map<TagID, Boolean> tagValuesMap; // Map of Tag IDs to their state (true = active, false = inactive)
+    private Map<String, TagID> tagDisplayNameMap; // Map of Tag Display Names (presented on UI) to Tag IDs
 
     // Constructor for tag mapper with default false values (i.e. no tags set)
     public TagMapper() {

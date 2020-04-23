@@ -16,7 +16,6 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -58,15 +57,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
     private RelativeLayout progressBarContainer;
     private MapView mapView; // View object displaying the map
 
+    // MAP AND LOCATION RELATED OBJECTS
     private GoogleMap googleMap; // Object representing the map itself
-    private DatabaseExtractor extractor; // Used to retrieve location information and create map markers
-    private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
-    private boolean introDialogNeeded; // Flag boolean to signal if the introductory dialog should show
     private Marker activeMarker; // The marker whose info window is currently showing (if any)
     private CameraUpdate defaultCameraPosition; // The default position the map camera will hover over
     private Map<Marker, String> markerIDMap; // Map of markers to corresponding location IDs
     // Map of markers to the thumbnail URLs for their locations
     private Map<Marker, String> markerThumbnailURLMap = new HashMap<>();
+
+    private DatabaseExtractor extractor; // Used to retrieve location information and create map markers
+    private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted
+    private boolean introDialogNeeded; // Flag boolean to signal if the introductory dialog should show
     // Bundle key for storing/retrieving the initial startup dialog boolean
     private static final String INTRO_DIALOG_KEY = "introDialogKey";
 
@@ -123,7 +124,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onMapReady(GoogleMap map) {
 
@@ -165,8 +165,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
         rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
 
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
-        rlp.addRule(RelativeLayout.ALIGN_END, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            rlp.addRule(RelativeLayout.ALIGN_END, 0);
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_END, 0);
+        }
         rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         rlp.setMargins(0, 0, 0, 80);
 
@@ -229,10 +231,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
                     if (markerIDMap.isEmpty()) {
                         ((MapsActivity) getActivity()).displayNoLocationsDialog();
                     }
+
                     // Once all markers are added to map, create bound and move camera with bound
                     createDefaultCameraPosition(cameraBoundBuilder);
                     googleMap.moveCamera(defaultCameraPosition);
-                    // Hide progress bar and show map once ready
+                    // Hide progress bar and show map once markers are ready
                     progressBarContainer.setVisibility(View.GONE);
                     mapContainer.setVisibility(View.VISIBLE);
                 } else {

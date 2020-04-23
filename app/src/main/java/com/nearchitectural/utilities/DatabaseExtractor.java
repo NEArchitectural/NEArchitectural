@@ -85,6 +85,7 @@ public class DatabaseExtractor {
     // Returns a list of all locations in the database location collection via callback
     public void extractAllLocations(@NonNull final DatabaseCallback<List<Location>> finishedCallback) {
 
+        // Get all location documents in the Firestore and parse a list of locations to return
         db.collection(LOCATION_COLLECTION_KEY)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -93,18 +94,19 @@ public class DatabaseExtractor {
                         // List to store all locations in
                         List<Location> locationList = new ArrayList<>();
 
+                        // Check if db retrieval is successful
                         if (task.isSuccessful()) {
+                            // Cycle through location documents, create location object and add to list
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, String.valueOf(document.getData().get(NAME)));
-                                // For each location create a new Location instance and add it to the list
                                 Location locationTemp = parseLocation(document.getId(), document.getData());
                                 locationList.add(locationTemp);
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
-                            finishedCallback.onDataRetrieved(locationList);
+                            finishedCallback.onDataRetrieved(locationList); // Return list via callback
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
-                            finishedCallback.onDataRetrieved(null);
+                            finishedCallback.onDataRetrieved(null); // Indicates db retrieval failed
                         }
                     }
                 });
@@ -113,18 +115,20 @@ public class DatabaseExtractor {
     // Returns a specific location corresponding to a provided location ID in the database via callback
     public void extractLocationByID(String locationID, @NonNull final DatabaseCallback<Location> finishedCallback) {
 
+        // Get a specific location document in the Firestore and parse that location to return
         db.collection(LOCATION_COLLECTION_KEY)
                 .document(locationID)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        // Check if db retrieval is successful
                         if (task.isSuccessful()) {
                             Location location = parseLocation(task.getResult().getId(), task.getResult().getData());
-                            finishedCallback.onDataRetrieved(location);
+                            finishedCallback.onDataRetrieved(location); // Return location via callback
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
-                            finishedCallback.onDataRetrieved(null);
+                            finishedCallback.onDataRetrieved(null); // Indicates db retrieval failed
                         }
                     }
                 });
@@ -133,18 +137,20 @@ public class DatabaseExtractor {
     // Returns a specific report corresponding to a provided report ID in the database via callback
     public void extractReport(String reportID, @NonNull final DatabaseCallback<Report> finishedCallback) {
 
+        // Get a specific report document in the Firestore and parse that location to return
         db.collection(REPORT_COLLECTION_KEY)
                 .document(reportID)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        // Check if db retrieval is successful
                         if (task.isSuccessful()) {
                             Report report = parseReport(task.getResult().getId(), task.getResult().getData());
-                            finishedCallback.onDataRetrieved(report);
+                            finishedCallback.onDataRetrieved(report); // Return report via callback
                         } else {
                             Log.w(TAG, "Error getting report.", task.getException());
-                            finishedCallback.onDataRetrieved(null);
+                            finishedCallback.onDataRetrieved(null); // Indicates db retrieval failed
                         }
                     }
                 });

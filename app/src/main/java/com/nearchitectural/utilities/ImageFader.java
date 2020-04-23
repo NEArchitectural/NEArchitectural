@@ -67,41 +67,8 @@ public class ImageFader {
         final Runnable changeImage = new Runnable() {
             @Override
             public void run() {
-                if (context != null) {
-                    Glide.with(context)
-                            .load(imageURLs.get(position))
-                            .error(R.drawable.launcher_icon)
-                            .placeholder(R.drawable.ic_loading_message)
-                            .centerCrop()
-                            .addListener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    // If image load failed, increment position but don't show next image
-                                    position++;
-                                    // If position reaches end of list, reset
-                                    if (position == imageURLs.size())
-                                        position = 0;
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    // Increment position
-                                    position++;
-                                    // If position reaches end of list, reset
-                                    if (position == imageURLs.size())
-                                        position = 0;
-                                    // Cross-fade images and swap active image
-                                    fade(activeImage, inactiveImage, fadeDuration);
-                                    ImageView temp = activeImage;
-                                    activeImage = inactiveImage;
-                                    inactiveImage = temp;
-                                    return false;
-                                }
-                            })
-                            .into(inactiveImage);
+                    performFadeSlideshow(imageURLs, fadeDuration);
                 }
-            }
         };
 
         // Cancels the animating of a previously animated set of images
@@ -119,9 +86,48 @@ public class ImageFader {
         }, 0, displayDuration);
     }
 
+    // Loads images via their URLs into alternating ImageViews to create fading slideshow effect
+    private void performFadeSlideshow(final List<String> imageURLs, final int fadeDuration) {
+        if (context != null) {
+            Glide.with(context)
+                    .load(imageURLs.get(position))
+                    .error(R.drawable.launcher_icon)
+                    .placeholder(R.drawable.ic_loading_message)
+                    .centerCrop()
+                    .addListener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            // If image load failed, increment position but don't show next image
+                            position++;
+                            // If position reaches end of list, reset
+                            if (position == imageURLs.size())
+                                position = 0;
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            // Increment position
+                            position++;
+                            // If position reaches end of list, reset
+                            if (position == imageURLs.size())
+                                position = 0;
+                            // Cross-fade images and swap active image
+                            fade(activeImage, inactiveImage, fadeDuration);
+                            ImageView temp = activeImage;
+                            activeImage = inactiveImage;
+                            inactiveImage = temp;
+                            return false;
+                        }
+                    })
+                    .into(inactiveImage);
+        }
+    }
+
     // Method used to cancel the current animation and prevent the timer from acting on a detached fragment
     public void finishAnimating() {
         if (timer != null)
             timer.cancel();
     }
+
 }

@@ -79,6 +79,7 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
 
         // Apply user's chosen font size across activity and child fragments
         getTheme().applyStyle(Settings.getInstance().getFontSize(), true);
+
         // Get user coordinates initially
         CurrentCoordinates.getInstance().getDeviceLocation(this, null);
 
@@ -116,10 +117,6 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
         // Flag initially set to true allowing the application to make a request
         canRequestLocation = true;
 
-        /* Bundle to hold information needed when handling if a fragment/location
-         * page needs to be opened */
-        Bundle bundle = getIntent().getExtras();
-
         // If user launches application for the first time, open the help fragment with an introductory guide
         if (firstTimeLaunch) {
             Bundle launchIntroGuideBundle = new Bundle();
@@ -127,10 +124,20 @@ public class MapsActivity extends AppCompatActivity implements NavigationView.On
             HelpFragment helpFragment = new HelpFragment();
             helpFragment.setArguments(launchIntroGuideBundle);
             fragmentManager.beginTransaction().replace(R.id.fragment_container, helpFragment).commit();
+        } else {
+            launchFragmentOnActivityStart(savedInstanceState);
         }
+    }
+
+    // Determines which fragment should be launched in the Activity fragment container when the activity is started
+    private void launchFragmentOnActivityStart(Bundle savedInstanceState) {
+
+        /* Bundle to hold information needed when handling if a fragment/location
+         * page needs to be opened */
+        Bundle bundle = getIntent().getExtras();
 
         // If application does not need to restore state, launch as normal
-        if (savedInstanceState == null && !firstTimeLaunch) {
+        if (savedInstanceState == null) {
             // Fragment to be opened based on user's choice (Map by default)
             Fragment fragmentToOpen = MapFragment.newInstance(false);
 

@@ -215,16 +215,20 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
     private void displayImportantTags(Map<TagID, Boolean> tagValues) {
         // Cycle through each text view and set text to tag value and icon
         for (TextView tagTextView : tagsTextViews) {
-            for (TagID tag : TagID.values())
+            for (TagID tag : TagID.values()) {
+
+                // If tag is active for this location, display on UI
                 if (tagValues.get(tag)) {
                     tagTextView.setText(tag.displayName);
                     // Get icon associated with tag
                     int iconID = getResources().getIdentifier(tag.iconName,
                             "drawable", getActivity().getPackageName());
+
                     tagTextView.setCompoundDrawablesWithIntrinsicBounds(iconID, 0, 0, 0);
                     tagValues.put(tag, false); // Flag that tag no longer needs to be displayed
                     break;
                 }
+            }
             // Hide text view if less than three tags are active
             if (tagTextView.getText().equals("")) {
                 tagTextView.setVisibility(View.GONE);
@@ -251,6 +255,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
                 if (data != null) {
                     location = data;
                     locationBinding.setLocation(location); // Set selected location as data binding model
+
                     // Handle displaying UI elements which use location values
                     likeButton.setLiked(Settings.getInstance().locationIsLiked(location.getId()));
                     displayImportantTags(new LinkedHashMap<>(location.getAllTags()));
@@ -298,6 +303,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         locationSlideshowAdapter = new LocationSlideshowAdapter(
                 LocationFragment.this.getContext(),
                 new ArrayList<>(locationReport.getSlideshowURLs()));
+
         slideshow.setAdapter(locationSlideshowAdapter);
 
         // Changes the current image index value on the slideshow TextView
@@ -305,6 +311,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
         slideshow.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                // Do nothing
             }
 
             @Override
@@ -315,6 +322,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
 
             @Override
             public void onPageScrollStateChanged(int state) {
+                // Do nothing
             }
         });
     }
