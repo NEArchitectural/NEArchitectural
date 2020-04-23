@@ -20,7 +20,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original author
  * Since:   29/03/20
  * Version: 1.1
  * Purpose: UI Utility used to create an animated fading slideshow from two ImageViews

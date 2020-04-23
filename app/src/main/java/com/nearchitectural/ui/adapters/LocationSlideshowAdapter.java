@@ -13,7 +13,7 @@ import com.nearchitectural.R;
 
 import java.util.ArrayList;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Kristiyan Doykov - Original Author
  * Since:   13/12/19
  * Version: 1.0
  * Purpose: Handles the displaying of slideshow images on the Location page

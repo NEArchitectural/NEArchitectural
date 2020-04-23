@@ -5,7 +5,8 @@ import com.nearchitectural.utilities.models.TagID;
 import java.io.Serializable;
 import java.util.HashSet;
 
-/* Author:  Joel Bell-Wilding, Mark Lumb
+/* Authors: Joel Bell-Wilding - Original co-author
+ *          Mark Lumb - Original co-author
  * Since:   15/01/20
  * Version: 1.1
  * Purpose: Settings singleton class which stores and allows manipulation of application-wide settings

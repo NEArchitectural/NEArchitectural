@@ -1,6 +1,6 @@
 package com.nearchitectural.ui.interfaces;
 
-/* Author:  Mark Lumb
+/* Author:  Mark Lumb - Original author
  * Since:   29/03/20
  * Version: 1.0
  * Purpose: Allows an active fragment to be alerted when the back button is pressed

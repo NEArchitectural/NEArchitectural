@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Authors: Kristiyan Doykov - Original author (for Firebase calling code)
+ *          Joel Bell-Wilding - Refinements and re-purposed to use callbacks
  * Since:   10/02/20
  * Version: 1.3
  * Purpose: Extracts information from the Firebase Database and produces and returns

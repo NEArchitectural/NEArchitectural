@@ -4,7 +4,7 @@ import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.Comparator;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original author
  * Version: 1.0
  * Since:   11/02/20
  * Purpose: Compare locations by oldest to newest (opening date)

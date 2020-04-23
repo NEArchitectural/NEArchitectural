@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, James Allwood-Panter
+/* Authors: Kristiyan Doykov - Original author for use in Search
+ *          James Allwood-Panter - Re-purposed for use in search and timeline
  * Since:   12/12/19
  * Version: 1.1
  * Purpose: Creates and updates Location models from static location information in

@@ -5,7 +5,7 @@ import com.nearchitectural.utilities.models.TagID;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original Author
  * Since:   07/02/20
  * Version: 1.1
  * Purpose: Utility class which stores mapping of Tag IDs, their state (active/inactive)

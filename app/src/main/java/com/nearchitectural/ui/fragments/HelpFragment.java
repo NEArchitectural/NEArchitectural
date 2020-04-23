@@ -23,7 +23,8 @@ import com.nearchitectural.utilities.models.HelpGuide;
 
 import me.relex.circleindicator.CircleIndicator;
 
-/* Author:  Kevin Mehta, Alistair Gimlette
+/* Authors: Kevin Mehta - Original author
+ *          Alistair Gimlette - Additional usability features (circle indicator, return button)
  * Since:   10/12/19
  * Version: 1.0
  * purpose: To provide a selection of help guides and display these guides in a

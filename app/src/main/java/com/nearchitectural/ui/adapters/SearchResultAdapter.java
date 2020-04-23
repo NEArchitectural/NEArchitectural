@@ -14,7 +14,8 @@ import com.nearchitectural.ui.models.LocationModel;
 import java.util.Comparator;
 import java.util.List;
 
-/* Author:  Kristiyan Doykov, Dimo Dimchev
+/* Authors: Kristiyan Doykov - Original author
+ *          Dimo Dimchev - Original author
  * Since:   13/12/19
  * Version: 1.0
  * Purpose: Handles operations for the search results recycler (i.e. a list of locations) for the search

@@ -14,7 +14,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.nearchitectural.R;
 import com.nearchitectural.utilities.models.HelpGuide;
 
-/* Author:  Kevin Mehta
+/* Author:  Kevin Mehta - Original Author
  * Since:   10/04/20
  * Version: 1.0
  * Purpose: Handles the adaptation of a HelpGuide to the help screen ViewPager to show

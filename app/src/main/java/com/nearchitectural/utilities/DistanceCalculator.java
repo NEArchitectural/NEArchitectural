@@ -1,7 +1,7 @@
 package com.nearchitectural.utilities;
 
 /*
- * Author:  Shaun Kurzyk
+ * Author:  Shaun Kurzyk - Original author
  * Since:   20/12/19
  * Version: 1.1
  * Purpose: Utility class which calculates the distance between two points on

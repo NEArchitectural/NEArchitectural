@@ -52,7 +52,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-/* Author:  James Allwood-Panter, Taylor Stubbs
+/* Authors: Taylor Stubbs - Original co-author
+ *          James Allwood-Panter - Original co-author
  * Since:   10/12/19g
  * Version: 1.2
  * Purpose: Visually display a timeline showing locations in both chronological and reverse chronological

@@ -2,7 +2,7 @@ package com.nearchitectural.utilities.models;
 
 import java.util.List;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original author
  * Since:   18/02/20
  * Version: 1.0
  * Purpose: A record-like class holding report-based information (text and images) for a

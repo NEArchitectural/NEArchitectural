@@ -21,7 +21,8 @@ import com.nearchitectural.utilities.Settings;
 import java.util.HashMap;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Authors: Kristiyan Doykov - Original Author
+ *          Joel Bell-Wilding - Changes made to improve display time performance
  * Since:   13/12/19
  * Version: 1.1
  * Purpose: Handles the retrieval of information for and rendering of a custom information

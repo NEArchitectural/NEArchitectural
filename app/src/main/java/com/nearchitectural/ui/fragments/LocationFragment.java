@@ -48,7 +48,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding, Shaun Kurzyk
+/* Authors: Kristiyan Doykov - Original author
+ *          Joel Bell-Wilding - Refinements for calls on database extractor class + progress bar
+ *          Shaun Kurzyk - Addition of Google Map location section at bottom of screen
  * Since:   20/01/20
  * Version: 1.2
  * purpose: Presents information and images regarding a given location

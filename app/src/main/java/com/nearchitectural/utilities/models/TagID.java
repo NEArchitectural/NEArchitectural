@@ -1,6 +1,6 @@
 package com.nearchitectural.utilities.models;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original author
  * Since:   07/02/20
  * Version: 1.2
  * Purpose: Enumerator storing available Tag IDs for use with TagMapper utility class

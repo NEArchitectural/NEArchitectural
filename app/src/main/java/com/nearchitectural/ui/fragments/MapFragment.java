@@ -42,7 +42,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Shaun Kuryzk, Joel Bell-Wilding
+/* Authors: Kristiyan Doykov - Original Author
+ *          Shaun Kuryzk - Refinements and implementation of user location
+ *          Joel Bell-Wilding - Camera bounds changes (fitting all markers) and filtering locations by settings
  * Since:   10/12/19
  * Version: 1.1
  * Purpose: Handles events and presentation related to the Google Maps section of the home screen

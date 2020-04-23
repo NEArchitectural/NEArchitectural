@@ -1,6 +1,7 @@
 package com.nearchitectural.ui.models;
 
-/* Author:  Taylor Stubbs, James Allwood-Panter
+/* Authors: Taylor Stubbs - Original Author
+ *          James Allwood-Panter - Addition of landscape layout functionality
  * Since:   03/04/20
  * Version: 1.1
  * Purpose: Extends LocationModel to provide further information about how to display the

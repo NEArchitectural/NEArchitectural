@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Joel Bell-Wilding, Kristiyan Doykov
+/* Authors: Joel Bell-Wilding - Created functionality to filter individual locations by criteria
+ *          Kristiyan Doykov - Created functionality to filter multiple locations by criteria
  * Since:   15/01/20
  * Version: 1.1
  * Purpose: Filter locations based on a set of factors (tags applied, distance to user etc)

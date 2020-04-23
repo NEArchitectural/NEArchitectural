@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding - Original author
  * Since:   12/12/19
  * Version: 1.0
  * Purpose: Record-like class which stores information regarding a given location

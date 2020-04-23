@@ -9,7 +9,8 @@ import com.nearchitectural.utilities.models.TagID;
 import java.util.HashSet;
 import java.util.Set;
 
-/* Author:  Joel Bell-Wilding, Mark Lumb
+/* Authors: Joel Bell-Wilding - Original author
+ *          Mark Lumb - Implemented changes for determining if app is launched for the first time
  * Since:   19/03/20
  * Version: 1.1
  * Purpose: Handle the retrieval and storage of user settings on the Android device

@@ -4,7 +4,7 @@ import com.nearchitectural.ui.models.LocationModel;
 
 import java.util.Comparator;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Kristiyan Doykov - Original author
  * Since:   15/01/20
  * Version: 1.0
  * Purpose: Comparator which compares location list models by closest distance to the user

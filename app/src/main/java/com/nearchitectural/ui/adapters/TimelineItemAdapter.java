@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/* Author:  James Allwood-Panter
+/* Author:  James Allwood-Panter - Original Author
  * Since:   11/04/20
  * Version: 1.0
  * Purpose: Handles operations for the timeline results recycler (i.e. a list of locations)

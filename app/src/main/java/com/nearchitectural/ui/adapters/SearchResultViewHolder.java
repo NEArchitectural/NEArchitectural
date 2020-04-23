@@ -9,7 +9,8 @@ import com.nearchitectural.databinding.ListItemBinding;
 import com.nearchitectural.ui.models.LocationModel;
 import com.nearchitectural.utilities.Settings;
 
-/* Author:  Kristiyan Doykov, Dimo Dimchev
+/* Authors: Dimo Dimchev - Original Author
+ *          Kristiyan Doykov - Refinements for inclusion of font-size
  * Since:   13/12/19
  * Version: 1.1
  * Purpose: Handles the displaying of the search results (i.e. a list of locations) to the UI

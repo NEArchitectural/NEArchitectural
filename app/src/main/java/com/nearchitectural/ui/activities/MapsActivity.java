@@ -41,7 +41,8 @@ import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
 
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Authors: Kristiyan Doykov - Original Author
+ *          Joel Bell-Wilding - Refinements and implementation of Settings related functionality
  * Since:   10/12/19
  * Version: 1.2
  * Purpose: Handle initialisation of application and provide utilities for child fragments

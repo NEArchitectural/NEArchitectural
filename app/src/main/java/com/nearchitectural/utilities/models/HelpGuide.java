@@ -2,7 +2,8 @@ package com.nearchitectural.utilities.models;
 
 import com.nearchitectural.R;
 
-/* Author:  Alistair Gimlette, Joel Bell-Wilding
+/* Authors: Alistair Gimlette - Structure and content provider
+ *          Joel Bell-Wilding - Original author
  * Since:   10/04/20
  * Version: 1.1
  * Purpose: Enumerator class to store all Help Guide information and images

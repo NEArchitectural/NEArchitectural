@@ -52,7 +52,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristyan Doykov, Dimo Dimchev, Joel Bell-Wilding
+/* Authors: Kristyan Doykov - Original Author
+ *          Dimo Dimchev - Usability Refinements
+ *          Joel Bell-Wilding - Adapted to make use of TagMapper Tags class system
  * Since:   12/12/19
  * Version: 1.2
  * Purpose: Activity which handles searching through list of locations through numerous approaches
