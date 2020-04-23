@@ -1,6 +1,6 @@
 package com.nearchitectural.ui.interfaces;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Mark Lumb
  * Since:   02/04/20
  * Version: 1.0
  * Purpose: Allows an active fragment to be alerted when a change in location permissions

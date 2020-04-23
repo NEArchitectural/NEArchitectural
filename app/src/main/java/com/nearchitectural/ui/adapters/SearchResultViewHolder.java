@@ -9,7 +9,7 @@ import com.nearchitectural.databinding.ListItemBinding;
 import com.nearchitectural.ui.models.LocationModel;
 import com.nearchitectural.utilities.Settings;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Kristiyan Doykov, Dimo Dimchev
  * Since:   13/12/19
  * Version: 1.1
  * Purpose: Handles the displaying of the search results (i.e. a list of locations) to the UI

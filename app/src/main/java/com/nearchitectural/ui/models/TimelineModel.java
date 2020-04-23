@@ -1,6 +1,6 @@
 package com.nearchitectural.ui.models;
 
-/* Author:  Taylor Stubbs
+/* Author:  Taylor Stubbs, James Allwood-Panter
  * Since:   03/04/20
  * Version: 1.1
  * Purpose: Extends LocationModel to provide further information about how to display the

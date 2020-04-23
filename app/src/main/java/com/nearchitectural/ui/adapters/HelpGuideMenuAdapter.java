@@ -13,7 +13,7 @@ import com.nearchitectural.R;
 import com.nearchitectural.ui.fragments.HelpFragment;
 import com.nearchitectural.utilities.models.HelpGuide;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Alistair Gimlette
  * Since:   10/04/20
  * Version: 1.0
  * Purpose: Adapts all HelpGuide enumerator objects into a RecyclerView menu on the UI

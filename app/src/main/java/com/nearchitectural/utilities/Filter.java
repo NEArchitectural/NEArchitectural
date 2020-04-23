@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding, Kristiyan Doykov
  * Since:   15/01/20
  * Version: 1.1
  * Purpose: Filter locations based on a set of factors (tags applied, distance to user etc)

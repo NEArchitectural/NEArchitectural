@@ -9,7 +9,7 @@ import com.nearchitectural.utilities.models.TagID;
 import java.util.HashSet;
 import java.util.Set;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Joel Bell-Wilding, Mark Lumb
  * Since:   19/03/20
  * Version: 1.1
  * Purpose: Handle the retrieval and storage of user settings on the Android device

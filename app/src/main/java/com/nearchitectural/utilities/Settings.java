@@ -5,7 +5,7 @@ import com.nearchitectural.utilities.models.TagID;
 import java.io.Serializable;
 import java.util.HashSet;
 
-/* Author:  Joel Bell-Wilding, Kristiyan Doykov
+/* Author:  Joel Bell-Wilding, Mark Lumb
  * Since:   15/01/20
  * Version: 1.1
  * Purpose: Settings singleton class which stores and allows manipulation of application-wide settings
@@ -81,12 +81,12 @@ public class Settings implements Serializable {
     }
 
     // Determines if a tag is currently active for application-wide filtering
-    public boolean getTagValue(TagID tag) {
+    boolean getTagValue(TagID tag) {
         return activeTags.getTagValuesMap().get(tag);
     }
 
     // Set a tag value in the internal TagMapper
-    public void setTagValue(TagID tag, boolean isActive) {
+    void setTagValue(TagID tag, boolean isActive) {
         Settings.activeTags.addTagToMapper(tag, isActive);
     }
 
@@ -104,7 +104,7 @@ public class Settings implements Serializable {
         return getInstance();
     }
 
-    public double getMaxDistance() {
+    double getMaxDistance() {
         return maxDistance;
     }
 

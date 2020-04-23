@@ -2,7 +2,7 @@ package com.nearchitectural.utilities.models;
 
 import com.nearchitectural.R;
 
-/* Author:  Joel Bell-Wilding
+/* Author:  Alistair Gimlette, Joel Bell-Wilding
  * Since:   10/04/20
  * Version: 1.1
  * Purpose: Enumerator class to store all Help Guide information and images
@@ -65,9 +65,9 @@ public enum HelpGuide {
     DIRECTIONS("How to find directions to a Location", 3,
             new int[] {
                     R.drawable.directions_guide_1,
-                    R.drawable.like_guide_2,
-                    R.drawable.like_guide_3,
-                    R.drawable.like_guide_4},
+                    R.drawable.directions_guide_2,
+                    R.drawable.directions_guide_3,
+                    R.drawable.directions_guide_4},
             new String[]{
                     "Access a location page from either the map/home, search or timeline pages",
                     "Once on the location page, scroll to the bottom of the page to find the map",

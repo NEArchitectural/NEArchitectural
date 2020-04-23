@@ -23,7 +23,7 @@ import com.nearchitectural.utilities.models.HelpGuide;
 
 import me.relex.circleindicator.CircleIndicator;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Kevin Mehta, Alistair Gimlette
  * Since:   10/12/19
  * Version: 1.0
  * purpose: To provide a selection of help guides and display these guides in a

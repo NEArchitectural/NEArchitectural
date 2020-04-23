@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Kristiyan Doykov, James Allwood-Panter
  * Since:   12/12/19
  * Version: 1.1
  * Purpose: Creates and updates Location models from static location information in

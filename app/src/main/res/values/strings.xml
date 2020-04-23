@@ -42,6 +42,8 @@
     <string name="location_thumbnail">Location Thumbnail</string>
     <string name="slideshow_text">%d/%d</string>
     <string name="architectural_information">Architectural Information</string>
+    <string name="location_retrieve_error">Error retrieving location</string>
+    <string name="report_retrieve_error">Error retrieving report</string>
 
     <!-- Slider related Text -->
     <string name="slider_max_distance">Showing locations over 10 %1$s</string>
@@ -73,10 +75,11 @@
     <string name="about_header_image">About Header Image</string>
     <string name="ne_architectural_logo">NE Architectural logo</string>
     <string name="about_us_image">About Us Image</string>
-    <string name="contact_text">\nIf you would like to get in touch with us, e-mail us at: nearchitecturalteam6@gmail.com\n</string>
+    <string name="contact_text">\nIf you would like to get in touch with us, e-mail us at: nearchitecturalteam6@gmail.com</string>
     <string name="about_us_text"><![CDATA[We are a group of students from Newcastle University who have developed the app for Northumblerand County Council. The aim for the project was to produce an application which would highlight interesting areas from both Northumberland and Tyne & Wear, providing some educational material about the history and architecture of these locations, as well as act as a tourism companion for discovering these areas yourself.]]></string>
     <string name="about_north_east_text">The North East is home to Northumberland and Tyne and Wear, both of which have a rich history as is showcased by its many culturally, historically and architecturally significant buildings and monuments. Northumberland is the most northern county in England and won gold in ‘Best UK Holiday County/Destination’ in the prestigious 2018 British Travel Awards, whilst Tyne and Wear is brimming with cultural quayside cities and sandy North Sea beaches. You can use our app to navigate through the history of the North East, with many sites being within walking distance of Newcastle City Centre, and numerous others dotted around the area for if a day trip is in order.</string>
     <string name="about_ne_architectural_text"><![CDATA[NE Architectural is an app designed to showcase places of historical and architectural significance in and around the Northumberland and Tyne & Wear area. The app was designed to cater to the needs of any and all tourists, allowing visitors to the area to choose which locations are suited to their specific needs. Whether you wish to find out more about the area\'s local history, or plan a day out sightseeing, NE Architectural is your handy companion for discovering the North East!]]></string>
+    <string name="council_logo_reference">The Northumberland County Council logo can be found at the following:\nUpload.wikimedia.org. n.d. [online] Available at: https://upload.wikimedia.org/wikipedia/commons/6/64/Coat_of_arms_of_Northumberland_County_Council.png.</string>
 
     <!-- Timeline Related -->
     <string name="timeline_start_icon">Timeline Start Icon</string>

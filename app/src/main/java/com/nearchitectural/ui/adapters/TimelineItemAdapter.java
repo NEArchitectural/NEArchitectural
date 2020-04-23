@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/* Author:  Taylor Stubbs
- * Since:   02/04/20
+/* Author:  James Allwood-Panter
+ * Since:   11/04/20
  * Version: 1.0
  * Purpose: Handles operations for the timeline results recycler (i.e. a list of locations)
  *          for the timeline fragment

@@ -221,6 +221,33 @@
                 android:paddingEnd="14dp"
                 android:gravity="end" />
 
+            <TextView
+                android:id="@+id/references_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contacts_section"
+                android:text="@string/references"
+                android:textAlignment="center"
+                android:padding="10dp"
+                android:gravity="center_horizontal"
+                android:background="@color/colorPrimary"
+                android:textColor="@color/white"
+                android:textSize="?attr/font_medium"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_below="@id/references_title"
+                android:text="@string/council_logo_reference"
+                android:textSize="?attr/font_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:background="@color/colorPrimary"
+                android:textColor="@color/white"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"/>
+
+
         </RelativeLayout>
 
     </ScrollView>

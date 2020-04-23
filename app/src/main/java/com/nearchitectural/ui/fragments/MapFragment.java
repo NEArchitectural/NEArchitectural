@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Kristiyan Doykov, Shaun Kuryzk, Joel Bell-Wilding
  * Since:   10/12/19
  * Version: 1.1
  * Purpose: Handles events and presentation related to the Google Maps section of the home screen
@@ -51,9 +51,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, BackHan
 
     public static final String TAG = "MapFragment"; // Tag used for logging status of application
 
+    // LAYOUT ELEMENTS
     private FrameLayout mapContainer;
     private RelativeLayout progressBarContainer;
     private MapView mapView; // View object displaying the map
+
     private GoogleMap googleMap; // Object representing the map itself
     private DatabaseExtractor extractor; // Used to retrieve location information and create map markers
     private boolean mLocationPermissionsGranted; // Boolean representing if location permissions were granted

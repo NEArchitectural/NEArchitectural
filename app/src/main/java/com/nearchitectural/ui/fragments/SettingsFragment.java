@@ -26,7 +26,7 @@ import com.nearchitectural.ui.interfaces.LocationHandleFragment;
 import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.SettingsManager;
 
-/* Author:  Joel Bell-Wilding, Kristiyan Doykov
+/* Author:  Mark Lumb, Joel Bell-Wilding
  * Since:   10/12/19
  * Version: 1.1
  * Purpose: Act as an interface between the user and the internal

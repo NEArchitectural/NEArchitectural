@@ -20,7 +20,7 @@ import com.nearchitectural.utilities.models.Location;
 import java.util.ArrayList;
 import java.util.List;
 
-/* Author:  Joel Bell Wilding, Krystian Doykov
+/* Author:  Shaun Kurzyk
  * Since:   10/12/19
  * Version: 1.1
  * Purpose: Display information about the application and the people behind it

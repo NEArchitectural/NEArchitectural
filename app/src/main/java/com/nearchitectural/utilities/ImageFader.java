@@ -22,7 +22,7 @@ import java.util.TimerTask;
 
 /* Author:  Joel Bell-Wilding
  * Since:   29/03/20
- * Version: 1.0
+ * Version: 1.1
  * Purpose: UI Utility used to create an animated fading slideshow from two ImageViews
  */
 public class ImageFader {

@@ -11,7 +11,7 @@ import com.nearchitectural.utilities.Settings;
 import com.nearchitectural.utilities.models.Location;
 
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Kristiyan Doykov
  * Since:   10/12/19
  * Version: 1.1
  * Purpose: Uses static location information and session-based information to provide a model

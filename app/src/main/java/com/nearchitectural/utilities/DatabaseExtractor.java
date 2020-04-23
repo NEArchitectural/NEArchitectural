@@ -23,8 +23,9 @@ import java.util.Map;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   10/02/20
  * Version: 1.3
- * Purpose: Extracts information from the database using the provided document
- *          and produces and returns a model object containing the necessary information
+ * Purpose: Extracts information from the Firebase Database and produces and returns
+ *          the appropriate object or list of objects needed for the chosen purpose
+ *          via callbacks
  */
 public class DatabaseExtractor {
 

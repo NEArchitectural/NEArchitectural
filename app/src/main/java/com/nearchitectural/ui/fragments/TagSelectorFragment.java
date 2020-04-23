@@ -19,7 +19,7 @@ import java.util.List;
 /* Author:  Kristiyan Doykov, Joel Bell-Wilding
  * Since:   15/01/20
  * Version: 1.2
- * Purpose: Handle the activation/deactivation of tags within a provider
+ * Purpose: Handle the activation/deactivation of tags within a provided
  *          TagMapper object through a UI Dialog
  */
 public class TagSelectorFragment extends DialogFragment {

@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/* Author:  Kristiyan Doykov, Joel Bell-Wilding
+/* Author:  Kristiyan Doykov, Joel Bell-Wilding, Shaun Kurzyk
  * Since:   20/01/20
  * Version: 1.2
  * purpose: Presents information and images regarding a given location
@@ -259,7 +259,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
                     // Hide progress bar and display error message
                     likeButton.setVisibility(View.GONE);
                     likesCount.setVisibility(View.GONE);
-                    title.setText("Error retrieving location");
+                    title.setText(R.string.location_retrieve_error);
                     progressBar.setVisibility(View.GONE);
                     contentContainer.setVisibility(View.VISIBLE);
                 }
@@ -281,7 +281,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback {
                 } else {
                     // Else display error message
                     reportText = locationBinding.reportText;
-                    reportText.setText("Error retrieving report");
+                    reportText.setText(R.string.report_retrieve_error);
                 }
                 // Hide progress bar and display content
                 progressBar.setVisibility(View.GONE);

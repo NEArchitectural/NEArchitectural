@@ -11,7 +11,7 @@ import com.nearchitectural.ui.models.TimelineModel;
 import com.nearchitectural.utilities.Settings;
 
 /* Author:  Taylor Stubbs
- * Since:   02/04/20
+ * Since:   11/04/20
  * Version: 1.1
  * Purpose: Handles the displaying of the locations in the timeline (i.e. a list of locations)
  *          to the UI using data binding

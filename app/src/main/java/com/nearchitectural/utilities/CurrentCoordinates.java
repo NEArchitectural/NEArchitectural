@@ -13,7 +13,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.Serializable;
 
-/* Author:  Kristiyan Doykov
+/* Author:  Shaun Kuryzyk
  * Since:   20/12/19
  * Version: 1.1
  * Purpose: Singleton class which stores and manipulates the user's current coordinates
